@@ -15,3 +15,5 @@ abbreviation affine_space
 def affine.diff : X → X → V := sorry
 
 -- TODO: affine combinations, affine transformations, affine frames
+
+#check affine_space
