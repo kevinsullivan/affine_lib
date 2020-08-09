@@ -10,7 +10,7 @@ variables (X : Type u) (K : Type v) (V : Type w) (n : ℕ) (id : ℕ) (k : K)
 structure aff_auto :=
 (f_v : V → V) 
 (f_p : X → X)
-(linear_map : ∃ g : linear_map K V V, ∀ v : V, ∃ x : V, f_v v = g v + x)
+(linear : ∃ g : linear_map K V V, ∃ x : V, ∀ v : V, f_v v = g v + x)
 
 structure aff_coord_map :=
 (f_v : aff_vec K n → aff_vec K n)
@@ -20,3 +20,12 @@ structure aff_coord_map :=
 structure aff_coord_map' :=
 (to_fun : affine_space X K V → affine_space X K V) -- doesn't work. maps one prop to another.
 
+/-
+want to say f_v = f_p
+
+want to say f_v is linear up to some translation
+
+v = x - 0
+
+f_v v = f_p x - 0
+-/

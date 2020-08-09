@@ -12,6 +12,21 @@ abbreviation r3_vec := real_vec 3
 abbreviation r3_pt  := real_pt  3
 
 
+universes u v w
+
+structure aff_struct :=
+(X : Type u)
+(K : Type v)
+(V : Type w)
+(fld : field K)
+(grp : add_comm_group V)
+(vec : vector_space K V)
+(aff : affine_space X K V)
+
+noncomputable def to_affine : ℕ → aff_struct := λ n,
+    ⟨aff_pt ℝ n, ℝ, aff_vec ℝ n, real.field, aff_comm_group ℝ n, aff_vec_space ℝ n, aff_coord_is ℝ n⟩
+
+
 /-
 def ra3space : _ := _
 

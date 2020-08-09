@@ -9,10 +9,7 @@ abbreviation zero := list.field_zero K n
 
 def to_std_basis : ℕ → list K := λ x, (zero K n).update_nth x 1
 
-variable [field ℤ]
-
 #check to_std_basis K n
 
 def std_basis : fin n → aff_vec K n :=
 λ x, ⟨to_std_basis K n x.1, sorry, sorry⟩
-

@@ -258,7 +258,7 @@ end
 
 
 /-! ### Type class instance for abelian group -/
-instance : add_comm_group (aff_vec K n) :=
+instance aff_comm_group : add_comm_group (aff_vec K n) :=
 begin
 split,
 exact vec_add_left_neg K n,
@@ -303,12 +303,12 @@ lemma vec_add_smul : ∀ g h : K, ∀ x : aff_vec K n, (g + h) • x = g•x + h
 
 lemma vec_zero_smul : ∀ x : aff_vec K n, (0 : K) • x = 0 := sorry
 
-instance : semimodule K (aff_vec K n) := ⟨vec_add_smul K n, vec_zero_smul K n⟩
+instance aff_semimod : semimodule K (aff_vec K n) := ⟨vec_add_smul K n, vec_zero_smul K n⟩
 
-instance aff_module : module K (aff_vec K n) := module.mk
+instance aff_module : module K (aff_vec K n) := aff_semimod K n
 
 -- need to define scalar multiplication to show it's a module
-instance : vector_space K (aff_vec K n) := aff_module K n
+instance aff_vec_space : vector_space K (aff_vec K n) := aff_module K n
 
 /-! ### group action of aff_vec on aff_pt -/
 -- need to actually write out the function
@@ -334,7 +334,7 @@ lemma aff_add_free : ∀ a : aff_pt K n, ∀ g h : aff_vec K n, g ⊹ a = h ⊹ 
 instance aff_torsor : add_torsor (aff_vec K n) (aff_pt K n) := ⟨aff_add_free K n⟩
 -- WTS the pair aff_vec and aff_pt form an affine space
 
-instance : affine_space (aff_pt K n) K (aff_vec K n) := aff_torsor K n
+instance aff_coord_is : affine_space (aff_pt K n) K (aff_vec K n) := aff_torsor K n
 -- Different file, physical quantities
 /-
 def time' := space.mk 1
