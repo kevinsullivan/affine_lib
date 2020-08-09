@@ -1,25 +1,31 @@
 import .affine
 import .list_stuff
 import .add_group_action
+
 universes u v w
 variables (X : Type u) (K : Type v) (V : Type w) (n : ℕ) (id : ℕ) (k : K)
 [inhabited K] [field K] [add_comm_group V] [vector_space K V] [affine_space X K V]
+
 open list
 /-- type class for affine vectors. This models n-1 dimensional K-coordinate space. -/
 structure aff_vec :=
 (l : list K)
 (len_fixed : l.length = n + 1)
 (fst_zero : head l = 0)
+
 /-- type class for affine points for coordinate spaces. -/
 structure aff_pt :=
 (l : list K)
 (len_fixed : l.length = n + 1)
 (fst_one : head l = 1)
+
 variables (x y : aff_vec K n) (a b : aff_pt K n)
+
 -- lemmas so that the following operations are well-defined
 /-- the length of the sum of two length n+1 vectors is n+1 -/
 lemma list_sum_fixed : length (x.1 + y.1) = n + 1 := 
     by simp only [sum_test K x.1 y.1, length_sum x.1 y.1, x.2, y.2, min_self]
+
 lemma aff_not_nil : x.1 ≠ [] := 
 begin
 intro h,
@@ -29,6 +35,7 @@ have len_fixed : length nil = n + 1 := eq.trans (eq.symm len_x_nil) x.2,
 have bad : 0 = n + 1 := eq.trans (eq.symm len_nil) len_fixed,
 contradiction,
 end
+
 lemma aff_cons : ∃ x_hd : K, ∃ x_tl : list K, x.1 = x_hd :: x_tl :=
 begin
 cases x,
@@ -44,6 +51,7 @@ cases x_l,
     exact rfl
 }
 end
+
 /-- head is compatible with addition -/
 lemma head_sum : head x.1 + head y.1 = head (x.1 + y.1) := 
 begin
@@ -63,9 +71,11 @@ rw head_xh at x_fst_zero,
 rw head_yh at y_fst_zero,
 simp [x_fst_zero, y_fst_zero, sum_test, add_cons_cons 0 0 x_l_tl y_l_tl],
 end
+
 /-- the head of the sum of two vectors is 0 -/
 lemma sum_fst_fixed : head (x.1 + y.1) = 0 :=
     by simp only [eq.symm (head_sum K n x y), x.3, y.3]; exact add_zero 0
+
 /-- the length of the zero vector is n+1 -/
 lemma len_zero : length (field_zero K n) = n + 1 :=
 begin
@@ -79,9 +89,14 @@ rw eq.symm h₃,
 exact h₄,
 }
 end
+
 /-- the head of the zero vector is zero -/
 lemma head_zero : head (field_zero K n) = 0 := by {cases n, refl, refl}
+
+
 lemma vec_len_neg : length (neg K x.1) = n + 1 := by {simp only [len_neg], exact x.2}
+
+
 lemma head_neg_0 : head (neg K x.1) = 0 :=
 begin
 cases x,
@@ -93,25 +108,36 @@ have head_0 : head (0 :: neg K x_l_tl) = 0 := rfl,
 rw head_xh at x_fst_zero,
 simp only [x_fst_zero, neg_zero, head_0],
 end
+
+
 /-! ### abelian group operations -/
 def vec_add : aff_vec K n → aff_vec K n → aff_vec K n :=
     λ x y, ⟨x.1 + y.1, list_sum_fixed K n x y, sum_fst_fixed K n x y⟩
 def vec_zero : aff_vec K n := ⟨field_zero K n, len_zero K n, head_zero K n⟩
 def vec_neg : aff_vec K n → aff_vec K n
 | ⟨l, len, fst⟩ := ⟨list.neg K l, vec_len_neg K n ⟨l, len, fst⟩, head_neg_0 K n ⟨l, len, fst⟩⟩
+
+
 /-! ### type class instances for the abelian group operations -/
 instance : has_add (aff_vec K n) := ⟨vec_add K n⟩
 instance : has_zero (aff_vec K n) := ⟨vec_zero K n⟩
 instance : has_neg (aff_vec K n) := ⟨vec_neg K n⟩
+
 -- misc
 def pt_zero_f : ℕ → list K 
 | 0 := [1]
 | (nat.succ n) := [1] ++ list.field_zero K n
+
 lemma pt_zero_len : length (pt_zero_f K n) = n + 1 := sorry
+
 lemma pt_zero_hd : head (pt_zero_f K n) = 1 := by {cases n, refl, refl} 
+
 def pt_zero : aff_pt K n := ⟨pt_zero_f K n, pt_zero_len K n, pt_zero_hd K n⟩
+
 lemma vec_zero_is : (0 : aff_vec K n) = vec_zero K n := rfl
+
 lemma vec_zero_list' : (0 : aff_vec K n).1 = field_zero K n := rfl
+
 -- properties necessary to show aff_vec K n is an instance of add_comm_group
 #print add_comm_group
 lemma vec_add_assoc : ∀ x y z : aff_vec K n,  x + y + z = x + (y + z) :=
@@ -125,6 +151,8 @@ induction y_l, contradiction,
 induction z_l, contradiction,
 sorry, -- issue with these lemmata is the obtuse tactic state. Needs fixing. 
 end
+
+
 lemma vec_zero_add : ∀ x : aff_vec K n, 0 + x = x :=
 begin
 intro x,
@@ -138,6 +166,8 @@ rw sum_is,
 -- rw zero_l_is,
 sorry
 end
+
+
 lemma vec_zero_add' : ∀ x : aff_vec K n, 0 + x = x :=
 begin
 intro x,
@@ -152,6 +182,8 @@ have zero_l_is : (vec_zero K n).l = field_zero K n := rfl,
 -- rw zero_l_is,
 sorry
 end
+
+
 lemma vec_add_zero : ∀ x : aff_vec K n, x + 0 = x :=
 begin
 intro x,
@@ -186,6 +218,8 @@ sorry,
 }
 -/
 end
+
+
 lemma vec_add_left_neg : ∀ x : aff_vec K n, -x + x = 0 :=
 begin
 intro x,
@@ -208,6 +242,8 @@ have zero_not_nil : zero_l ≠ nil :=
 -- rw neg_x_is,
 sorry
 end
+
+
 lemma vec_add_comm : ∀ x y : aff_vec K n, x + y = y + x :=
 begin
 intros x y,
@@ -219,6 +255,8 @@ induction y_l,
 contradiction,
 repeat{sorry},
 end
+
+
 /-! ### Type class instance for abelian group -/
 instance : add_comm_group (aff_vec K n) :=
 begin
@@ -229,6 +267,7 @@ exact vec_add_assoc K n,
 exact vec_zero_add K n,
 exact vec_add_zero K n,
 end
+
 /-! ### Scalar action -/
 #check semimodule
 #check distrib_mul_action
@@ -242,35 +281,59 @@ have hd0 : x_l_hd = 0 := x_fst_zero,
 rw [scalar_cons, hd0, mul_zero],
 refl,
 end
+
 def vec_scalar : K → aff_vec K n → aff_vec K n :=
     λ a x, ⟨field_scalar K a x.1, trans (scale_len K a x.1) x.2, scale_head K n a x⟩
+
 instance : has_scalar K (aff_vec K n) := ⟨vec_scalar K n⟩
+
 lemma vec_one_smul : (1 : K) • x = x := sorry
+
 lemma vec_mul_smul : ∀ g h : K, ∀ x : aff_vec K n, (g * h) • x = g • h • x := sorry
+
 instance : mul_action K (aff_vec K n) := ⟨vec_one_smul K n, vec_mul_smul K n⟩
+
 lemma vec_smul_add : ∀ g : K, ∀ x y : aff_vec K n, g • (x + y) = g•x + g•y := sorry
+
 lemma vec_smul_zero : ∀ g : K, g • (0 : aff_vec K n) = 0 := sorry
+
 instance : distrib_mul_action K (aff_vec K n) := ⟨vec_smul_add K n, vec_smul_zero K n⟩
+
 lemma vec_add_smul : ∀ g h : K, ∀ x : aff_vec K n, (g + h) • x = g•x + h•x := sorry
+
 lemma vec_zero_smul : ∀ x : aff_vec K n, (0 : K) • x = 0 := sorry
+
 instance : semimodule K (aff_vec K n) := ⟨vec_add_smul K n, vec_zero_smul K n⟩
+
 instance aff_module : module K (aff_vec K n) := module.mk
+
 -- need to define scalar multiplication to show it's a module
 instance : vector_space K (aff_vec K n) := aff_module K n
+
 /-! ### group action of aff_vec on aff_pt -/
 -- need to actually write out the function
 def aff_group_action : aff_vec K n → aff_pt K n → aff_pt K n :=
     λ x y, sorry
+
 instance : has_trans (aff_vec K n) (aff_pt K n) := ⟨aff_group_action K n⟩
+
 lemma aff_zero_sadd : ∀ x : aff_pt K n, (0 : aff_vec K n) ⊹ x = x := sorry
+
 lemma aff_add_sadd : ∀ x y : aff_vec K n, ∀ a : aff_pt K n, (x + y) ⊹ a = x ⊹ y ⊹ a := sorry
+
 instance : add_action (aff_vec K n) (aff_pt K n) := ⟨aff_zero_sadd K n, aff_add_sadd K n⟩
+
 instance : add_space (aff_vec K n) (aff_pt K n) := add_space.mk
+
 lemma aff_add_trans : ∀ a b : aff_pt K n, ∃ x : aff_vec K n, x ⊹ a = b := sorry
+
 instance : add_homogeneous_space (aff_vec K n) (aff_pt K n) := ⟨aff_add_trans K n⟩
+
 lemma aff_add_free : ∀ a : aff_pt K n, ∀ g h : aff_vec K n, g ⊹ a = h ⊹ a → g = h := sorry
+
 instance aff_torsor : add_torsor (aff_vec K n) (aff_pt K n) := ⟨aff_add_free K n⟩
 -- WTS the pair aff_vec and aff_pt form an affine space
+
 instance : affine_space (aff_pt K n) K (aff_vec K n) := aff_torsor K n
 -- Different file, physical quantities
 /-
