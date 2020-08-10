@@ -23,8 +23,24 @@ structure aff_struct :=
 (vec : vector_space K V)
 (aff : affine_space X K V)
 
+structure vec_struct :=
+(K : Type u)
+(V : Type v)
+(fld : field K)
+(grp : add_comm_group V)
+(vec : vector_space K V)
+
+inductive Algebra  
+| affine_space (a : aff_struct)
+| nat_monoid --placeholder, what really goes here? E.g., for quantity of material
+| vector_space (v : vec_struct)
+
 noncomputable def to_affine : ℕ → aff_struct := λ n,
     ⟨aff_pt ℝ n, ℝ, aff_vec ℝ n, real.field, aff_comm_group ℝ n, aff_vec_space ℝ n, aff_coord_is ℝ n⟩
+
+
+noncomputable def to_vector : ℕ → vec_struct := λ n, -- TBD
+    ⟨ℝ, aff_vec ℝ n, real.field, aff_comm_group ℝ n, aff_vec_space ℝ n⟩
 
 
 /-
