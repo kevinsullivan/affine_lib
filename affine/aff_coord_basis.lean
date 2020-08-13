@@ -7,9 +7,11 @@ variables (X : Type u) (K : Type v) (V : Type w) (n : ℕ) (k : K)
 
 abbreviation zero := list.field_zero K n
 
-def to_std_basis : ℕ → list K := λ x, (zero K n).update_nth x 1
+def list.to_basis_vec : fin n → list K := λ x, (zero K n).update_nth (x.1 + 1) 1
 
-#check to_std_basis K n
+lemma len_basis_vec_fixed (x : fin n) : (list.to_basis_vec K n x).length = n + 1 := sorry
+
+lemma head_basis_vec_fixed (x : fin n) : (list.to_basis_vec K n x).head = 0 := sorry
 
 def std_basis : fin n → aff_vec K n :=
-λ x, ⟨to_std_basis K n x.1, sorry, sorry⟩
+λ x, ⟨list.to_basis_vec K n x, len_basis_vec_fixed K n x, head_basis_vec_fixed K n x⟩

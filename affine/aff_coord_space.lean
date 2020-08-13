@@ -7,7 +7,7 @@ variables (X : Type u) (K : Type v) (V : Type w) (n : ℕ) (id : ℕ) (k : K)
 [inhabited K] [field K] [add_comm_group V] [vector_space K V] [affine_space X K V]
 
 open list
-/-- type class for affine vectors. This models n-1 dimensional K-coordinate space. -/
+/-- type class for affine vectors. This models n-dimensional K-coordinate space. -/
 structure aff_vec :=
 (l : list K)
 (len_fixed : l.length = n + 1)
@@ -163,7 +163,7 @@ rw vec_zero_is,
 have sum_is : vec_zero K n + x = ⟨(vec_zero K n).l + x.1, list_sum_fixed K n (vec_zero K n) x, sum_fst_fixed K n (vec_zero K n) x⟩ := rfl,
 have zero_l_is : (vec_zero K n).l = field_zero K n := rfl,
 rw sum_is,
--- rw zero_l_is,
+induction x,
 sorry
 end
 
