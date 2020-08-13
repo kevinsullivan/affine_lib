@@ -29,7 +29,7 @@ structure vec_struct :=
 inductive Algebra  
 | affine_space (a : aff_struct)
 | vector_space (v : vec_struct)
-| nat_monoid -- placeholder
+| nat_monoid -- placeholder, commutative monoid with monus operator
 
 noncomputable def to_affine : ℕ → aff_struct := λ n,
     ⟨aff_pt ℝ n, ℝ, aff_vec ℝ n, real.field, aff_comm_group ℝ n, aff_vec_space ℝ n, aff_coord_is ℝ n⟩
