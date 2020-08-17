@@ -19,7 +19,13 @@ def affine_combination (g_add : ∑ i in s, g i = 1) := ∑ i in s, g i • v i
 
 def barycenter (g_add : ∑ i in s, g i = 1) := g -- TODO: want to coerce g to be a list?
 
-structure affine_basis :=
+structure affine_frame :=
 (ref_pt : X)
 (vec : ι → V)
 (basis : is_basis K vec)
+
+structure vec_with_frame (basis: affine_frame X K V ι) :=
+(vec : V)
+
+structure pt_with_frame (basis: affine_frame X K V ι) :=
+(pt : X)

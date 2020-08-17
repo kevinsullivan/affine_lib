@@ -15,3 +15,14 @@ lemma head_basis_vec_fixed (x : fin n) : (list.to_basis_vec K n x).head = 0 := s
 
 def std_basis : fin n → aff_vec K n :=
 λ x, ⟨list.to_basis_vec K n x, len_basis_vec_fixed K n x, head_basis_vec_fixed K n x⟩
+
+lemma std_is_basis : is_basis K (std_basis K n) := sorry
+
+def std_frame : affine_frame (aff_pt K n) K (aff_vec K n) (fin n) := ⟨pt_zero K n, std_basis K n, std_is_basis K n⟩
+
+noncomputable def r3_std_frame := std_frame ℝ 3
+
+--def origin_with_frame : pt_with_frame (std_frame K n) K n := ⟨pt_zero K n⟩
+--TODO: fix this
+
+-- nothing in the phys layer should be called "aff_pt K n" or "aff_vec K n"

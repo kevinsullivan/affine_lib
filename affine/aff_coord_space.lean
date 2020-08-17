@@ -1,6 +1,6 @@
 import .affine
 import .list_stuff
-import .add_group_action
+import .add_group_action linear_algebra.basis
 
 universes u v w
 variables (X : Type u) (K : Type v) (V : Type w) (n : ℕ) (id : ℕ) (k : K)
@@ -8,13 +8,39 @@ variables (X : Type u) (K : Type v) (V : Type w) (n : ℕ) (id : ℕ) (k : K)
 
 open list
 /-- type class for affine vectors. This models n-dimensional K-coordinate space. -/
-structure aff_vec :=
+structure aff_vec_coord_tuple :=
 (l : list K)
 (len_fixed : l.length = n + 1)
 (fst_zero : head l = 0)
 
 /-- type class for affine points for coordinate spaces. -/
-structure aff_pt :=
+structure aff_point_coord_tuple :=
+(l : list K)
+(len_fixed : l.length = n + 1)
+(fst_one : head l = 1)
+
+-- coordinate tuple
+-- aff_pt, aff_vec
+
+/-
+structure aff_vec :=    -- an affine vector tuple + a frame
+(c : aff_vec_coord_tuple K n)
+(f : frame) -- this can be either std_frame or new_frame relative to some old_frame
+
+/-- type class for affine points for coordinate spaces. -/
+structure aff_pt :=     -- an affine point tuple with a frame
+(l : list K)
+(len_fixed : l.length = n + 1)
+(fst_one : head l = 1)
+-/
+
+structure aff_vec :=    -- an affine vector tuple + a frame
+(l : list K)
+(len_fixed : l.length = n + 1)
+(fst_zero : head l = 0)
+
+/-- type class for affine points for coordinate spaces. -/
+structure aff_pt :=     -- an affine point tuple with a frame
 (l : list K)
 (len_fixed : l.length = n + 1)
 (fst_one : head l = 1)
@@ -348,3 +374,14 @@ def phys_pt  := aff_pt  ℝ 3 geom3
 -- WTS the pair aff_vec and aff_pt form an affine space
 instance aff_coord_inst : affine_space (aff_pt K n) K (aff_vec K n) := aff_torsor K n
 
+inductive aff_frame 
+| std_frame  --...
+| new_frame (origin : aff_pt K n) (vec : fin n → aff_vec K n) (b : is_basis K vec) (old_frame : aff_frame)
+
+def std : sorry := sorry--aff_frame.std_frame ....
+
+def orig : aff_pt K n--mutual recursion?
+| getOrigin std
+
+structure relative_vec (ref_pt : aff_pt K n) :=
+(vec : aff_vec K n)
