@@ -8,13 +8,15 @@ variables (X : Type u) (K : Type v) (V : Type w) (n : ℕ) (id : ℕ) (k : K)
 
 open list
 /-- type class for affine vectors. This models n-dimensional K-coordinate space. -/
-structure aff_vec_coord_tuple :=
+@[ext]
+structure aff_vec :=
 (l : list K)
 (len_fixed : l.length = n + 1)
 (fst_zero : head l = 0)
 
 /-- type class for affine points for coordinate spaces. -/
-structure aff_point_coord_tuple :=
+@[ext]
+structure aff_pt :=
 (l : list K)
 (len_fixed : l.length = n + 1)
 (fst_one : head l = 1)
@@ -34,16 +36,6 @@ structure aff_pt :=     -- an affine point tuple with a frame
 (fst_one : head l = 1)
 -/
 
-structure aff_vec :=    -- an affine vector tuple + a frame
-(l : list K)
-(len_fixed : l.length = n + 1)
-(fst_zero : head l = 0)
-
-/-- type class for affine points for coordinate spaces. -/
-structure aff_pt :=     -- an affine point tuple with a frame
-(l : list K)
-(len_fixed : l.length = n + 1)
-(fst_one : head l = 1)
 
 variables (x y : aff_vec K n) (a b : aff_pt K n)
 
@@ -172,41 +164,32 @@ intros,
 cases x,
 cases y,
 cases z,
-induction x_l, contradiction,
-induction y_l, contradiction,
-induction z_l, contradiction,
-sorry, -- issue with these lemmata is the obtuse tactic state. Needs fixing. 
+dsimp [has_add.add, vec_add],
+ext,
+split,
+intros,
+sorry, sorry
 end
 
 
 lemma vec_zero_add : ∀ x : aff_vec K n, 0 + x = x :=
 begin
 intro x,
-rw vec_zero_is,
--- have sum_len_fixed : length ((vec_zero K n).1 + x.1) = n + 1 := sorry,
--- have sum_fst_zero : head ((vec_zero K n).1 + x.1) = 0 := sorry,
--- have sum_is : vec_zero K n + x = ⟨(vec_zero K n).1 + x.1, sum_len_fixed, sum_fst_zero⟩ := rfl,
-have sum_is : vec_zero K n + x = ⟨(vec_zero K n).l + x.1, list_sum_fixed K n (vec_zero K n) x, sum_fst_fixed K n (vec_zero K n) x⟩ := rfl,
-have zero_l_is : (vec_zero K n).l = field_zero K n := rfl,
-rw sum_is,
-induction x,
-sorry
-end
-
-
-lemma vec_zero_add' : ∀ x : aff_vec K n, 0 + x = x :=
-begin
-intro x,
-rw vec_zero_is,
 cases x,
-cases vec_zero K n with zero_l zero_len_fixed zero_fst_zero,
-have sum_len_fixed : length (zero_l + x_l) = n + 1 := sorry,
-have sum_fst_zero : head (zero_l + x_l) = 0 := sorry,
--- have sum_is : ⟨zero_l, zero_len_fixed, zero_fst_zero⟩ + ⟨x_l, x_len_fixed, x_fst_zero⟩ = ⟨zero_l + x_l, sum_len_fixed, sum_fst_zero⟩ := rfl,
-have zero_l_is : (vec_zero K n).l = field_zero K n := rfl,
--- rw sum_is,
--- rw zero_l_is,
-sorry
+rw vec_zero_is,
+ext,
+split,
+intros,
+dsimp [has_add.add, vec_add, vec_zero] at a_1,
+change a ∈ ((field_zero K n) + x_l).nth n_1 at a_1,
+rw list.zero_add' K x_l n x_len_fixed at a_1,
+exact a_1,
+
+intros,
+dsimp [has_add.add, vec_add, vec_zero],
+change a ∈ ((field_zero K n) + x_l).nth n_1,
+rw list.zero_add' K x_l n x_len_fixed,
+exact a_1,
 end
 
 
@@ -215,34 +198,19 @@ begin
 intro x,
 cases x,
 rw vec_zero_is,
-cases vec_zero K n with zero_l zero_len_fixed zero_fst_zero,
-induction zero_l,
-contradiction,
-induction x_l,
-contradiction,
-sorry,
-/-
-{
-    have list_eq : x_l + (zero_l_hd :: zero_l_tl) = x_l :=
-        begin
-        have zero_list_is : (0 : aff_vec K n).1 = (zero_l_hd :: zero_l_tl) := sorry,
-        have zero_vec_zero : (list.cons zero_l_hd zero_l_tl) = field_zero K n :=
-            begin
-            rw (eq.symm zero_list_is),
-            rw vec_zero_list',
-            end,
-        have vec_field_zero : n = length x_l - 1 := sorry,
-        have zero_field_zero : (list.cons zero_l_hd zero_l_tl) = field_zero K (length x_l - 1) :=
-            begin
-            rw (eq.symm vec_field_zero),
-            exact zero_vec_zero
-            end,
-        rw zero_field_zero,
-        apply list.add_zero,
-        end,
-    {sorry}
-}
--/
+ext,
+split,
+intros,
+dsimp [has_add.add, vec_add, vec_zero] at a_1,
+change a ∈ (x_l + (field_zero K n)).nth n_1 at a_1,
+rw list.add_zero' K x_l n x_len_fixed at a_1,
+exact a_1,
+
+intros,
+dsimp [has_add.add, vec_add, vec_zero],
+change a ∈ (x_l + (field_zero K n)).nth n_1,
+rw list.add_zero' K x_l n x_len_fixed,
+exact a_1,
 end
 
 
@@ -251,35 +219,46 @@ begin
 intro x,
 cases x,
 rw vec_zero_is,
-cases vec_zero K n with zero_l zero_len_fixed zero_fst_zero,
-have x_not_nil : x_l ≠ nil :=
-    begin
-    induction x_l,
-    {contradiction},
-    {simp}
-    end,
-have zero_not_nil : zero_l ≠ nil :=
-    begin
-    induction zero_l,
-    {contradiction},
-    {simp}
-    end,
--- have neg_x_is : - ⟨x_l, x_len_fixed, x_fst_zero⟩ = ⟨- x_l, vec_len_neg K n ⟨x_l, x_len_fixed, x_fst_zero⟩, head_neg_0 K n ⟨x_l, x_len_fixed, x_fst_zero⟩⟩ := rfl,
--- rw neg_x_is,
-sorry
+ext,
+split,
+intros,
+dsimp [vec_zero],
+dsimp [has_neg.neg, vec_neg, has_add.add, vec_add] at a_1,
+cases x_l,
+contradiction,
+have nz : n + 1 ≠ 0 := nat.succ_ne_zero n,
+have hnz : (cons x_l_hd x_l_tl).length ≠ 0 := ne_of_eq_of_ne x_len_fixed nz,
+change a ∈ (neg K (x_l_hd :: x_l_tl) + x_l_hd :: x_l_tl).nth n_1 at a_1,
+rw list.add_left_neg K (cons x_l_hd x_l_tl) at a_1,
+sorry, -- need to show that if (a ∈ field_zero ...), then a=0
+intros,
+contradiction,
+intros,
+sorry, -- can be filled out easily if above sorry is fixed
 end
 
+#check ladd
 
 lemma vec_add_comm : ∀ x y : aff_vec K n, x + y = y + x :=
 begin
 intros x y,
 cases x,
 cases y,
-induction x_l,
-contradiction,
-induction y_l,
-contradiction,
-repeat{sorry},
+ext,
+split,
+intros,
+dsimp [has_add.add, vec_add],
+dsimp [has_add.add, vec_add] at a_1,
+change a ∈ (y_l + x_l).nth n_1,
+rw list.add_comm,
+exact a_1,
+
+intros,
+dsimp [has_add.add, vec_add],
+dsimp [has_add.add, vec_add] at a_1,
+change a ∈ (x_l + y_l).nth n_1,
+rw list.add_comm,
+exact a_1,
 end
 
 
@@ -308,12 +287,27 @@ rw [scalar_cons, hd0, mul_zero],
 refl,
 end
 
+@[ext]
 def vec_scalar : K → aff_vec K n → aff_vec K n :=
     λ a x, ⟨field_scalar K a x.1, trans (scale_len K a x.1) x.2, scale_head K n a x⟩
 
 instance : has_scalar K (aff_vec K n) := ⟨vec_scalar K n⟩
 
-lemma vec_one_smul : (1 : K) • x = x := sorry
+lemma vec_one_smul : (1 : K) • x = x := 
+begin
+cases x,
+ext,
+split,
+intros,
+dsimp only [has_scalar.smul, vec_scalar] at a_1,
+rw list.one_smul_cons at a_1,
+exact a_1,
+
+intros,
+dsimp only [has_scalar.smul, vec_scalar],
+rw list.one_smul_cons,
+exact a_1,
+end
 
 lemma vec_mul_smul : ∀ g h : K, ∀ x : aff_vec K n, (g * h) • x = g • h • x := sorry
 
@@ -377,11 +371,3 @@ instance aff_coord_inst : affine_space (aff_pt K n) K (aff_vec K n) := aff_torso
 inductive aff_frame 
 | std_frame  --...
 | new_frame (origin : aff_pt K n) (vec : fin n → aff_vec K n) (b : is_basis K vec) (old_frame : aff_frame)
-
-def std : sorry := sorry--aff_frame.std_frame ....
-
-def orig : aff_pt K n--mutual recursion?
-| getOrigin std
-
-structure relative_vec (ref_pt : aff_pt K n) :=
-(vec : aff_vec K n)

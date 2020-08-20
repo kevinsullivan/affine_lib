@@ -1,6 +1,6 @@
 import .aff_coord_space .affine .list_stuff data.real.basic
 
-universes u v w 
+universes u v w x
 
 variables (X : Type u) (K : Type v) (V : Type w) (n : ℕ) (k : K)
 [inhabited K] [field K] [add_comm_group V] [vector_space K V] [affine_space X K V]
@@ -22,7 +22,7 @@ def std_frame : affine_frame (aff_pt K n) K (aff_vec K n) (fin n) := ⟨pt_zero 
 
 noncomputable def r3_std_frame := std_frame ℝ 3
 
---def origin_with_frame : pt_with_frame (std_frame K n) K n := ⟨pt_zero K n⟩
+def std_origin : pt_with_frame (aff_pt K n) K (aff_vec K n) (fin n) (std_frame K n) := ⟨pt_zero K n⟩
 --TODO: fix this
 
 -- nothing in the phys layer should be called "aff_pt K n" or "aff_vec K n"

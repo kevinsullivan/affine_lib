@@ -1,4 +1,4 @@
-import algebra.field
+import algebra.field tactic.ext
 open list
 
 universes u v
@@ -25,12 +25,18 @@ def ladd : list α → list α → list α := zip_with has_add.add
 @[simp] theorem add_nil_right (l : list α) : ladd l ([] : list α) = [] :=
 by cases l; refl
 
+
 /-- The length of the sum of two lists is the length of the shorter list -/
 @[simp] theorem length_sum : ∀ (l₁ : list α) (l₂ : list α),
    length (ladd l₁ l₂) = min (length l₁) (length l₂)
 | []      l₂      := rfl
 | l₁      []      := by simp -- TODO: figure out which simp lemmata are being used, and use "simp only"
-| (a::l₁) (b::l₂) := by simp only [length, add_cons_cons, length_sum l₁ l₂, min_add_add_right]
+| (a::l₁) (b::l₂) := --by simp only [length, add_cons_cons, length_sum l₁ l₂, min_succ_succ]
+begin
+simp only [length, add_cons_cons, length_sum l₁ l₂],
+exact ((length l₁).min_succ_succ (length l₂)).symm,
+end
+
 
 /-- the length of nil is 0 -/
 lemma len_nil : length ([] : list α) = 0 := rfl
@@ -125,50 +131,10 @@ end
 lemma list.add_assoc : ∀ x y z : list K, (x + y) + z = x + (y + z) :=
 begin
 intros x y z,
-induction x,
-{
-  have sum_nil_y : nil + y = nil := rfl,
-  have sum_nil_z : nil + z = nil := rfl,
-  have sum_nil_yz : nil + (y + z) = nil := rfl,
-  rw [sum_nil_y, sum_nil_z, sum_nil_yz]
-},
-{
-  sorry
-}
-end
-
-lemma list.add_assoc' : ∀ x y z : list K, (x + y) + z = x + (y + z) :=
-begin
-intros x y z,
-induction x,
-{
-  have sum_nil_y : nil + y = nil := rfl,
-  have sum_nil_z : nil + z = nil := rfl,
-  have sum_nil_yz : nil + (y + z) = nil := rfl,
-  rw [sum_nil_y, sum_nil_z, sum_nil_yz]
-},
-induction y,
-{
-  have sum_x_nil : x_hd :: x_tl + nil = nil := rfl,
-  have sum_nil_z : nil + z = nil := rfl,
-  rw [sum_x_nil, sum_nil_z, sum_x_nil]
-},
-induction z,
-{
-  have sum_xy_nil : (x_hd :: x_tl + y_hd :: y_tl) + nil = nil := rfl,
-  have sum_y_nil : (y_hd :: y_tl) + nil = nil := rfl,
-  have sum_x_nil : (x_hd :: x_tl) + nil = nil := rfl,
-  rw [sum_xy_nil, sum_y_nil, sum_x_nil]
-},
-{
-  have sum_x_y : x_hd :: x_tl + y_hd :: y_tl = (x_hd + y_hd) :: (x_tl + y_tl) := rfl,
-  have sum_xy_z : (x_hd + y_hd) :: (x_tl + y_tl) + z_hd :: z_tl = (x_hd + y_hd + z_hd) :: (x_tl + y_tl + z_tl) := rfl,
-  have sum_y_z : y_hd :: y_tl + z_hd :: z_tl = (y_hd + z_hd) :: (y_tl + z_tl) := rfl,
-  have sum_x_yz : x_hd :: x_tl + (y_hd + z_hd) :: (y_tl + z_tl) = (x_hd + (y_hd + z_hd)) :: (x_tl + (y_tl + z_tl)) := rfl,
-  have sum_hd : x_hd + y_hd + z_hd = x_hd + (y_hd + z_hd) := by apply add_assoc,
-  have sum_tl : x_tl + y_tl + z_tl = x_tl + (y_tl + z_tl) := sorry,
-  rw [sum_x_y, sum_xy_z, sum_y_z, sum_x_yz, sum_hd, sum_tl]
-}
+cases x, refl,
+cases y, refl,
+cases z, refl,
+sorry,
 end
 
 lemma list.zero_add : ∀ x : list K, (list.field_zero K (length x - 1)) + x = x :=
@@ -206,6 +172,18 @@ induction x,
 }
 end
 
+lemma list.zero_add' : ∀ x : list K, ∀ n : ℕ, length x = n + 1 → (list.field_zero K n) + x = x :=
+begin
+intros x n x_len,
+induction x,
+contradiction,
+have tl_l : length (x_hd :: x_tl) - 1 = length x_tl := rfl,
+have tl_len : length x_tl = n := nat.succ.inj x_len,
+rw (eq.symm tl_len),
+rw (eq.symm tl_l),
+apply list.zero_add,
+end 
+
 -- TODO: clean up this lemma
 lemma list.add_zero : ∀ x : list K, x + (list.field_zero K (length x - 1)) = x :=
 begin
@@ -239,6 +217,18 @@ induction x,
     rw [zero_tl, sep_head, head_add, x_ih]
   }
 }
+end
+
+lemma list.add_zero' : ∀ x : list K, ∀ n : ℕ, length x = n + 1 → x + (list.field_zero K n) = x :=
+begin
+intros x n x_len,
+induction x,
+contradiction,
+have tl_l : length (x_hd :: x_tl) - 1 = length x_tl := rfl,
+have tl_len : length x_tl = n := nat.succ.inj x_len,
+rw (eq.symm tl_len),
+rw (eq.symm tl_l),
+apply list.add_zero,
 end
 
 lemma list.add_left_neg : ∀ x : list K, x ≠ [] → list.neg K x + x = list.field_zero K ((length x) - 1) :=
@@ -279,50 +269,13 @@ list.field_zero K 0 = [0]
 }
 end
 
+lemma head_cons_add : ∀ a : K, ∀ x y : list K, a :: x + y = a :: (x + y) := sorry
+
 lemma list.add_comm : ∀ x y : list K, x + y = y + x :=
 begin
 intros x y,
-induction x,
-{
-  have nil_y : nil + y = nil := rfl,
-  rw nil_y,
-  induction y,
-  repeat {refl}
-},
-{
-  induction y,
-  {refl},
-  {
-    have sep_head_xy : (x_hd :: x_tl) + (y_hd :: y_tl) = (x_hd + y_hd) :: (x_tl + y_tl) := rfl,
-    have sep_head_yx : (y_hd :: y_tl) + (x_hd :: x_tl) = (y_hd + x_hd) :: (y_tl + x_tl) := rfl,
-    have hd_comm : x_hd + y_hd = y_hd + x_hd := by apply add_comm,
-    rw [sep_head_xy, sep_head_yx, hd_comm],
-    have tl_comm : x_tl + y_tl = y_tl + x_tl := sorry,
-      -- begin
-      -- induction x_tl,
-      -- {
-      --   have nil_y : nil + y_tl = nil := rfl,
-      --   rw nil_y,
-      --   induction y_tl,
-      --   {refl},
-      --   {refl}
-      -- },
-      -- {
-      --   induction y_tl,
-      --   {refl},
-      --   {
-      --   have sep_head_xty : x_tl_hd :: x_tl_tl + y_tl_hd :: y_tl_tl = (x_tl_hd + y_tl_hd) :: (x_tl_tl + y_tl_tl) := rfl,
-      --   rw sep_head_xty,
-      --   have sep_head_yxt : y_tl_hd :: y_tl_tl + x_tl_hd :: x_tl_tl = (y_tl_hd + x_tl_hd) :: (y_tl_tl + x_tl_tl) := rfl,
-      --   rw sep_head_yxt,
-      --   have tl_hd_comm : x_tl_hd + y_tl_hd = y_tl_hd + x_tl_hd := by apply add_comm,
-      --   rw tl_hd_comm,
-      --   have tl_tl_comm : x_tl_tl + y_tl_tl = y_tl_tl + x_tl_tl := sorry,
-      --   rw tl_tl_comm
-      --   }
-      -- }
-      -- end,
-    rw tl_comm
-  }
-}
+cases x,
+dsimp only [has_add.add],
+rw [add_nil_left, add_nil_right],
+sorry,
 end
