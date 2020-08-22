@@ -309,19 +309,130 @@ rw list.one_smul_cons,
 exact a_1,
 end
 
-lemma vec_mul_smul : ∀ g h : K, ∀ x : aff_vec K n, (g * h) • x = g • h • x := sorry
+lemma vec_mul_smul : ∀ g h : K, ∀ x : aff_vec K n, (g * h) • x = g • h • x :=
+begin
+intros,
+cases x,
+ext;
+split,
+{
+    intro hy,
+    dsimp only [has_scalar.smul, vec_scalar] at hy,
+    dsimp only [has_scalar.smul, vec_scalar],
+    rw list.smul_assoc at hy,
+    exact hy
+},
+{
+    intro hy,
+    dsimp only [has_scalar.smul, vec_scalar] at hy,
+    dsimp only [has_scalar.smul, vec_scalar],
+    rw list.smul_assoc,
+    exact hy
+}
+end
 
 instance : mul_action K (aff_vec K n) := ⟨vec_one_smul K n, vec_mul_smul K n⟩
 
-lemma vec_smul_add : ∀ g : K, ∀ x y : aff_vec K n, g • (x + y) = g•x + g•y := sorry
+lemma vec_smul_add : ∀ g : K, ∀ x y : aff_vec K n, g • (x + y) = g•x + g•y :=
+begin
+intros,
+cases x,
+cases y,
+ext;
+split,
+{
+    intro h,
+    dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar] at h,
+    dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar],
+    -- rw list.smul_add at h,
+    {sorry}
+},
+{
+    
+    intro h,
+    dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar] at h,
+    dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar],
+    -- rw list.smul_add,
+    {sorry}
+}
+end
 
-lemma vec_smul_zero : ∀ g : K, g • (0 : aff_vec K n) = 0 := sorry
+lemma vec_smul_zero : ∀ g : K, g • (0 : aff_vec K n) = 0 :=
+begin
+intro,
+have h₁ : (0 : aff_vec K n) = ⟨field_zero K n, len_zero K n, head_zero K n⟩ := rfl,
+rw h₁,
+cases (vec_zero K n),
+ext;
+split,
+{
+    intro h,
+    dsimp only [has_scalar.smul, vec_scalar] at h,
+    dsimp only [has_scalar.smul, vec_scalar],
+    rw list.smul_zero at h,
+    exact h
+},
+{
+    intro h,
+    dsimp only [has_scalar.smul, vec_scalar] at h,
+    dsimp only [has_scalar.smul, vec_scalar],
+    rw list.smul_zero,
+    exact h
+}
+end
 
 instance : distrib_mul_action K (aff_vec K n) := ⟨vec_smul_add K n, vec_smul_zero K n⟩
 
-lemma vec_add_smul : ∀ g h : K, ∀ x : aff_vec K n, (g + h) • x = g•x + h•x := sorry
+lemma vec_add_smul : ∀ g h : K, ∀ x : aff_vec K n, (g + h) • x = g•x + h•x :=
+begin
+intros,
+cases x,
+ext;
+split,
+{
+    intro h,
+    dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar] at h,
+    dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar],
+    -- rw list.add_smul at h,
+    {sorry}
+},
+{
+    intro h,
+    dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar] at h,
+    dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar],
+    -- rw list.add_smul,
+    {sorry}
+}
+end
 
-lemma vec_zero_smul : ∀ x : aff_vec K n, (0 : K) • x = 0 := sorry
+lemma vec_zero_smul : ∀ x : aff_vec K n, (0 : K) • x = 0 :=
+begin
+intro,
+have h₁ : (0 : aff_vec K n) = ⟨field_zero K n, len_zero K n, head_zero K n⟩ := rfl,
+rw h₁,
+cases (vec_zero K n),
+cases x,
+ext;
+split,
+{
+    have x_not_nil : x_l ≠ nil := by {cases x_l, contradiction, contradiction},
+    intro h,
+    dsimp only [has_scalar.smul, vec_scalar] at h,
+    dsimp only [has_scalar.smul, vec_scalar],
+    rw list.zero_smul at h,
+    {sorry},
+    exact x_not_nil,
+},
+{
+    have x_not_nil : x_l ≠ nil := by {cases x_l, contradiction, contradiction},
+    intro h,
+    dsimp only [has_scalar.smul, vec_scalar] at h,
+    dsimp only [has_scalar.smul, vec_scalar],
+    rw list.zero_smul,
+    {sorry},
+    exact x_not_nil,
+}
+end
 
 instance aff_semimod : semimodule K (aff_vec K n) := ⟨vec_add_smul K n, vec_zero_smul K n⟩
 

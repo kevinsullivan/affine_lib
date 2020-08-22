@@ -2,7 +2,7 @@ import algebra.field tactic.ext
 open list
 
 universes u v
-variables (K : Type u) [field K] {α : Type v} [has_add α]
+variables (K : Type u) [field K] [inhabited K] {α : Type v} [has_add α]
 (x y : K) (xl yl : list K)
 
 /-- addition function on `list α`, where `α` has an addition function -/
@@ -90,6 +90,43 @@ rw mul_assoc,
 exact xl_ih,
 end
 
+lemma list.smul_zero : ∀ n : ℕ, list.field_scalar K x (list.field_zero K n) = list.field_zero K n :=
+begin
+intros,
+induction n with n',
+{
+  have zero_is : list.field_zero K 0 = [0] := rfl,
+  have mul_zero : x * 0 = 0 := by apply mul_zero,
+  rw [zero_is, scalar_cons, mul_zero, scalar_nil]
+},
+{
+  have field_zero_succ : list.field_zero K n'.succ = 0 :: list.field_zero K n' := rfl,
+  have mul_zero : x * 0 = 0 := by apply mul_zero,
+  rw [field_zero_succ, scalar_cons, mul_zero, n_ih]
+}
+end
+
+lemma list.zero_smul : xl ≠ nil → list.field_scalar K 0 xl = list.field_zero K (length xl - 1) :=
+begin
+intro h,
+induction xl,
+{contradiction},
+{
+  induction xl_tl,
+  {
+    have zero_is : list.field_zero K ([xl_hd].length - 1) = [0] := rfl,
+    have zero_mul : 0 * xl_hd = 0 := by apply zero_mul,
+    rw [zero_is, scalar_cons, scalar_nil, zero_mul]
+  },
+  {
+    have zero_mul : 0 * xl_hd = 0 := by apply zero_mul,
+    have non_nil : xl_tl_hd :: xl_tl_tl ≠ nil := by contradiction,
+    rw [scalar_cons, zero_mul, xl_ih non_nil],
+    refl
+  }
+}
+end
+
 --below are functions. TODO: remove 2 of the neg functions
 
 def field_neg : K → K := λ a, -a
@@ -127,6 +164,10 @@ induction n with n',
 {contradiction},
 {refl}
 end
+
+-- Lemmas concerning addition
+lemma nil_add : ∀ x : list K, nil + x = nil := by {intros, refl}
+lemma add_nil : ∀ x : list K, x + nil = nil := by {intros, induction x, refl, refl}
 
 lemma list.add_assoc : ∀ x y z : list K, (x + y) + z = x + (y + z) :=
 begin
@@ -278,4 +319,117 @@ cases x,
 dsimp only [has_add.add],
 rw [add_nil_left, add_nil_right],
 sorry,
+end
+
+lemma list.add_trans : ∀ a b : list K, length a = length b → ∃ x : list K, x + a = b :=
+begin
+intros a b h,
+induction a,
+{
+  apply exists.intro,
+  {
+    have b_nil : b = nil := by {cases b, refl, contradiction},
+    rw [b_nil, add_nil]
+  },
+  {exact nil}
+},
+{
+  apply exists.intro,
+  {
+    induction b,
+    {contradiction},
+    {sorry}
+  },
+  {exact b + list.neg K (a_hd :: a_tl)}
+}
+end
+
+lemma list.aff_add_trans : ∀ a b : list K, (length a = length b) ∧ (a.head = (1 : K)) ∧ (b.head = (1 : K)) → ∃ x : list K, (x + a = b ∧ x.head = (0 : K)) :=
+begin
+sorry
+end
+
+lemma list.add_free : ∀ a g h : list K, length g = length a → length h = length a → g + a = h + a → g = h :=
+begin
+intros a g h g_len_a h_len_a sum_h,
+cases a,
+{
+  have g_nil : g = nil := by {cases g, refl, contradiction},
+  have h_nil : h = nil := by {cases h, refl, contradiction},
+  rw [g_nil, h_nil]
+},
+{
+  have g_neg_cancel : g = g + (a_hd :: a_tl) + list.neg K (a_hd :: a_tl) :=
+  begin
+    have a_na_zero : (a_hd :: a_tl) + list.neg K (a_hd :: a_tl) = list.field_zero K ((length (a_hd :: a_tl)) - 1) :=
+    begin
+      transitivity,
+      {apply list.add_comm},
+      {
+        apply list.add_left_neg,
+        have a_not_nil : (a_hd :: a_tl) ≠ nil := by contradiction,
+        apply a_not_nil
+      }
+    end,
+    rw [list.add_assoc, a_na_zero],
+    rw [eq.symm g_len_a],
+    symmetry,
+    apply list.add_zero
+  end,
+  have h_neg_cancel : h = h + (a_hd :: a_tl) + list.neg K (a_hd :: a_tl) :=
+  begin
+    have a_na_zero : (a_hd :: a_tl) + list.neg K (a_hd :: a_tl) = list.field_zero K ((length (a_hd :: a_tl)) - 1) :=
+    begin
+      transitivity,
+      {apply list.add_comm},
+      {
+        apply list.add_left_neg,
+        have a_not_nil : (a_hd :: a_tl) ≠ nil := by contradiction,
+        apply a_not_nil
+      }
+    end,
+    rw [list.add_assoc, a_na_zero],
+    rw [eq.symm h_len_a],
+    symmetry,
+    apply list.add_zero
+  end,
+rw [g_neg_cancel, h_neg_cancel, sum_h]
+}
+end
+
+-- Lemmas that involve addition and scalar multiplication
+lemma list.smul_add : ∀ g : K, ∀ x y : list K, list.field_scalar K g (x + y) = (list.field_scalar K g x) + (list.field_scalar K g y) :=
+begin
+intros,
+induction x,
+{
+  rw [nil_add, scalar_nil, nil_add]
+},
+{
+  induction y,
+  {rw [scalar_nil, add_nil, add_nil, scalar_nil]},
+  {
+    repeat {rw scalar_cons},
+    have add_xy : x_hd :: x_tl + y_hd :: y_tl = (x_hd + y_hd) :: (x_tl + y_tl) := rfl,
+    have scalar_is : g * x_hd :: list.field_scalar K g x_tl + g * y_hd :: list.field_scalar K g y_tl = (g * x_hd + g * y_hd) :: (list.field_scalar K g x_tl + list.field_scalar K g y_tl) := rfl,
+    have head_distrib : g * x_hd + g * y_hd = g * (x_hd + y_hd) := by {symmetry, apply left_distrib},
+    have tail_distrib : list.field_scalar K g x_tl + list.field_scalar K g y_tl = list.field_scalar K g (x_tl + y_tl) := sorry,
+    rw [add_xy, scalar_cons, scalar_is, head_distrib, tail_distrib]
+  }
+}
+end
+
+lemma list.add_smul : ∀ g h : K, ∀ x : list K, list.field_scalar K (g + h) x = (list.field_scalar K g x) + (list.field_scalar K h x) :=
+begin
+intros,
+induction x,
+{
+  rw [scalar_nil, scalar_nil, scalar_nil],
+  refl
+},
+{
+  have sum_is : g * x_hd :: list.field_scalar K g x_tl + h * x_hd :: list.field_scalar K h x_tl = (g * x_hd + h * x_hd) :: (list.field_scalar K g x_tl + list.field_scalar K h x_tl) := rfl,
+  have head_distrib : g * x_hd + h * x_hd = (g + h) * x_hd := by {symmetry, apply right_distrib},
+  rw [scalar_cons, scalar_cons, scalar_cons, sum_is, head_distrib, x_ih]
+}
 end
