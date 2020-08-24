@@ -6,6 +6,7 @@ variables (K : Type u) [field K] [inhabited K] {α : Type v} [has_add α]
 (x y : K) (xl yl : list K)
 
 /-- addition function on `list α`, where `α` has an addition function -/
+@[ext]
 def ladd : list α → list α → list α := zip_with has_add.add
 
 /- 

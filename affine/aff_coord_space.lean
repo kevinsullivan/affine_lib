@@ -1,6 +1,7 @@
 import .affine
 import .list_stuff
 import .add_group_action linear_algebra.basis
+import algebra.field tactic.ext
 
 universes u v w
 variables (X : Type u) (K : Type v) (V : Type w) (n : ℕ) (id : ℕ) (k : K)
@@ -260,8 +261,7 @@ split,
     intro h,
     dsimp [has_neg.neg, vec_neg, has_add.add, vec_add] at h,
     dsimp [has_neg.neg, vec_neg, has_add.add, vec_add],
-    rw list.ladd_is at h,
-    rw list.add_left_neg at h,
+    rw [list.ladd_is, list.add_left_neg] at h,
     {
         have h₃ : x_l.length - 1 = n := by {rw x_len_fixed, refl},
         rw h₃ at h,
@@ -546,12 +546,28 @@ lemma action_fst_fixed : ∀ x : aff_vec K n, ∀ y : aff_pt K n, head (x.1 + y.
     by {intros, simp only [eq.symm (head_action K n x y), x.3, y.3]; exact zero_add 1}
 
 -- need to actually write out the function
+@[ext]
 def aff_group_action : aff_vec K n → aff_pt K n → aff_pt K n :=
     λ x y, ⟨x.1 + y.1, list_action_fixed K n x y, action_fst_fixed K n x y⟩
 
+@[ext]
 instance : has_trans (aff_vec K n) (aff_pt K n) := ⟨aff_group_action K n⟩
 
-lemma aff_zero_sadd : ∀ x : aff_pt K n, (0 : aff_vec K n) ⊹ x = x := sorry
+lemma aff_zero_sadd : ∀ x : aff_pt K n, (0 : aff_vec K n) ⊹ x = x :=
+begin
+intro,
+cases x,
+have h₁ : (0 : aff_vec K n) = ⟨field_zero K n, len_zero K n, head_zero K n⟩ := rfl,
+rw h₁,
+ext;
+split,
+{
+    intro h,
+    -- dsimp [has_trans.trans, aff_group_action],
+    {sorry}
+},
+{sorry}
+end
 
 lemma aff_add_sadd : ∀ x y : aff_vec K n, ∀ a : aff_pt K n, (x + y) ⊹ a = x ⊹ y ⊹ a := sorry
 
