@@ -146,7 +146,28 @@ def pt_zero_f : ℕ → list K
 | 0 := [1]
 | (nat.succ n) := [1] ++ list.field_zero K n
 
-lemma pt_zero_len : length (pt_zero_f K n) = n + 1 := sorry
+#check list.append
+
+lemma pt_zero_len : length (pt_zero_f K n) = n + 1 :=
+begin
+induction n with n',
+{refl},
+{
+    cases n' with n'',
+    {refl},
+    {
+        have h₁ : pt_zero_f K n''.succ = [1] ++ field_zero K n'' := rfl,
+        have h₂ : ([1] ++ field_zero K n'').length = (field_zero K n'').length + 1 := rfl,
+        rw [h₁, h₂] at n_ih,
+
+        have h₃ : pt_zero_f K n''.succ.succ = [1] ++ field_zero K n''.succ := rfl,
+        have h₄ : ([1] ++ field_zero K n''.succ).length = (field_zero K n''.succ).length + 1 := rfl,
+        have h₅ : field_zero K n''.succ = 0 :: (field_zero K n'') := rfl,
+        have h₆ : (0 :: field_zero K n'').length = (field_zero K n'').length + 1 := rfl,
+        rw [h₃, h₄, h₅, h₆, n_ih]
+    }
+}
+end
 
 lemma pt_zero_hd : head (pt_zero_f K n) = 1 := by {cases n, refl, refl} 
 
@@ -158,19 +179,33 @@ lemma vec_zero_list' : (0 : aff_vec K n).1 = field_zero K n := rfl
 
 -- properties necessary to show aff_vec K n is an instance of add_comm_group
 #print add_comm_group
-lemma vec_add_assoc : ∀ x y z : aff_vec K n,  x + y + z = x + (y + z) :=
+lemma vec_add_assoc : ∀ x y z : aff_vec K n, x + y + z = x + (y + z) :=
 begin
 intros,
 cases x,
 cases y,
 cases z,
-dsimp [has_add.add, vec_add],
-ext,
+ext;
 split,
-intros,
-sorry, sorry
+{
+    intro h,
+    dsimp [has_add.add, vec_add] at h,
+    dsimp [has_add.add, vec_add],
+    rw [list.ladd_is, list.ladd_is] at h,
+    rw [list.ladd_is, list.ladd_is],
+    rw list.add_assoc at h,
+    exact h
+},
+{
+    intro h,
+    dsimp [has_add.add, vec_add] at h,
+    dsimp [has_add.add, vec_add],
+    rw [list.ladd_is, list.ladd_is] at h,
+    rw [list.ladd_is, list.ladd_is],
+    rw list.add_assoc,
+    exact h
+}
 end
-
 
 lemma vec_zero_add : ∀ x : aff_vec K n, 0 + x = x :=
 begin
@@ -213,28 +248,49 @@ rw list.add_zero' K x_l n x_len_fixed,
 exact a_1,
 end
 
-
 lemma vec_add_left_neg : ∀ x : aff_vec K n, -x + x = 0 :=
 begin
 intro x,
 cases x,
-rw vec_zero_is,
-ext,
+have h₁ : (0 : aff_vec K n) = ⟨field_zero K n, len_zero K n, head_zero K n⟩ := rfl,
+rw h₁,
+ext;
 split,
-intros,
-dsimp [vec_zero],
-dsimp [has_neg.neg, vec_neg, has_add.add, vec_add] at a_1,
-cases x_l,
-contradiction,
-have nz : n + 1 ≠ 0 := nat.succ_ne_zero n,
-have hnz : (cons x_l_hd x_l_tl).length ≠ 0 := ne_of_eq_of_ne x_len_fixed nz,
-change a ∈ (neg K (x_l_hd :: x_l_tl) + x_l_hd :: x_l_tl).nth n_1 at a_1,
-rw list.add_left_neg K (cons x_l_hd x_l_tl) at a_1,
-sorry, -- need to show that if (a ∈ field_zero ...), then a=0
-intros,
-contradiction,
-intros,
-sorry, -- can be filled out easily if above sorry is fixed
+{
+    intro h,
+    dsimp [has_neg.neg, vec_neg, has_add.add, vec_add] at h,
+    dsimp [has_neg.neg, vec_neg, has_add.add, vec_add],
+    rw list.ladd_is at h,
+    rw list.add_left_neg at h,
+    {
+        have h₃ : x_l.length - 1 = n := by {rw x_len_fixed, refl},
+        rw h₃ at h,
+        exact h
+    },
+    {
+        cases x_l,
+        contradiction,
+        contradiction
+    }
+},
+{
+    intro h,
+    dsimp [has_neg.neg, vec_neg, has_add.add, vec_add] at h,
+    dsimp [has_neg.neg, vec_neg, has_add.add, vec_add],
+    have h₂ : ladd (neg K x_l) x_l = neg K x_l + x_l := rfl,
+    rw h₂,
+    rw list.add_left_neg,
+    {
+        have h₃ : x_l.length - 1 = n := by {rw x_len_fixed, refl},
+        rw h₃,
+        exact h
+    },
+    {
+        cases x_l,
+        contradiction,
+        contradiction
+    }
+}
 end
 
 #check ladd
@@ -344,16 +400,20 @@ split,
     intro h,
     dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar] at h,
     dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar],
-    -- rw list.smul_add at h,
-    {sorry}
+    rw list.ladd_is at h,
+    rw list.ladd_is,
+    rw list.smul_add at h,
+    exact h
 },
 {
     
     intro h,
     dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar] at h,
     dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar],
-    -- rw list.smul_add,
-    {sorry}
+    rw list.ladd_is at h,
+    rw list.ladd_is,
+    rw list.smul_add,
+    exact h
 }
 end
 
@@ -390,18 +450,24 @@ cases x,
 ext;
 split,
 {
-    intro h,
-    dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar] at h,
+    intro hy,
+    dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar] at hy,
     dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar],
-    -- rw list.add_smul at h,
-    {sorry}
+    have h₁ : distrib.add g h = g + h := rfl,
+    rw h₁ at hy,
+    rw list.ladd_is,
+    rw list.add_smul at hy,
+    exact hy
 },
 {
-    intro h,
-    dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar] at h,
+    intro hy,
+    dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar] at hy,
     dsimp only [has_add.add, vec_add, has_scalar.smul, vec_scalar],
-    -- rw list.add_smul,
-    {sorry}
+    have h₁ : distrib.add g h = g + h := rfl,
+    rw list.ladd_is at hy,
+    rw h₁,
+    rw list.add_smul,
+    exact hy
 }
 end
 
@@ -420,7 +486,11 @@ split,
     dsimp only [has_scalar.smul, vec_scalar] at h,
     dsimp only [has_scalar.smul, vec_scalar],
     rw list.zero_smul at h,
-    {sorry},
+    {
+        have h₂ : x_l.length - 1 = n := by {rw x_len_fixed, refl},
+        rw h₂ at h,
+        exact h
+    },
     exact x_not_nil,
 },
 {
@@ -429,7 +499,11 @@ split,
     dsimp only [has_scalar.smul, vec_scalar] at h,
     dsimp only [has_scalar.smul, vec_scalar],
     rw list.zero_smul,
-    {sorry},
+    {
+        have h₂ : x_l.length - 1 = n := by {rw x_len_fixed, refl},
+        rw h₂,
+        exact h
+    },
     exact x_not_nil,
 }
 end
@@ -442,9 +516,38 @@ instance aff_module : module K (aff_vec K n) := aff_semimod K n
 instance aff_vec_space : vector_space K (aff_vec K n) := aff_module K n
 
 /-! ### group action of aff_vec on aff_pt -/
+-- Proof that for any vector x and point y, x.length + y.length = (x ⊹ y).length
+lemma list_action_fixed : ∀ x : aff_vec K n, ∀ y : aff_pt K n, length (x.1 + y.1) = n + 1 := 
+    by {intros, simp only [sum_test K x.1 y.1, length_sum x.1 y.1, x.2, y.2, min_self]}
+
+/-- head is compatible with addition -/
+lemma head_action : ∀ x : aff_vec K n, ∀ y : aff_pt K n, head x.1 + head y.1 = head (x.1 + y.1) := 
+begin
+intros,
+cases x,
+cases y,
+cases x_l,
+    have f : 0 ≠ n + 1 := ne.symm (nat.succ_ne_zero n),
+    have bad := eq.trans (eq.symm len_nil) x_len_fixed,
+    contradiction,
+cases y_l,
+    have f : 0 ≠ n + 1 := ne.symm (nat.succ_ne_zero n),
+    have bad := eq.trans (eq.symm len_nil) y_len_fixed,
+    contradiction,
+have head_xh : head (x_l_hd :: x_l_tl) = x_l_hd := rfl,
+have head_yh : head (y_l_hd :: y_l_tl) = y_l_hd := rfl,
+rw head_xh at x_fst_zero,
+rw head_yh at y_fst_one,
+simp [x_fst_zero, y_fst_one, sum_test, add_cons_cons 0 0 x_l_tl y_l_tl],
+end
+
+/-- the head of the sum of a vector and a point is 1 -/
+lemma action_fst_fixed : ∀ x : aff_vec K n, ∀ y : aff_pt K n, head (x.1 + y.1) = 1 :=
+    by {intros, simp only [eq.symm (head_action K n x y), x.3, y.3]; exact zero_add 1}
+
 -- need to actually write out the function
 def aff_group_action : aff_vec K n → aff_pt K n → aff_pt K n :=
-    λ x y, sorry
+    λ x y, ⟨x.1 + y.1, list_action_fixed K n x y, action_fst_fixed K n x y⟩
 
 instance : has_trans (aff_vec K n) (aff_pt K n) := ⟨aff_group_action K n⟩
 

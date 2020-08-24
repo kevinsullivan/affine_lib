@@ -166,6 +166,8 @@ induction n with n',
 end
 
 -- Lemmas concerning addition
+lemma list.ladd_is : ∀ x y : list K, ladd x y = x + y := by {intros, refl}
+
 lemma nil_add : ∀ x : list K, nil + x = nil := by {intros, refl}
 lemma add_nil : ∀ x : list K, x + nil = nil := by {intros, induction x, refl, refl}
 
