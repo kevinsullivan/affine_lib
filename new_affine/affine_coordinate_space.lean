@@ -1,4 +1,5 @@
 import .list_as_k_tuple linear_algebra.affine_space.basic
+import .affine_with_frame
 
 universes u v w
 variables (X : Type u) (k : Type v) (V : Type w) (n : ℕ) (id : ℕ)
@@ -341,3 +342,35 @@ end
 -- WTS the pair aff_vec and aff_pt form an affine space
 
 instance aff_coord_is : affine_space (aff_vec k n) (aff_pt k n) := aff_torsor k n
+
+
+variables (ι : Type*) (vec : ι → V) (frame : affine_frame (aff_pt k n) k (aff_vec k n) ι)
+
+open aff_fr
+
+abbreviation vwf := vec_with_frame (aff_pt k n) k (aff_vec k n) ι frame
+
+abbreviation pwf := pt_with_frame (aff_pt k n) k (aff_vec k n) ι frame
+
+/-
+def vec_basis : ι → aff_vec k n := λ x, [0, 1, 0, 0] [0, 0, 1, 0] [0, 0, 0, 1]
+
+
+def f : affine_frame (aff_pt k n) k (aff_vec k n) ι := ⟨[1, 0, 0, 0], vec_basis, pf_that_vec_basis_is_basis⟩
+
+v : vec_with_frame f ⟨[0,1,2,3]⟩
+
+x = aff_pt [1, 0, 0, 0]
+
+new frame -> ⟨v +ᵥ x, new_basis, pf_that_vec_basis_is_basis⟩ ( from f)
+
+frame c = ....
+pt = [1, 1, 1]
+basis = 
+frame a (pt, basis, standard frame)
+
+
+pt2 = ...
+b2 = ...
+frame b (pt2, b2, frame a)
+-/

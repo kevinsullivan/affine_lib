@@ -3,7 +3,7 @@ import algebra.module linear_algebra.basis
 
 universes u v w
 variables (X : Type u) (K : Type v) (V : Type w) (ι : Type*)
-[field K] [add_comm_group V] [vector_space K V]
+[ring K] [add_comm_group V] [module K V]
 
 variables (s : finset ι) (g : ι → K) (v : ι → V) [is_basis K v] [affine_space V X]
 
@@ -107,7 +107,7 @@ instance : add_comm_group (vec_with_frame X K V ι basis) :=
 #print vector_space
 #print semimodule
 
-instance : vector_space K (vec_with_frame X K V ι basis) := sorry
+instance : module K (vec_with_frame X K V ι basis) := sorry
 
 instance : affine_space (vec_with_frame X K V ι basis) (pt_with_frame X K V ι basis) := sorry
 
