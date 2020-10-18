@@ -3,6 +3,8 @@ import ..new_affine.affine_coordinate_space
 import data.real.basic
 
 
+namespace real_affine
+
 abbreviation real_vec := aff_vec ℝ
 abbreviation real_pt  := aff_pt  ℝ
 
@@ -32,9 +34,20 @@ inductive Algebra
 | vec_space (v : vec_struct)
 | nat_monoid -- placeholder, commutative monoid with monus operator
 
-noncomputable def to_affine : ℕ → aff_struct := λ n,
-    ⟨aff_pt ℝ n, ℝ, aff_vec ℝ n, real.ring, aff_comm_group ℝ n, aff_module ℝ n, aff_coord_is ℝ n⟩
+def real_aff_pt_n := λn : ℕ, aff_pt ℝ n
+def real_scalar := ℝ
+def real_aff_vec_n := λn : ℕ, aff_vec ℝ n
+def prf_ring := real.ring
+def prf_real_add_comm_grp_n := λn : ℕ, aff_comm_group ℝ n
+def prf_vec_module_n := λn : ℕ, aff_module ℝ n
+def prf_aff_crd_sp := λn : ℕ, aff_coord_is ℝ n
+
+    --⟨aff_pt ℝ n, ℝ, aff_vec ℝ n, real.ring, aff_comm_group ℝ n, aff_module ℝ n, aff_coord_is ℝ n⟩
+def to_affine : ℕ → aff_struct := λ n,
+    ⟨real_aff_pt_n n, ℝ , (real_aff_vec_n n), real.ring, prf_real_add_comm_grp_n n,prf_vec_module_n n,prf_aff_crd_sp n⟩
 
 
 noncomputable def to_vector : ℕ → vec_struct := λ n, 
     ⟨ℝ, aff_vec ℝ n, real.field, aff_comm_group ℝ n, aff_module ℝ n⟩
+
+end real_affine
