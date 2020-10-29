@@ -62,7 +62,7 @@ structure aff_fr_struct
     [add_comm_group V] 
     [module K V]  
     [affine_space V X]:=
-    (aff_sp : aff_struct dim X K V)
+    --(aff_sp : aff_struct dim X K V)
     (aff_fr : affine_frame X K V (fin dim))
 
 /-
@@ -105,7 +105,7 @@ inductive Algebra
     [add_comm_group V] 
     [module K V]  
     [affine_space V X] (a : aff_pt_struct dim X K V)
-| aff_fr 
+| aff_frame 
     {dim : ℕ} {X : Type} {K : Type} {V : Type} 
     [ring K] 
     [add_comm_group V] 
@@ -123,10 +123,6 @@ def get_e_i (dim : ℕ) : list ℝ → ℕ → list ℝ
 | l (nat.zero) := l
 
 def get_zero_pt (dim : ℕ) : aff_pt ℝ dim := ⟨get_vecl dim, sorry, sorry⟩
-
-instance : has_singleton (aff_vec ℝ 3) (ℕ → aff_vec ℝ 3) := sorry
-
-
 
 def vector_copy_helper {dim : ℕ} : vector ℝ dim → ℕ → list ℝ → list ℝ 
 | v (nat.succ n) l := [(v.nth (⟨n,sorry⟩ : fin dim))]++(vector_copy_helper v n l)
@@ -151,12 +147,17 @@ def get_basis (dim : ℕ) : fin dim → aff_vec ℝ dim :=
 def get_standard_frame_on_Rn (dim : ℕ) : affine_frame  (aff_pt ℝ dim) ℝ (aff_vec ℝ dim) (fin dim) :=
     affine_frame.standard (get_zero_pt dim) (get_basis dim) sorry
 
-abbreviation p_f (dim : ℕ) := pt_with_frame (aff_pt ℝ dim) ℝ (aff_vec ℝ dim) (fin dim) 
-abbreviation v_f (dim : ℕ) := vec_with_frame (aff_pt ℝ dim) ℝ (aff_vec ℝ dim) (fin dim) 
+abbreviation real_affine_point_with_frame (dim : ℕ) := 
+    pt_with_frame (aff_pt ℝ dim) ℝ (aff_vec ℝ dim) (fin dim) 
+abbreviation real_affine_vector_with_frame (dim : ℕ) := 
+    vec_with_frame (aff_pt ℝ dim) ℝ (aff_vec ℝ dim) (fin dim) 
 
-abbreviation r_fr (dim : ℕ) := affine_frame  (aff_pt ℝ dim) ℝ (aff_vec ℝ dim) (fin dim)
-
-abbreviation derived_fr {dim : ℕ} := affine_frame  (aff_pt ℝ dim) ℝ (aff_vec ℝ dim) (fin dim)
+abbreviation r_fr (dim : ℕ) :=
+    affine_frame  (aff_pt ℝ dim) ℝ (aff_vec ℝ dim) (fin dim)
+abbreviation real_affine_frame (dim : ℕ) := 
+    --affine_frame  (aff_pt ℝ dim) ℝ (aff_vec ℝ dim) (fin dim)
+    aff_fr_struct dim (aff_pt ℝ dim) ℝ (aff_vec ℝ dim) 
+--abbreviation derived_fr {dim : ℕ} := affine_frame  (aff_pt ℝ dim) ℝ (aff_vec ℝ dim) (fin dim)
 
 abbreviation real_affine_vector (dim : ℕ) :=
     aff_vec_struct dim (aff_pt ℝ dim) ℝ (aff_vec ℝ dim) 
@@ -169,26 +170,21 @@ abbreviation real_affine_space (dim : ℕ) :=
 
 
 abbreviation real_coordinatized_affine_space {dim : ℕ} (fr : r_fr dim) :=
-     aff_struct dim (p_f dim fr) ℝ (v_f dim fr)
+     aff_struct dim (real_affine_point_with_frame dim fr) ℝ (real_affine_vector_with_frame dim fr)
 abbreviation real_affine_coordinatized_vector  {dim : ℕ} (fr : r_fr dim) :=
-     aff_vec_struct dim (p_f dim fr) ℝ (v_f dim fr)
+     aff_vec_struct dim (real_affine_point_with_frame dim fr) ℝ (real_affine_vector_with_frame dim fr)
 abbreviation real_affine_coordinatized_point  {dim : ℕ} (fr : r_fr dim) :=
-     aff_pt_struct dim (p_f dim fr) ℝ (v_f dim fr)
+     aff_pt_struct dim (real_affine_point_with_frame dim fr) ℝ (real_affine_vector_with_frame dim fr)
 
-def real_affine_space.get_standard_frame {dim : ℕ} --{f : r_fr dim} 
+def real_affine_space.get_standard_frame {dim : ℕ} --{f : real_affine_frame dim} 
     (sp : real_affine_space dim)
-    : r_fr dim 
+    : r_fr dim
 := get_standard_frame_on_Rn dim --⟨get_zero_pt dim, get_basis dim, sorry⟩
 
 def real_affine_coordinate_space.get_coordinate_frame {dim : ℕ} {f : r_fr dim} 
     (sp : real_coordinatized_affine_space f)
     : r_fr dim 
 := f
-
-
-def ptt {d : ℕ } (f : r_fr d) (v : aff_pt ℝ d) : pt_with_frame (aff_pt ℝ d) ℝ (aff_vec ℝ d) (fin d) f :=
-    ⟨v⟩
-
 
 def real_affine_coordinate_space.change_coordinate_frame {dim : ℕ} {f : r_fr dim}
     (original : real_coordinatized_affine_space f)
@@ -199,13 +195,6 @@ def real_affine_coordinate_space.change_coordinate_frame {dim : ℕ} {f : r_fr d
             (aff_pt.mk (vector_to_pt_list origin) sorry sorry)
              (λ x: fin dim, ⟨vector_to_vec_list (basis x),sorry,sorry⟩) sorry f)
 
-def fr (dim : ℕ ) : affine_frame  (aff_pt ℝ dim) ℝ (aff_vec ℝ dim) (fin dim) 
-:= get_standard_frame_on_Rn dim
-/-
-def p (dim : ℕ ): 
-    pt_with_frame (affine_frame  (aff_pt ℝ dim) ℝ (aff_vec ℝ dim) (fin dim)) 
-    := ⟨get_zero_pt 3⟩
--/
 def to_affine_space (n : ℕ) : real_affine_space n :=
     ⟨⟩
     --⟨aff_pt ℝ n, ℝ, aff_vec ℝ n, real.ring, aff_comm_group ℝ n, aff_module ℝ n, aff_coord_is ℝ n⟩
@@ -218,15 +207,15 @@ def to_affine_vector {n : ℕ} (v : vector ℝ n) : real_affine_vector n :=
 def to_affine_point {n : ℕ} (v : vector ℝ n) : real_affine_point n :=
     ⟨to_affine_space n, vector_to_pt v⟩
 
-def to_standard_frame (n : ℕ) :=
-    real_affine_space.get_standard_frame (to_affine_space n)
+def to_standard_frame (n : ℕ) : real_affine_frame n :=
+    ⟨real_affine_space.get_standard_frame (to_affine_space n)⟩
 
 def to_derived_frame
     (n : ℕ) (p : vector ℝ n) (b : fin n → vector ℝ n) 
-    {fr : affine_frame (aff_pt ℝ n) ℝ (aff_vec ℝ n) (fin n)} 
+    {fr : r_fr n} 
     (sp : real_coordinatized_affine_space fr) :
-    r_fr n :=
-    affine_frame.derived (vector_to_pt p) (λi : fin n,vector_to_vec (b i)) sorry fr
+    real_affine_frame n :=
+    ⟨affine_frame.derived (vector_to_pt p) (λi : fin n,vector_to_vec (b i)) sorry fr⟩
     
 def to_affine_vector_with_frame {n : ℕ} (v : vector ℝ n)
     {fr : r_fr n} 
@@ -240,53 +229,5 @@ def to_affine_point_with_frame {n : ℕ} (v : vector ℝ n)
     (sp : real_coordinatized_affine_space fr) :
     real_affine_coordinatized_point fr :=
     ⟨sp,  ⟨(vector_to_pt v)⟩⟩
-
-
---def to_affine (n : ℕ) : aff_struct n (aff_fr.pt_with_frame get_standard_frame_on_Rn n) ℝ  (aff_vec ℝ n) := 
---    ⟨get_standard_frame_on_Rn n⟩ --⟨real.ring, prf_real_add_comm_grp_n n,prf_vec_module_n n,prf_aff_crd_sp n, get_standard_frame n⟩
-
-/-
-variables (ι : Type*) (vec : ι → V) (frame : affine_frame (aff_pt k n) k (aff_vec k n) ι)
-
-open aff_fr
-
-abbreviation vwf := vec_with_frame (aff_pt k n) k (aff_vec k n) ι frame
-
-abbreviation pwf := pt_with_frame (aff_pt k n) k (aff_vec k n) ι frame
-
-
-def vec_basis : ι → aff_vec ℝ 3 := λ x, ⟨[0, 1, 0, 0],sorry,sorry⟩
--/
-
---def f : affine_frame (aff_pt k n) k (aff_vec k n) ι := ⟨[1, 0, 0, 0], vec_basis, pf_that_vec_basis_is_basis⟩
-/-
-/-
-def vec_basis : ι → aff_vec k n := λ x, [0, 1, 0, 0] [0, 0, 1, 0] [0, 0, 0, 1]
-
-
-def f : affine_frame (aff_pt k n) k (aff_vec k n) ι := ⟨[1, 0, 0, 0], vec_basis, pf_that_vec_basis_is_basis⟩
-
-v : vec_with_frame f ⟨[0,1,2,3]⟩
-
-x = aff_pt [1, 0, 0, 0]
-
-new frame -> ⟨v +ᵥ x, new_basis, pf_that_vec_basis_is_basis⟩ ( from f)
-
-frame c = ....
-pt = [1, 1, 1]
-basis = 
-frame a (pt, basis, standard frame)
-
--/
-
-
-pt2 = ...
-b2 = ...
-frame b (pt2, b2, frame a)
--/
-
-
---noncomputable def to_vector : ℕ → vec_struct := λ n, 
---    ⟨ℝ, aff_vec ℝ n, real.field, aff_comm_group ℝ n, aff_module ℝ n⟩
 
 end real_affine
