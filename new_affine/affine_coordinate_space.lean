@@ -7,19 +7,28 @@ variables (X : Type u) (k : Type v) (V : Type w) (n : ℕ) (id : ℕ)
 
 open list
 open vecl
-/-- type class for affine vectors. This models n-dimensional K-coordinate space. -/
+
+/-- 
+We define the types of n-dimensional affine points
+and vectors represented by n+1-dimension coordinate
+tuples, where points are distinguished by having 1
+as their first element and vectors by having 0 (in
+the given ring) as their first elements. 
+-/
+
 @[ext]
 structure aff_vec :=
 (l : list k)
 (len_fixed : l.length = n + 1)
 (fst_zero : head l = 0)
 
-/-- type class for affine points for coordinate spaces. -/
+/-- type of affine points represented by coordinate tuples -/
 @[ext]
 structure aff_pt :=
 (l : list k)
 (len_fixed : l.length = n + 1)
 (fst_one : head l = 1)
+
 
 variables (x y : aff_vec k n) (a b : aff_pt k n)
 
@@ -341,9 +350,14 @@ end
 -- ⟨aff_group_action k n, aff_zero_sadd k n, aff_add_sadd k n, aff_group_sub k n, aff_vadd_vsub k n  ⟩
 -- WTS the pair aff_vec and aff_pt form an affine space
 
+
+/-
+"THEOREM" these sets of scalar tuples with the operations defined on them
+do have the structure of an affine space.
+-/
 instance aff_coord_is : affine_space (aff_vec k n) (aff_pt k n) := aff_torsor k n
 
-
+/-
 variables (ι : Type*) (vec : ι → V) (frame : affine_frame (aff_pt k n) k (aff_vec k n) ι)
 
 open aff_fr
@@ -351,6 +365,7 @@ open aff_fr
 abbreviation vwf := vec_with_frame (aff_pt k n) k (aff_vec k n) ι frame
 
 abbreviation pwf := pt_with_frame (aff_pt k n) k (aff_vec k n) ι frame
+-/
 
 /-
 def vec_basis : ι → aff_vec k n := λ x, [0, 1, 0, 0] [0, 0, 1, 0] [0, 0, 0, 1]

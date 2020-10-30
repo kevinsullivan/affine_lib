@@ -2,6 +2,11 @@ import .affine_coordinate_space .list_as_k_tuple
 import data.real.basic linear_algebra.affine_space.basic
 import linear_algebra.basis
 
+/-
+This file imports affine_coordinate_space, which, in turn
+imports affine_with_frame.
+-/
+
 universes u v w x
 
 variables (X : Type u) (K : Type v) (V : Type w) (n : ℕ) (k : K)
@@ -22,8 +27,13 @@ def std_basis : fin n → aff_vec K n :=
 
 lemma std_is_basis : is_basis K (std_basis K n) := sorry
 
-def std_frame : affine_frame (aff_pt K n) K (aff_vec K n) (fin n) := ⟨pt_zero K n, std_basis K n, std_is_basis K n⟩
+/-
+A stamdard frame is an affine frame using the standard zero
+point as an origin and the standard unit basis vectors as a
+basis.
+-/
+def std_frame : affine_frame (aff_pt K n) K (aff_vec K n) (fin n) := 
+    ⟨pt_zero K n, std_basis K n, std_is_basis K n⟩
 
-noncomputable def r3_std_frame := std_frame ℝ 3
-
-def std_origin : pt_with_frame (aff_pt K n) K (aff_vec K n) (fin n) (std_frame K n) := ⟨pt_zero K n⟩
+-- noncomputable def r3_std_frame := std_frame ℝ 3
+-- def std_origin : pt_with_frame (aff_pt K n) K (aff_vec K n) (fin n) (std_frame K n) := pt_zero K n

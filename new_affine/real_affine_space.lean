@@ -13,7 +13,20 @@ abbreviation r3_pt  := real_pt  3
 
 universes u v w
 
-structure aff_struct 
+/-
+A polymorphic affine space type with
+explicit type parameters
+- dimension, dim; 
+- "point" set, X;
+- scalar set, K; 
+- module (e.g., "vector" set), V
+
+The typeclass mechanism is used to find
+proofs that confirm that the specified 
+type does actually constitute an affine
+space type.
+-/
+structure aff_struct
     (dim : ℕ)
     (X : Type u)
     (K : Type v)
@@ -22,11 +35,8 @@ structure aff_struct
     [add_comm_group V] 
     [module K V]  
     [affine_space V X]
---(vec : add_comm_group V)
---(vs : module K V)
---(aff : affine_space V X)
---(fr : affine_frame  X K V (fin dim))
-open aff_fr
+
+open aff_fr 
 
 structure aff_vec_struct 
     (dim : ℕ)
@@ -86,6 +96,7 @@ structure vec_struct (dim : ℕ) :=
 (grp : add_comm_group V)
 (vec : vector_space K V)
 
+-- Still needed but goes in different file eventually
 inductive Algebra  
 | aff_space 
     {dim : ℕ} {X : Type} {K : Type} {V : Type} 
@@ -93,6 +104,7 @@ inductive Algebra
     [add_comm_group V] 
     [module K V]  
     [affine_space V X] (a : aff_struct dim X K V)
+/-
 | aff_vector 
     {dim : ℕ} {X : Type} {K : Type} {V : Type} 
     [ring K] 
@@ -112,6 +124,7 @@ inductive Algebra
     [module K V]  
     [affine_space V X] (a : aff_fr_struct dim X K V)
 | vec_space (dim : ℕ) (v : vec_struct dim)
+-/
 | nat_monoid -- placeholder, commutative monoid with monus operator
 
 def get_vecl : ℕ → list ℝ
@@ -165,9 +178,12 @@ abbreviation real_affine_vector (dim : ℕ) :=
 abbreviation real_affine_point (dim : ℕ) :=
     aff_pt_struct dim (aff_pt ℝ dim) ℝ (aff_vec ℝ dim) 
 
-abbreviation real_affine_space (dim : ℕ) := 
+-- This is still needed
+-- Basically an abbreviation
+def real_affine_space (dim : ℕ) := 
     aff_struct dim (aff_pt ℝ dim) ℝ (aff_vec ℝ dim)
 
+#check real_affine_space
 
 abbreviation real_coordinatized_affine_space {dim : ℕ} (fr : r_fr dim) :=
      aff_struct dim (real_affine_point_with_frame dim fr) ℝ (real_affine_vector_with_frame dim fr)

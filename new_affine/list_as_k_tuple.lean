@@ -1,10 +1,11 @@
 import algebra.ring tactic.ext 
 
 /-!
-This file includes definitions and theorems about lists as vectors. These are necessary to instantiate
-specific instances of vector spaces (e.g. coordinate spaces over fields, Minkowski space, etc)
-
-
+This file includes definitions of standard
+coordinate tuples represented as lists and 
+the usual coordinate-wise operations needed
+for linear algebra. This file supports our
+formalization of affine coordinate spaces. 
 -/
 
 
