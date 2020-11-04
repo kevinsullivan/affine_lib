@@ -21,7 +21,7 @@ variables (s : finset ι) (g : ι → K) (v : ι → V) [is_basis K v] [affine_s
 --open_locale big_operators
 
 structure affine_frame :=
-(ref_pt : X)
+(origin : X)
 (vec : ι → V)
 (basis : is_basis K vec)
 

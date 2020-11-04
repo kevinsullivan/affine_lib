@@ -227,7 +227,7 @@ def derived_space2 : framed_affine_coord_space_type
 --possible to push it up inductively
 
 def derived_std_frame_origin : (pt_wrapper derived_frame) :=
-    ⟨⟨real_affine3_std_frame.ref_pt⟩⟩
+    ⟨⟨real_affine3_std_frame.origin⟩⟩
 def derived_std_frame_basis : fin 3 → vec_wrapper derived_frame :=
     (λ i : fin 3,
         ⟨⟨real_affine3_std_frame.vec i⟩⟩)

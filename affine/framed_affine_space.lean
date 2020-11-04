@@ -8,8 +8,8 @@ def std_frame : affine_frame (aff_pt_coord_tuple K n) K (aff_vec_coord_tuple K n
 
 /-
 inductive affine_frame --need proof that "standard" is THE standard basis?
-| standard (ref_pt : X) (vec : ι → V) (basis : is_basis K vec ) : affine_frame
-| derived (ref_pt : X) (vec : ι → V) (basis :  is_basis K vec ) : affine_frame → affine_frame
+| standard (origin : X) (vec : ι → V) (basis : is_basis K vec ) : affine_frame
+| derived (origin : X) (vec : ι → V) (basis :  is_basis K vec ) : affine_frame → affine_frame
 -/
 
 namespace aff_fr
