@@ -46,7 +46,7 @@ Here we equip any generic affine coordinate space with a standard frame
 def aff_coord_space_std_frame : 
     affine_frame (aff_pt_coord_tuple K n) K (aff_vec_coord_tuple K n) (fin n) := 
         ⟨pt_zero K n, std_basis K n, std_is_basis K n⟩
-
+#check aff_coord_space_std_frame
 end aff_basis
 
 /-

@@ -136,5 +136,7 @@ def framed_affine_coord_space_type
 
 
 -- do the same thing here we did before
-
+--create a framed affine coordinate space, get a standard frame on it
+--rewrite charlie's std frame
+-- create a point, create a vector in that framed space
 end aff_fr
