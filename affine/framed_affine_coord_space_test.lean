@@ -63,16 +63,16 @@ def vec_basis3 :
     := ⟨⟨[0,0,0,1],sorry,sorry⟩⟩
 
 universes u v w
-def pt_wrapper {X : Type u} {K : Type v} {V : Type w}
+abbreviation pt_wrapper {X : Type u} {K : Type v} {V : Type w}
 [inhabited K] [field K] [add_comm_group V] [vector_space K V] [affine_space V X]
 (fr : affine_frame X K V (fin 3))
 := pt_with_frame X K V (fin 3) fr
-def vec_wrapper {X : Type u} {K : Type v} {V : Type w}
+abbreviation vec_wrapper {X : Type u} {K : Type v} {V : Type w}
 [inhabited K] [field K] [add_comm_group V] [vector_space K V] [affine_space V X]
 (fr : affine_frame X K V (fin 3))
 := vec_with_frame X K V (fin 3) fr
 
-
+/-
 def derived_frame : affine_frame (pt_with_frame 
         (aff_pt_coord_tuple ℝ 3) ℝ (aff_vec_coord_tuple ℝ 3) (fin 3) 
         real_affine3_std_frame) ℝ (vec_with_frame 
@@ -89,7 +89,7 @@ def derived_space : framed_affine_coord_space_type
 (vec_with_frame 
         (aff_pt_coord_tuple ℝ 3) ℝ (aff_vec_coord_tuple ℝ 3) (fin 3) 
         real_affine3_std_frame)
-ℝ 3 derived_frame := ⟨ ⟩ 
+ℝ 3 derived_frame := ⟨ ⟩ -/
  /--/   (pt_with_frame (pt_with_frame 
         (aff_pt_coord_tuple ℝ 3) ℝ (aff_vec_coord_tuple ℝ 3) (fin 3) 
         real_affine3_std_frame) ℝ (vec_with_frame 
@@ -101,20 +101,22 @@ def derived_space : framed_affine_coord_space_type
         real_affine3_std_frame) ℝ (vec_with_frame 
         (aff_pt_coord_tuple ℝ 3) ℝ (aff_vec_coord_tuple ℝ 3) (fin 3) 
         real_affine3_std_frame) (fin 3) derived_frame)
--//-
+-/
 def derived_frame : affine_frame (pt_wrapper 
         real_affine3_std_frame) ℝ (vec_wrapper 
-        real_affine3_std_frame) (fin 3)
-        [
-            add_comm_group (vec_wrapper real_affine3_std_frame)
-        ]
-        [affine_space (vec_wrapper 
-        real_affine3_std_frame) (pt_wrapper 
-        real_affine3_std_frame)]    := 
+        real_affine3_std_frame) (fin 3)   := 
         ⟨pt_origin, λi:fin 3, 
             if i = 1 then vec_basis1 
             else (if i = 2 then vec_basis2 else vec_basis3), sorry⟩
--/
+
+def derived_space : framed_affine_coord_space_type 
+(pt_wrapper 
+        real_affine3_std_frame) 
+(vec_wrapper 
+        real_affine3_std_frame)
+ℝ 3 derived_frame := ⟨ ⟩
+
+/-
 def pt_origin_derived : 
     pt_with_frame (pt_with_frame 
         (aff_pt_coord_tuple ℝ 3) ℝ (aff_vec_coord_tuple ℝ 3) (fin 3) 
@@ -148,8 +150,35 @@ def vec_basis3_derived :
         real_affine3_std_frame) ℝ (vec_with_frame 
         (aff_pt_coord_tuple ℝ 3) ℝ (aff_vec_coord_tuple ℝ 3) (fin 3) 
         real_affine3_std_frame) (fin 3) derived_frame :=
+        ⟨vec_basis2⟩-/
+def pt_origin_derived :
+    pt_with_frame 
+        (pt_wrapper real_affine3_std_frame) ℝ 
+        (vec_wrapper real_affine3_std_frame) (fin 3) derived_frame :=
+        ⟨pt_origin⟩
+
+
+def vec_basis1_derived : 
+    vec_with_frame 
+        (pt_wrapper real_affine3_std_frame) ℝ 
+        (vec_wrapper real_affine3_std_frame) (fin 3) derived_frame :=
+        ⟨vec_basis3⟩
+        
+
+def vec_basis2_derived : 
+    vec_with_frame 
+        (pt_wrapper real_affine3_std_frame) ℝ 
+        (vec_wrapper real_affine3_std_frame) (fin 3) derived_frame :=
+        ⟨vec_basis1⟩
+        
+
+def vec_basis3_derived : 
+    vec_with_frame 
+        (pt_wrapper real_affine3_std_frame) ℝ 
+        (vec_wrapper real_affine3_std_frame) (fin 3) derived_frame :=
         ⟨vec_basis2⟩
 
+/-
 def derived_frame2 : affine_frame 
         (pt_with_frame (pt_with_frame 
         (aff_pt_coord_tuple ℝ 3) ℝ (aff_vec_coord_tuple ℝ 3) (fin 3) 
@@ -166,7 +195,16 @@ def derived_frame2 : affine_frame
         ⟨pt_origin_derived, λi:fin 3, 
             if i = 1 then vec_basis1_derived 
             else (if i = 2 then vec_basis2_derived else vec_basis3_derived), sorry⟩
-
+-/
+def derived_frame2 : affine_frame 
+        (pt_wrapper derived_frame)
+        ℝ 
+        (vec_wrapper derived_frame)
+        (fin 3) :=
+        ⟨pt_origin_derived, λi:fin 3, 
+            if i = 1 then vec_basis1_derived 
+            else (if i = 2 then vec_basis2_derived else vec_basis3_derived), sorry⟩
+/-
 def derived_space2 : framed_affine_coord_space_type
 (pt_with_frame (pt_with_frame 
         (aff_pt_coord_tuple ℝ 3) ℝ (aff_vec_coord_tuple ℝ 3) (fin 3) 
@@ -179,5 +217,26 @@ def derived_space2 : framed_affine_coord_space_type
         (aff_pt_coord_tuple ℝ 3) ℝ (aff_vec_coord_tuple ℝ 3) (fin 3) 
         real_affine3_std_frame) (fin 3) derived_frame)
 ℝ 3 derived_frame2 := ⟨⟩
+-/
+def derived_space2 : framed_affine_coord_space_type
+(pt_wrapper derived_frame)
+(vec_wrapper derived_frame)
+ℝ 3 derived_frame2 := ⟨⟩
 
---no way to get a standard frame on derived spaces
+--no way to get a standard frame on derived spaces deductively
+--possible to push it up inductively
+
+def derived_std_frame_origin : (pt_wrapper derived_frame) :=
+    ⟨⟨real_affine3_std_frame.ref_pt⟩⟩
+def derived_std_frame_basis : fin 3 → vec_wrapper derived_frame :=
+    (λ i : fin 3,
+        ⟨⟨real_affine3_std_frame.vec i⟩⟩)
+
+
+def derived_sp_std_frame :
+    affine_frame 
+        (pt_wrapper derived_frame)
+        ℝ 
+        (vec_wrapper derived_frame)
+        (fin 3)
+    := ⟨derived_std_frame_origin,derived_std_frame_basis,sorry⟩ 
