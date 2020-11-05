@@ -68,7 +68,7 @@ structure ap
     {x : Type u}
     {k : Type v}
     {v : Type w}
-    {dim : ℕ}
+    (dim : ℕ)
     {ι : Type*}
     [inhabited k] 
     [field k] 
@@ -99,6 +99,9 @@ variables
     (fr : affine_frame X K V ι) 
     (cv1 cv2 : aff_coord_vec X K V n ι fr) 
     (cp1 cp2 : aff_coord_pt  X K V n ι fr)
+
+variables
+    (a1 : av (fr))
 
 abbreviation vec_type := aff_coord_vec X K V n ι fr
 abbreviation pt_type := aff_coord_pt X K V n ι fr
@@ -360,13 +363,17 @@ lemma vec_add_smul_coord : ∀ g h : K, ∀ x : (aff_coord_vec X K V n ι fr), (
 
 lemma vec_zero_smul_coord : ∀ x : (aff_coord_vec X K V n ι fr), (0 : K) • x = 0 := sorry
 
-abbreviation affer := (aff_coord_vec X K V n ι fr)
 instance : distrib_mul_action K (aff_coord_vec X K V n ι fr) := 
     sorry
-
 instance aff_semimod_coord : semimodule K (aff_coord_vec X K V n ι fr) := 
     -- extremely odd that this doesnt work....
     ⟨vec_add_smul_coord X K V n ι fr, vec_zero_smul_coord X K V n ι fr⟩
+/-
+failed to synthesize type class instance for
+distrib_mul_action K (aff_coord_vec X K V n ι fr)
+-/
+
+
 /-
 @[protect_proj] class semimodule (R : Type u) (M : Type v) [semiring R]
   [add_comm_monoid M] extends distrib_mul_action R M :=
