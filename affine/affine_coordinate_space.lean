@@ -29,7 +29,6 @@ variables
 open list
 open vecl
 
-open vecl
 
 /-- 
 We define the types of n-dimensional tuples that
@@ -392,75 +391,3 @@ instance aff_coord_is :
 /-
 NEW FILE
 -/
-
-/-
-An affine frame comprises an origin point
-and a basis for the vector space.
--/
-structure affine_frame :=
-(origin : X)
-(basis : ι → V)
-(proof_is_basis : is_basis K basis)
-
-
-/-
-To do: Look at using inheritance to make everything easier?
--/
-
-/-- type of affine vectors represented by coordinate tuples -/
-@[ext]
-structure aff_coord_vec (frame : affine_frame X K V ι) :=
-(tuple : aff_vec_coord_tuple K n)
-
-
-/-- type of affine points represented by coordinate tuples -/
-
-@[ext]
-structure aff_coord_pt (frame : affine_frame X K V ι) :=
-(tuple : aff_pt_coord_tuple K n)
-
-variables 
-    (fr : affine_frame X K V ι) 
-    (cv1 cv2 : aff_coord_vec X K V n ι fr) 
-    (cp1 cp2 : aff_coord_pt  X K V n ι fr)
-
-/-
-We need proof that given a frame f, 
-⟨ aff_coord_pt f, aff_coord_vec f⟩ is 
-an affine space,
--/
-
---instance 
-
-instance : affine_space (aff_coord_vec X K V n ι fr) (aff_coord_pt  X K V n ι fr) := sorry
-
-
-/-
-KEEP?
--/
-def affine_coord_space_type (K : Type v) (n : ℕ) [field K] [inhabited K] := 
-    affine_space_type 
-        (aff_pt_coord_tuple K n)
-        K
-        (aff_vec_coord_tuple K n)
-
-
-/-
-Code to manufacture a standard basis for a given affine space.
--/
-abbreviation zero := zero_vector K n
-
-def list.to_basis_vec : fin n → list K := λ x, (zero K n).update_nth (x.1 + 1) 1
-
-lemma len_basis_vec_fixed (x : fin n) : (list.to_basis_vec K n x).length = n + 1 := sorry
-
-lemma head_basis_vec_fixed (x : fin n) : (list.to_basis_vec K n x).head = 0 := sorry
-
-def std_basis : fin n → aff_vec_coord_tuple K n :=
-λ x, ⟨list.to_basis_vec K n x, len_basis_vec_fixed K n x, head_basis_vec_fixed K n x⟩
-
-lemma std_is_basis : is_basis K (std_basis K n) := sorry
-
-def aff_coord_space_std_frame : 
-    affine_frame (aff_pt_coord_tuple K n) K (aff_vec_coord_tuple K n) (fin n) := 
-        ⟨pt_zero K n, std_basis K n, std_is_basis K n⟩
