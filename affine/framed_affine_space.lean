@@ -41,6 +41,24 @@ structure vec_with_frame (frame : affine_frame X K V ι) :=
 structure pt_with_frame (frame : affine_frame X K V ι) :=
 (pt : X)
 
+/-
+aff space 1 : (aff_vec real 3) real ( aff_pt real 3)
+std : (affine frame  (aff_vec real 3) real ( aff_pt real 3) (fin 3)) := std_frame aff space 1
+der_fr1 : (pt with frame (affine frame  (aff_vec real 3) real ( aff_pt real 3) (fin 3))
+                ) 
+                real 
+          (vec with frame (affine frame  (aff_vec real 3) real ( aff_pt real 3) (fin 3)))( fin 3)
+der_fr1 : (pt with frame (der_f1)) real (vec with frame der_fr1)( fin 3)
+
+def my_pt : pt frame_n := ⟨⟨⟨⟨⟩⟩⟩⟩ 
+
+
+aff space 2 : (pt with frame std) real (vec with frame std)
+std2 : std_frame aff space 2
+
+
+-/
+
 variables (basis : affine_frame X K V ι) (pt : X)
 
 def vecf_add : vec_with_frame X K V ι basis → vec_with_frame X K V ι basis → vec_with_frame X K V ι basis :=
