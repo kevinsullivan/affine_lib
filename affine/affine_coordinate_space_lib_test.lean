@@ -69,3 +69,7 @@ def der_basis := affine_coord_nspace.basis der_sp
 #check der_basis 1 -ᵥ basis 1
 #check der_origin -ᵥ der_origin
 #check der_origin -ᵥ origin
+
+open real_lib
+
+def R3 := real_affine_coord_nspace.mk_with_standard_frame 3

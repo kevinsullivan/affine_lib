@@ -1,16 +1,41 @@
-import linear_algebra.affine_space.basic
-import ..new_affine.affine_coordinate_space
-import ..new_affine.affine_coordinate_basis
+
 import data.real.basic
-import .real_affine_space
+import ..affine.real_affine_coordinate_space_lib
+import ..affine.affine_coordinate_framed_space
+
+open aff_fr
+
+universes u v w
 
 
+variables 
+    (X : Type u) 
+    (K : Type v) 
+    (V : Type w) 
+    (n : ℕ) 
+    (k : K)
+    (ι : Type*)
+    (s : finset ι) 
+    (g : ι → K) 
+    (v : ι → V) 
+    [inhabited K] 
+    [field K] 
+    [add_comm_group V] 
+    [module K V] 
+    [vector_space K V] 
+    [affine_space V X]
+    [is_basis K v] 
+    [affine_space V X]
 
 inductive Algebra  
-| aff_space 
-    {dim : ℕ} {X : Type} {K : Type} {V : Type} 
-    [ring K] 
+    {X : Type u} {V : Type w}
     [add_comm_group V] 
-    [module K V]  
-    [affine_space V X] (a : real_affine.affine_space_type dim X K V)
-| nat_monoid -- placeholder, commutative monoid with monus operator
+    [module ℝ V] 
+    [vector_space ℝ V] 
+    [affine_space V X]
+    {n : ℕ}
+| aff_sp 
+    {fr : affine_frame X ℝ V (fin n) } (a : real_lib.real_affine_coord_nspace n fr) : Algebra
+| aff_fr (fr : affine_frame X ℝ V (fin n)) : Algebra
+
+--| nat_monoid -- placeholder, commutative monoid with monus operator
