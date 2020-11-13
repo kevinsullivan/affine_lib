@@ -139,6 +139,34 @@ def affine_coord_space.basis
     := 
         fr.basis 
 
+def affine_coord_space.frame
+    {X : Type u} {K : Type v} {V : Type w} {ι : Type*}
+    [inhabited K] 
+    [field K] 
+    [add_comm_group V] 
+    [module K V] 
+    [vector_space K V] 
+    [affine_space V X]
+    {n : ℕ}
+    {fr : affine_frame X K V ι }
+    (sp : affine_coord_space n fr) 
+    := 
+        fr
+
+def affine_coord_space.get_base_space
+    {X : Type u} {K : Type v} {V : Type w} {ι : Type*}
+    [inhabited K] 
+    [field K] 
+    [add_comm_group V] 
+    [module K V] 
+    [vector_space K V] 
+    [affine_space V X]
+    {n : ℕ}
+    {fr : affine_frame X K V ι }
+    (sp : affine_coord_space n fr)
+    :=
+        affine_space_type X K V
+
 /-
 Helper method to retrieve the basis of ℕ-indexed coordinate space defined in
 terms of a particular frame (which has a basis that we need to retrieve)
@@ -156,6 +184,23 @@ def affine_coord_nspace.basis
     (sp : affine_coord_nspace n fr) 
     := 
         fr.basis 
+
+
+
+def affine_coord_nspace.frame
+    {X : Type u} {K : Type v} {V : Type w}
+    [inhabited K] 
+    [field K] 
+    [add_comm_group V] 
+    [module K V] 
+    [vector_space K V] 
+    [affine_space V X]
+    {n : ℕ}
+    {fr : affine_frame X K V (fin n) }
+    (sp : affine_coord_nspace n fr) 
+    := 
+        fr
+
 
 /-
 Given field and dimension, construct a raw affine tuple space
@@ -196,7 +241,8 @@ def affine_coord_nspace.mk_from_raw
 Construct a derived space of a ℕ-index coordinate space by selling an
 origin and a basis in the original coordinate space. 
 -/
-def affine_coord_nspace.mk_derived
+
+def affine_coord_nspace.mk_derived_from_basis
     {X : Type u} {K : Type v} {V : Type w}
     [inhabited K] 
     [field K] 
@@ -215,9 +261,67 @@ def affine_coord_nspace.mk_derived
                 (aff_coord_vec X K V n (fin n) f) (fin n)) :=
     ⟨⟩
 
+def affine_coord_nspace.mk_derived
+    {X : Type u} {K : Type v} {V : Type w}
+    [inhabited K] 
+    [field K] 
+    [add_comm_group V] 
+    [module K V] 
+    [vector_space K V] 
+    [affine_space V X]
+    {n : ℕ}
+    {f : affine_frame X K V (fin n) }
+    (sp : affine_coord_space n f) 
+    (origin : aff_coord_pt X K V n (fin n) f) 
+    (basis : vector (aff_coord_vec X K V n (fin n) f) n) 
+    : affine_coord_nspace n (⟨origin, (λ i : fin n, basis.nth i), sorry⟩ : affine_frame 
+                (aff_coord_pt X K V n (fin n) f) 
+                (K) 
+                (aff_coord_vec X K V n (fin n) f) (fin n)) :=
+    ⟨⟩
+
+
+def affine_coord_nspace.mk_derived_from_frame
+    {X : Type u} {K : Type v} {V : Type w}
+    [inhabited K] 
+    [field K] 
+    [add_comm_group V] 
+    [module K V] 
+    [vector_space K V] 
+    [affine_space V X]
+    {n : ℕ}
+    {f : affine_frame X K V (fin n) }
+    (sp : affine_coord_space n f) 
+    (f : affine_frame 
+                (aff_coord_pt X K V n (fin n) f) 
+                (K) 
+                (aff_coord_vec X K V n (fin n) f) (fin n))
+    : affine_coord_nspace n f :=
+    ⟨⟩
+
     
-/-
+
 def affine_coord_nspace.mk_derived_frame
+    {X : Type u} {K : Type v} {V : Type w}
+    [inhabited K] 
+    [field K] 
+    [add_comm_group V] 
+    [module K V] 
+    [vector_space K V] 
+    [affine_space V X]
+    {n : ℕ}
+    {fr : affine_frame X K V (fin n) }
+    (sp : affine_coord_space n fr) 
+    (origin : aff_coord_pt X K V n (fin n) fr) 
+    (basis : vector (aff_coord_vec X K V n (fin n) fr) n)  :
+    affine_frame 
+        (aff_coord_pt X K V n (fin n) fr) 
+        K 
+        (aff_coord_vec X K V n (fin n) fr) 
+        (fin n):=
+    ⟨origin, (λ i : fin n, basis.nth i), sorry⟩ 
+
+def affine_coord_nspace.mk_derived_frame_with_basis
     {X : Type u} {K : Type v} {V : Type w}
     [inhabited K] 
     [field K] 
@@ -237,7 +341,7 @@ def affine_coord_nspace.mk_derived_frame
         (fin n):=
     ⟨origin, basis, sorry⟩
 
--/ 
+ 
 
 /-
 Helper to make a point in a ℕ-index coordinate space by supplying just a
@@ -302,7 +406,7 @@ def affine_coord_nspace.mk_with_standard_frame
                 ⟨[1,0,0,0],sorry,sorry⟩
                 (λ i:(fin n), ⟨[0,0,0,0].update_nth i.1 1,sorry,sorry⟩))
                     in
-                affine_coord_nspace.mk_derived 
+                affine_coord_nspace.mk_derived_from_basis
                     sp_raw_wrapper_as_coord_nspace
                         ⟨affine_coord_nspace.origin sp_raw_wrapper_as_coord_nspace⟩
                         (λ i:(fin n), ⟨⟨[0,0,0,0].update_nth i.1 1,sorry,sorry⟩⟩)

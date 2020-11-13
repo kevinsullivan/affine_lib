@@ -220,9 +220,19 @@ instance aff_semimod_coord : semimodule K (aff_coord_vec X K V n ι fr)
     -- extremely odd that this doesnt work....
     ⟨sorry, sorry⟩
 
-instance : has_vadd (aff_coord_vec X K V n ι fr) (aff_coord_pt X K V n ι fr) := sorry--⟨aff_group_action K n⟩
 
-instance : has_vsub (aff_coord_vec X K V n ι fr) (aff_coord_pt X K V n ι fr) := sorry--⟨aff_group_sub K n⟩
+
+def aff_group_action_coord : (aff_coord_vec X K V n ι fr) → (aff_coord_pt X K V n ι fr) → (aff_coord_pt X K V n ι fr) :=
+    λ x y, ⟨⟨ladd x.1.1 y.1.1, sorry, sorry⟩⟩
+
+def aff_group_sub_coord : (aff_coord_pt X K V n ι fr) → (aff_coord_pt X K V n ι fr) → (aff_coord_vec X K V n ι fr) :=
+    λ x y, ⟨⟨ladd x.1.1 (vecl_neg y.1.1), sorry, sorry⟩⟩
+
+
+
+instance : has_vadd (aff_coord_vec X K V n ι fr) (aff_coord_pt X K V n ι fr) := ⟨aff_group_action_coord X K V n ι fr⟩
+
+instance : has_vsub (aff_coord_vec X K V n ι fr) (aff_coord_pt X K V n ι fr) := ⟨aff_group_sub_coord X K V n ι fr⟩
 
 instance : add_action (aff_coord_vec X K V n ι fr) (aff_coord_pt X K V n ι fr) := sorry--⟨aff_group_action K n, aff_zero_sadd K n, aff_add_sadd K n⟩
 
@@ -231,6 +241,55 @@ We need proof that given a frame f,
 ⟨ aff_coord_pt f, aff_coord_vec f⟩ is 
 an affine space,
 -/
+
+/-
+
+def vecptadd := r3_der2_pt1 +ᵥ r3_der2_vec2 --expected : pass
+def vecptsub := r3_der2_pt1 -ᵥ r3_der2_vec2 --expected : pass
+def ptvecsub := r3_der2_vec2 -ᵥ r3_der2_pt1 -- expected : pass
+-/
+def pt_plus_vec
+    {X : Type u} 
+    {K : Type v} 
+    {V : Type w} 
+    {n : ℕ}
+    {ι : Type*}
+    [inhabited K] 
+    [field K] 
+    [add_comm_group V] 
+    [module K V] 
+    [vector_space K V] 
+    [affine_space V X]
+    {fr : affine_frame X K V ι} :
+    (aff_coord_pt X K V n ι fr) → 
+    (aff_coord_vec X K V n ι fr) → 
+    (aff_coord_pt X K V n ι fr) 
+| p v := aff_group_action_coord X K V n ι fr v p
+
+notation
+ pt +ᵥ v := pt_plus_vec pt v
+ 
+def pt_minus_vec
+    {X : Type u} 
+    {K : Type v} 
+    {V : Type w} 
+    {n : ℕ}
+    {ι : Type*}
+    [inhabited K] 
+    [field K] 
+    [add_comm_group V] 
+    [module K V] 
+    [vector_space K V] 
+    [affine_space V X]
+    {fr : affine_frame X K V ι} :
+    (aff_coord_pt X K V n ι fr) → 
+    (aff_coord_vec X K V n ι fr) → 
+    (aff_coord_pt X K V n ι fr) 
+| p v := aff_group_action_coord X K V n ι fr (vec_neg_coord X K V n ι fr v) p
+.
+notation
+ pt -ᵥ v := pt_minus_vec pt v
+
 
 def prf : affine_space (aff_coord_vec X K V n ι fr) (aff_coord_pt  X K V n ι fr) := sorry
 

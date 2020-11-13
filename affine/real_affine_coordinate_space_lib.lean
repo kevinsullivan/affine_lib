@@ -199,11 +199,9 @@ def real_affine_coord_nspace.mk_derived
     ⟨⟩
 
     
-/-
-def affine_coord_nspace.mk_derived_frame
-    {X : Type u} {ℝ : Type v} {V : Type w}
-    [inhabited ℝ] 
-    [field ℝ] 
+
+def real_affine_coord_nspace.mk_derived_frame
+    {X : Type u} {V : Type w}
     [add_comm_group V] 
     [module ℝ V] 
     [vector_space ℝ V] 
@@ -219,8 +217,6 @@ def affine_coord_nspace.mk_derived_frame
         (aff_coord_vec X ℝ V n (fin n) fr) 
         (fin n):=
     ⟨origin, basis, sorry⟩
-
--/ 
 
 /-
 Helper to make a point in a ℕ-index coordinate space by supplying just a
@@ -248,9 +244,9 @@ def real_affine_coord_nspace.mk_point
     {n : ℕ}
     {fr : affine_frame X ℝ V (fin n) }
     (sp : affine_coord_space n fr) 
-    (coords : list ℝ)  :
+    (coords : vector ℝ n)  :
     (aff_coord_pt X ℝ V n (fin n) fr) :=
-    ⟨⟨[1]++coords, sorry, sorry⟩⟩
+    ⟨⟨[1]++coords.1, sorry, sorry⟩⟩
 
 /-
 Helper to make a vector in a ℕ-index coordinate space by supplying just a
@@ -278,9 +274,9 @@ def real_affine_coord_nspace.mk_vec
     {n : ℕ}
      {fr : affine_frame X ℝ V (fin n) }
     (sp : affine_coord_space n fr) 
-    (coords : list ℝ)  :
+    (coords : vector ℝ n)  :
     (aff_coord_vec X ℝ V n (fin n) fr) :=
-    ⟨⟨[0]++coords, sorry, sorry⟩⟩
+    ⟨⟨[0]++coords.1, sorry, sorry⟩⟩
 
 #check list.nth
 
