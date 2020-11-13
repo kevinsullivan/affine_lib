@@ -38,6 +38,7 @@ lemma head_basis_vec_fixed (x : fin n) : (list.to_basis_vec K n x).head = 0 := s
 def std_basis : fin n → aff_vec_coord_tuple K n :=
 λ x, ⟨list.to_basis_vec K n x, len_basis_vec_fixed K n x, head_basis_vec_fixed K n x⟩
 
+
 lemma std_is_basis : is_basis K (std_basis K n) := sorry
 
 /-
@@ -46,11 +47,10 @@ Here we equip any generic affine coordinate space with a standard frame
 def aff_coord_space_std_frame : 
     affine_frame (aff_pt_coord_tuple K n) K (aff_vec_coord_tuple K n) (fin n) := 
         ⟨pt_zero K n, std_basis K n, std_is_basis K n⟩
-#check aff_coord_space_std_frame
+
 end aff_basis
 
 /-
-What's funny is that:
-
- * FIXED! We don't have an explicit abstraction of affine coordinate space, e.g., as a type.
+What's funny is that we don't actually have an explicit abstraction of 
+affine coordinate space, e.g., as a type.
 -/
