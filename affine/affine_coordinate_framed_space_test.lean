@@ -301,7 +301,7 @@ def derived_space_base := aff_lib.affine_coord_space.get_base_space derived_spac
 
 def a_fully_framed_affine_space_base := aff_lib.affine_coord_space.get_base_space a_fully_framed_affine_space
 
-def another_base := aff_lib.affine_coord_space.get_base_space a_fully_framed_affine_space_base
+def another_base := aff_lib.affine_coord_space.get_base_space a_fully_framed_affine_space
 
 def a_quasi_framed_affine_space_base := aff_lib.affine_coord_space.get_base_space a_fully_framed_affine_space
 
