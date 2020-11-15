@@ -4,7 +4,6 @@ import .affine_coordinate_space
 import data.real.basic
 
 
-
 open list
 open vecl
 
@@ -14,26 +13,26 @@ universes u v w
 
 variables 
     -- (id : ℕ)
-    (X : Type u) 
-    (K : Type v) 
-    (V : Type w) 
-    (n : ℕ) 
-    (k : K)
-    (ι : Type*)
-    (s : finset ι) 
-    (g : ι → K) 
-    (v : ι → V) 
-    [inhabited K] 
-    [field K] 
-    [add_comm_group V] 
-    [module K V] 
-    [vector_space K V] 
-    [affine_space V X]
-    [is_basis K v] 
-    [affine_space V X]
+    (X : Type u)        -- set of "points"
+    (K : Type v)        -- scalar field
+    (V : Type w)        -- set of vectors
+    (n : ℕ)             -- dimension of coordinate space
+    (k : K)             -- some field element
+    (ι : Type*)         -- basis vector indexing set
+    (s : finset ι)      -- ??
+    (g : ι → K)         -- ??
+    (v : ι → V)         -- basis by index value 
+    [inhabited K]       -- set of scalars is non-empty
+    [field K]           -- set of scalars is a field
+    [add_comm_group V]  -- set of vectors is an add/comm group
+    [module K V]        -- set of vectors is a K-module
+    [vector_space K V]  -- set of vectors is a vector space
+    [affine_space V X]  -- X is a torsor over V
+    [is_basis K v]      -- v is actually a basis
 
 /-
-An affine frame comprises an origin point
+An affine frame comprises an origin point,
+which is simply some "point"
 and a basis for the vector space.
 -/
 structure affine_frame  :=
@@ -43,21 +42,9 @@ structure affine_frame  :=
 
 
 /-
-mutual inductive affine_coordinate_frame, aff_coord_pt, aff_coord_vec
-with affine_coordinate_frame : Type
-| std_frame 
-| gen_frame 
-    (origin : aff_coord_pt) 
-    (basis : ι → aff_coord_vec) 
-    (proof_is_basis : is_basis K basis)
-with aff_coord_pt : affine_coordinate_frame X K V ι →  Type
-| mk (tuple : aff_pt_coord_tuple K n)
-with aff_coord_vec : affine_coordinate_frame X K V ι → Type
-| mk (tuple : aff_vec_coord_tuple K n)
--/
-
+Define aff_coord_pt and aff_coord_vec as extensions of 
+-/   -- (tuple : aff_pt_coord_tuple K n)
 structure aff_coord_pt (fr : affine_frame X K V ι) extends aff_pt_coord_tuple K n :=
-   -- (tuple : aff_pt_coord_tuple K n)
    mk ::
 
 structure aff_coord_vec (fr : affine_frame X K V ι) extends aff_vec_coord_tuple K n  :=

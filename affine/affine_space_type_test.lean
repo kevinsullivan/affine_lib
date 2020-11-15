@@ -1,23 +1,12 @@
 import .affine_space_type
-import .affine_frame
 import data.real.basic
 
-def reals_as_affine_space := affine_space_type
-    ℝ 
-    ℝ 
-    ℝ
+open space
 
-#check reals_as_affine_space
+def bsp : space ℝ ℝ ℝ := space.std 
+def dsp1 : space ℝ ℝ ℝ := space.derived 0 [0,0]
+def dsp2 : space ℝ ℝ ℝ := space.derived 0 [0]
 
-def reals_as_affine_space_1 : reals_as_affine_space  := ⟨⟩
-def reals_as_affine_space_2 : reals_as_affine_space  := ⟨⟩
-
-example : reals_as_affine_space_1 = reals_as_affine_space_2 := rfl
-
-def a_frame : affine_frame ℝ ℝ ℝ (fin 1) :=
-⟨(0 : ℝ),
-(λ (n : fin 1), 1),
-sorry ⟩ 
 
 
 

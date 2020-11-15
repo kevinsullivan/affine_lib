@@ -7,93 +7,214 @@ import .affine_coordinate_space_lib
 noncomputable theory
 open aff_fr
 
-
 /-
-For now we'll work with real 3-spaces
--/
-def dim := 3            -- pick whatever dimension you want here (other than 0? TODO: Check)
-abbreviation K := ℝ     -- alternative field could be ℚ for example
-
-/-
-Type aliases for vector and point types in raw (frameless) K-dim affine coordinate space
--/
-abbreviation aff_vec_coords := (aff_vec_coord_tuple K dim)
-abbreviation aff_pt_coords := (aff_pt_coord_tuple K dim)
-
-/-
-Create a "raw" standard frame to bootstrap framed coordinate spaces, using
-
--/
-def std_frame_on_raw_coord_space : affine_frame aff_pt_coords K aff_vec_coords (fin dim) := 
-    aff_coord_space_std_frame K dim
-
-#check std_frame_on_raw_coord_space
-
-/-
-Define type aliases for, respectively, the types of vectors and points with
-coordinates in terms of the *raw* standard frame.
--/
-abbreviation K_dim_raw_std_fr_vec := aff_coord_vec aff_pt_coords K aff_vec_coords dim (fin dim) std_frame_on_raw_coord_space
-abbreviation K_dim_raw_std_fr_pt := aff_coord_pt aff_pt_coords K aff_vec_coords dim (fin dim) std_frame_on_raw_coord_space
-
-
-/-
-Create unframed standard basis vectors and origin points.
--/
-def aff_vec_coords1 : aff_vec_coords := ⟨[0,1,0,0],sorry,sorry⟩
-def aff_vec_coords2 : aff_vec_coords := ⟨[0,0,1,0],sorry,sorry⟩
-def aff_vec_coordsdim : aff_vec_coords := ⟨[0,0,0,1],sorry,sorry⟩
-def aff_pt_coords1 : aff_pt_coords := ⟨[1,0,0,0],sorry,sorry⟩
-
-
-/-
-
-structure aff_coord_pt (fr : affine_frame X K V ι) extends aff_pt_coord_tuple K n :=
-   -- (tuple : aff_pt_coord_tuple K n)
-   mk ::
-
-structure aff_coord_vec (fr : affine_frame X K V ι) extends aff_vec_coord_tuple K n  :=
-   -- (tuple : aff_vec_coord_tuple K n)
-   mk ::
 -/
 
-/-
-Lift unframed vectors and point to vectors and point with the raw standard frame
--/
-def K_dim_raw_std_fr_vec1 : K_dim_raw_std_fr_vec := ⟨aff_vec_coordsdim⟩
-def K_dim_raw_std_fr_vec2 : K_dim_raw_std_fr_vec := ⟨aff_vec_coords1⟩
-def K_dim_raw_std_fr_vecdim : K_dim_raw_std_fr_vec := ⟨aff_vec_coords2⟩
-def K_dim_raw_std_fr_pt1 : K_dim_raw_std_fr_pt := ⟨aff_pt_coords1⟩
 
 /-
-(fin n ) → "My Vector Type"
+For now we'll work with real affine 3-spaces
+-/
+def dim := 3            -- pick a dimension (other than 0? TODO)
+abbreviation K := ℝ     -- alternative field could be, e.g., ℚ
+
+
+
+/- 
+    RAW SPACE 
+
+The points and vectors of this space are just
+"bare" coordinate dim-tuples (of values from K). There
+is no definition of any kind of frame at this juncture.
+-/
+
+-- Type aliases for vector and point types in THIS space.
+abbreviation pt_coords := (aff_pt_coord_tuple K dim)
+abbreviation vec_coords := (aff_vec_coord_tuple K dim)
+
+-- Our representation of that actual affine space
+def raw_aff_coord_space : 
+    affine_space_type pt_coords K vec_coords 
+:= ⟨⟩
+
+
+
+/- 
+    STD FRAMED RAW SPACE 
+
+The salient feature of this space is that the points
+and vectors in its frame are *raw* point and vector
+coordinate tuples from the space defined just above.
+-/
+
+-- A standard frame on raw coordinate tuple space
+def std_frame_on_raw_space : 
+    affine_frame pt_coords K vec_coords (fin dim) := 
+aff_coord_space_std_frame K dim -- TODO: fn not typed to space
+
+
+
+/-
+Aliases for point and vector types in THIS space. Note this
+points in this space are built by adding our frame to points
+in the base space (pt_coords, vec_coords).
+-/
+abbreviation std_framed_raw_vec := 
+    aff_coord_vec 
+-- Recall    aff_coord_vec is aff_vec_coords + a frame.
+-- Similarly aff_coord_pt  is aff_pt_coords  + a frame.
+        pt_coords 
+        K 
+        vec_coords 
+        dim 
+        (fin dim) 
+        std_frame_on_raw_space  -- here's the frame
+
+
+abbreviation std_framed_raw_pt := 
+    aff_coord_pt 
+        pt_coords 
+        K 
+        vec_coords
+        dim
+        (fin dim)
+        std_frame_on_raw_space  -- here's the frame
+
+
+-- New affine space
+def std_framed_raw_coord_space : 
+    affine_space_type 
+        std_framed_raw_pt 
+        K 
+        std_framed_raw_vec 
+:= ⟨⟩
+
+
+/-
+    STANDARD FRAMED SPACE
+
+The salient characteristic of this space is that both
+points and vectors in the space and points and vectors
+in its frames themselves have frames. In particular, 
+points and vectors in frames on this space live in the 
+framed raw space. 
+-/
+
+-- aliases for point and vectors types IN THIS SPACE?
+-- formerly K_dim_raw_std_fr_vec and K_dim_raw_std_fr_pt
+abbreviation std_framed_vec := 
+    aff_coord_vec 
+        pt_coords 
+        K 
+        vec_coords 
+        dim 
+        (fin dim) 
+        std_frame_on_raw_space
+abbreviation std_framed_pt := 
+    aff_coord_pt 
+        pt_coords 
+        K 
+        vec_coords 
+        dim 
+        (fin dim) 
+        std_frame_on_raw_space
+
+
+/-
+Now we create a frame for this space. To do this we 
+first instantiate the standard origin and basis vector
+values in the underlying framed raw space, then we put
+them together into a frame, and finally we create this
+new space from that frame.
 -/
 
 /-
-Define a function to assemble basis vectors into a *basis*
-TODO: Fix this. Wrong level of abstraction at this point.
+Our design to date has us represent coordinate tuples
+no matter where used as points and vectors in the raw
+space. Among other things, this approach ensures that
+the constraints on the first values of these tuples
+are enforced (0:K for vectors and 1:K for points).
+-/
+def pt_coords1 : pt_coords   := ⟨[1,0,0,0], by refl ,by refl⟩
+def vec_coords1 : vec_coords := ⟨[0,1,0,0], by refl, by refl⟩ 
+def vec_coords2 : vec_coords := ⟨[0,0,1,0], by refl, by refl⟩
+def vec_coords3 : vec_coords := ⟨[0,0,0,1], by refl, by refl⟩
+
+
+/- BUG BUG BUG.
+
+BIG TODO: THIS IS WRONG. FRAME ELEMENTS SHOULD COME
+FROM PRECEDING SPACE. LACK OF TYPE CHECKING HERE IS 
+A PROBLEM. NOTE: CHANGE TYPE OF STD_FRAMED_VEC1 AND
+IT DOESN'T BREAK ANY OF THE TYPING, WHICH IS WRONG. 
+FIXED TYPES.
+-/
+-- Lift tuples to point and vectors w.r.t the raw standard frame
+def std_framed_pt1 : std_framed_raw_pt    := ⟨pt_coords1⟩
+def std_framed_vec2 : std_framed_raw_vec  := ⟨vec_coords1⟩
+def std_framed_vec3 : std_framed_raw_vec  := ⟨vec_coords2⟩
+def std_framed_vec1 : std_framed_raw_vec  := ⟨vec_coords3⟩
+
+/-
+A function to assemble basis vectors into a *basis*
+TODO: Fix this. Should be general utility routine
+somewhere, not in the test file. Wrong abstraction 
+level at this point.
 -/
 def to_basis (n:ℕ) {vec_type : Type*} (l : vector vec_type n) 
     : (fin n) → vec_type := 
     λ i : fin n, l.nth i
 
-
 /-
-Create a standard frame whose points and vectors themselves have frames, namely
-the raw standard frame.
+Create a standard frame whose points and vectors themselves 
+have frames, namely the raw standard frame.
 -/ 
-def std_frame_complete : affine_frame K_dim_raw_std_fr_pt K K_dim_raw_std_fr_vec (fin dim) := 
-    ⟨K_dim_raw_std_fr_pt1, to_basis dim ⟨[K_dim_raw_std_fr_vec1,K_dim_raw_std_fr_vec2,K_dim_raw_std_fr_vecdim],sorry⟩,sorry⟩
+def std_space_std_frame : 
+    affine_frame std_framed_pt K std_framed_vec (fin dim) 
+:= 
+⟨
+    std_framed_pt1, 
+    to_basis 
+        dim 
+        ⟨
+            [
+                std_framed_vec1,
+                std_framed_vec2,
+                std_framed_vec3
+            ],
+            sorry
+        ⟩,
+    sorry
+⟩
+
+
+-- And now the affine space we were after
+-- TODO: Can have pt, vec in different spaces
+def std_space : 
+    affine_space_type 
+        std_framed_pt 
+        K 
+        std_framed_vec 
+:= ⟨⟩
 
 
 /-
-Abbreviations for points and vectors in the complete standard frame. The points
-and vectors in this complete frame are themselves framed in the raw frame.
+    A DERIVED SPACE
+
+Here we create a new space derived from the standard
+space by the definition of a new frame, one with the
+original basis vectors permuted. Note the order when
+we create the basis.
 -/
-abbreviation K_dim_std_frame_complete_vec := 
-    aff_coord_vec K_dim_raw_std_fr_pt K K_dim_raw_std_fr_vec dim (fin dim) std_frame_complete
-abbreviation K_dim_std_frame_complete_pt := 
-    aff_coord_pt K_dim_raw_std_fr_pt K K_dim_raw_std_fr_vec dim (fin dim) std_frame_complete
+
+/-
+Abbreviations for points and vectors in the complete 
+standard frame. The points and vectors in this complete 
+frame are themselves framed in the raw frame.
+-/
+abbreviation derived_space_vec := 
+    aff_coord_vec std_framed_pt K std_framed_vec dim (fin dim) std_space_std_frame
+abbreviation derived_space_pt := 
+    aff_coord_pt std_framed_pt K std_framed_vec dim (fin dim) std_space_std_frame
 
 
 /-
@@ -103,57 +224,69 @@ are themselves expressed in terms of this standard frame?
 
 
 /-
-Create basis vectors and points in the complete standard frame suitable for
-constructing a derived, non-standard frame. Note that the basis vectors in
-this case are in different order than 1, 2, dim (now 2, dim, 1).
+Create basis vectors and points in the complete standard 
+frame suitable for constructing a derived, non-standard frame.
+Note that the basis vectors in this case are in different order 
+than 1, 2, dim (now 2, dim, 1).
 -/
-def K_dim_std_frame_complete_vec1 : K_dim_std_frame_complete_vec := ⟨aff_vec_coords2⟩
-def K_dim_std_frame_complete_vec2 : K_dim_std_frame_complete_vec := ⟨aff_vec_coordsdim⟩
-def K_dim_std_frame_complete_vecdim : K_dim_std_frame_complete_vec := ⟨aff_vec_coords1⟩
-def K_dim_std_frame_complete_pt1 : K_dim_std_frame_complete_pt := ⟨aff_pt_coords1⟩
+
+/- WAIT WAIT WAIT. Here again we're creating derived (this)
+space points and vectors to create a basis for the new space,
+but these points should live in the base (std) space.
+
+-/
+
+def derived_space_vec1 : derived_space_vec := ⟨vec_coords2⟩
+def derived_space_vec2 : derived_space_vec := ⟨vec_coords3⟩
+def derived_space_vec3 : derived_space_vec := ⟨vec_coords1⟩
+def derived_space_pt1 : derived_space_pt := ⟨pt_coords1⟩
 
 
 /-
 Use the point and vectors just created to create a non-standard frame.
 -/
-def non_standard_frame : affine_frame K_dim_std_frame_complete_pt K K_dim_std_frame_complete_vec (fin dim) := 
-    ⟨K_dim_std_frame_complete_pt1,to_basis dim ⟨[K_dim_std_frame_complete_vec1,K_dim_std_frame_complete_vec2,K_dim_std_frame_complete_vecdim],sorry⟩,sorry⟩
-    
+def derived_space_frame : affine_frame derived_space_pt K derived_space_vec (fin dim) := 
+⟨
+    derived_space_pt1,
+    to_basis dim ⟨[derived_space_vec1,derived_space_vec2,derived_space_vec3],sorry⟩,
+    sorry
+⟩
+
 
 /-
 Abbreviations for points and vectors in this new non-standard frame
 -/
-abbreviation K_dim_non_standard_frame_vec := 
-    aff_coord_vec K_dim_std_frame_complete_pt K K_dim_std_frame_complete_vec dim (fin dim) non_standard_frame
-abbreviation K_dim_non_standard_frame_pt := 
-    aff_coord_pt K_dim_std_frame_complete_pt K K_dim_std_frame_complete_vec dim (fin dim) non_standard_frame
+abbreviation K_dim_derived_space_frame_vec := 
+    aff_coord_vec derived_space_pt K derived_space_vec dim (fin dim) derived_space_frame
+abbreviation K_dim_derived_space_frame_pt := 
+    aff_coord_pt derived_space_pt K derived_space_vec dim (fin dim) derived_space_frame
 
 /-
 Some points and vectors in this non-standard frame. (Note that in all cases we're using
 raw affine points and vectors to supply coordinate tuples for all of these constructors.)
 -/
-def K_dim_non_standard_frame_vec1 : K_dim_non_standard_frame_vec := ⟨aff_vec_coords2⟩
-def K_dim_non_standard_frame_vec2 : K_dim_non_standard_frame_vec := ⟨aff_vec_coordsdim⟩
-def K_dim_non_standard_frame_vecdim : K_dim_non_standard_frame_vec := ⟨aff_vec_coords1⟩
-def K_dim_non_standard_frame_pt1 : K_dim_non_standard_frame_pt := ⟨aff_pt_coords1⟩
+def K_dim_derived_space_frame_vec1 : K_dim_derived_space_frame_vec := ⟨vec_coords2⟩
+def K_dim_derived_space_frame_vec2 : K_dim_derived_space_frame_vec := ⟨vec_coords3⟩
+def K_dim_derived_space_frame_vec3 : K_dim_derived_space_frame_vec := ⟨vec_coords1⟩
+def K_dim_derived_space_frame_pt1 : K_dim_derived_space_frame_pt := ⟨pt_coords1⟩
 
 /-
 Test out type checking of affine space algebraic operations: expect succeed.
 -/
-def vecsub := K_dim_non_standard_frame_vec1 - K_dim_non_standard_frame_vec2 -- expected :pass
-def vecptadd := pt_plus_vec K_dim_non_standard_frame_pt1 K_dim_non_standard_frame_vec2 --expected : pass
-def vecptaddnotation := K_dim_non_standard_frame_pt1 +ᵥ K_dim_non_standard_frame_vec2 --expected : pass
-def ptvecadd := K_dim_non_standard_frame_vec2 +ᵥ K_dim_non_standard_frame_pt1 --expected : pass
-def vecptsub := K_dim_non_standard_frame_pt1 -ᵥ K_dim_non_standard_frame_vec2  --K_dim_non_standard_frame_pt1 -ᵥ K_dim_non_standard_frame_vec2 --expected : pass
-def pt_sub := K_dim_non_standard_frame_pt1 -ᵥ K_dim_non_standard_frame_pt1 -- expected : pass
-def scaled : K_dim_non_standard_frame_vec  := (1:K)•K_dim_non_standard_frame_vec2 
+def vecsub := K_dim_derived_space_frame_vec1 - K_dim_derived_space_frame_vec2 -- expected :pass
+def vecptadd := pt_plus_vec K_dim_derived_space_frame_pt1 K_dim_derived_space_frame_vec2 --expected : pass
+def vecptaddnotation := K_dim_derived_space_frame_pt1 +ᵥ K_dim_derived_space_frame_vec2 --expected : pass
+def ptvecadd := K_dim_derived_space_frame_vec2 +ᵥ K_dim_derived_space_frame_pt1 --expected : pass
+def vecptsub := K_dim_derived_space_frame_pt1 -ᵥ K_dim_derived_space_frame_vec2  --K_dim_derived_space_frame_pt1 -ᵥ K_dim_derived_space_frame_vec2 --expected : pass
+def pt_sub := K_dim_derived_space_frame_pt1 -ᵥ K_dim_derived_space_frame_pt1 -- expected : pass
+def scaled : K_dim_derived_space_frame_vec  := (1:K)•K_dim_derived_space_frame_vec2 
 
 /-
 Test type checking of affine space operations: expect fail.
 -/
-def ptvecsub := K_dim_non_standard_frame_vec2 -ᵥ K_dim_non_standard_frame_pt1 -- expected : fail?
-def pt_add := K_dim_non_standard_frame_pt1 +ᵥ K_dim_non_standard_frame_pt1 -- expected : fail
-def dif_fr := K_dim_std_frame_complete_vec1 - K_dim_non_standard_frame_vec2 -- expected : fail
+def ptvecsub := K_dim_derived_space_frame_vec2 -ᵥ K_dim_derived_space_frame_pt1 -- expected : fail?
+def pt_add := K_dim_derived_space_frame_pt1 +ᵥ K_dim_derived_space_frame_pt1 -- expected : fail
+def dif_fr := derived_space_vec1 - K_dim_derived_space_frame_vec2 -- expected : fail
 
 /-
 SUMMARY:
@@ -173,10 +306,10 @@ Define affine spaces with increasingly structured frames.
 - The quasi-framed space imposes a frame on this space whose points and vectors are in the raw_std space
 - The fully framed space imposes a frame whose points and vectors are in the quasi-framed (compl) space. 
 -/
-def an_unframed_affine_space : affine_space_type aff_pt_coords K aff_vec_coords := ⟨⟩ 
-def a_raw_std_framed_affine_space : affine_space_type K_dim_raw_std_fr_pt K K_dim_raw_std_fr_vec := ⟨⟩
-def a_quasi_framed_affine_space : affine_space_type K_dim_std_frame_complete_pt K K_dim_std_frame_complete_vec := ⟨⟩
-def a_fully_framed_affine_space : affine_space_type K_dim_non_standard_frame_pt K K_dim_non_standard_frame_vec := ⟨⟩
+def an_unframed_affine_space : affine_space_type pt_coords K vec_coords := ⟨⟩ 
+def a_raw_std_framed_affine_space : affine_space_type std_framed_pt K std_framed_vec := ⟨⟩
+def a_quasi_framed_affine_space : affine_space_type derived_space_pt K derived_space_vec := ⟨⟩
+def a_fully_framed_affine_space : affine_space_type K_dim_derived_space_frame_pt K K_dim_derived_space_frame_vec := ⟨⟩
 
 
 /-
@@ -192,8 +325,8 @@ Here's derived_frame and derived space
 def derived_frame := 
     aff_lib.affine_coord_nspace.mk_derived_frame
     a_fully_framed_affine_space
-            ⟨aff_pt_coords1⟩ 
-            ⟨[⟨aff_vec_coordsdim⟩,⟨aff_vec_coords2⟩,⟨aff_vec_coords1⟩],
+            ⟨pt_coords1⟩ 
+            ⟨[⟨vec_coords3⟩,⟨vec_coords2⟩,⟨vec_coords1⟩],
                     by refl⟩
                 
 def derived_space :=
@@ -236,7 +369,7 @@ its frame elements are expressed.
 /-
 
 def an_unframed_affine_space 
-    : affine_space_type aff_pt_coords K aff_vec_coords 
+    : affine_space_type pt_coords K vec_coords 
     := ⟨⟩ 
 def a_raw_std_framed_affine_space : affine_space_type K_dim_raw_std_fr_pt K K_dim_raw_std_fr_vec := ⟨⟩
 def a_quasi_framed_affine_space : affine_space_type K_dim_std_frame_complete_pt K K_dim_std_frame_complete_vec := ⟨⟩
@@ -295,7 +428,7 @@ def affine_coord_space.get_base_space
 
 def derived_space_2_base := aff_lib.affine_coord_space.get_base_space derived_space_2
 
-example : derived_space_2_base = derived_space := rfl       -- nope
+-- example : derived_space_2_base = derived_space := rfl       -- nope
 
 def derived_space_base := aff_lib.affine_coord_space.get_base_space derived_space
 
