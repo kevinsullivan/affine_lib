@@ -30,6 +30,8 @@ inductive space
 -- Inductively defined data structure, or TYPE HIERARCHY? The latter I want. Type classes critical.
 -- [has_point_type]
 -- [has_vector_type]
+-- [has_point_point_minus]
+-- [has_parent_space]
 
 
 
