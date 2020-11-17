@@ -328,4 +328,75 @@ def aff_coord_space_std_frame :
 --affine_frame (aff_coord_pt fr_n) K (aff_coord_pt fr_n) (iota)
 
 
+def aff_tuple_frame 
+    :=
+    affine_frame 
+        (aff_pt_coord_tuple K n) K (aff_vec_coord_tuple K n) (fin n)
+
+def aff_tuple_framed_pt (f : aff_tuple_frame K n) :=
+    aff_coord_pt (aff_pt_coord_tuple K n) K (aff_vec_coord_tuple K n) n (fin n) f
+
+def aff_tuple_framed_vec (f : aff_tuple_frame K n) :=
+    aff_coord_vec (aff_pt_coord_tuple K n) K (aff_vec_coord_tuple K n) n (fin n) f
+
+instance a1 (fr : aff_tuple_frame K n): has_add (aff_tuple_framed_vec K n fr) := sorry
+instance a2 (fr : aff_tuple_frame K n): has_zero (aff_tuple_framed_vec K n fr) := sorry
+instance a3 (fr : aff_tuple_frame K n): has_neg (aff_tuple_framed_vec K n fr) := sorry
+instance a4 (fr : aff_tuple_frame K n): add_comm_group (aff_tuple_framed_vec K n fr) := sorry
+instance a5 (fr : aff_tuple_frame K n) : has_scalar K (aff_tuple_framed_vec K n fr) := sorry
+instance a6 (fr : aff_tuple_frame K n) : mul_action K (aff_tuple_framed_vec K n fr) := 
+    ⟨sorry, sorry⟩
+instance a7 (fr : aff_tuple_frame K n) : distrib_mul_action K (aff_tuple_framed_vec K n fr) := 
+    sorry
+instance a8 (fr : aff_tuple_frame K n) : semimodule K (aff_tuple_framed_vec K n fr)
+    := ⟨sorry, sorry⟩
+instance a9 (fr : aff_tuple_frame K n)  : has_vadd (aff_tuple_framed_vec K n fr) (aff_tuple_framed_pt K n fr) := sorry
+instance a10 (fr : aff_tuple_frame K n)  : has_vsub (aff_tuple_framed_vec K n fr) (aff_tuple_framed_pt K n fr) := sorry
+instance a11 (fr : aff_tuple_frame K n)  : add_action (aff_tuple_framed_vec K n fr) (aff_tuple_framed_pt K n fr) := sorry--⟨aff_group_action K n, aff_zero_sadd K n, aff_add_sadd K n⟩
+instance a12 (fr : aff_tuple_frame K n)  : affine_space 
+    (aff_tuple_framed_vec K n fr) 
+    (aff_tuple_framed_pt K n fr) := 
+    sorry
+
+inductive fr_type (t : Type) : Type → Type
+| fr1 : fr_type t
+
+def aff_tuple_framed_frame
+    (f : aff_tuple_frame K n)
+    :=
+    affine_frame 
+        (aff_tuple_framed_pt K n f) K (aff_tuple_framed_vec K n f) (fin n)
+
+def aff_quasi_framed_pt 
+    {f : aff_tuple_frame K n}
+    (fr : aff_tuple_framed_frame K n f) :=
+    aff_coord_pt (aff_pt_coord_tuple K n) K (aff_vec_coord_tuple K n) n (fin n) f
+
+def aff_quasi_framed_vec
+    {f : aff_tuple_frame K n}
+    (fr : aff_tuple_framed_frame K n f) :=
+    aff_coord_vec (aff_pt_coord_tuple K n) K (aff_vec_coord_tuple K n) n (fin n) f
+
+
+instance a21 {f : aff_tuple_frame K n} (fr : aff_tuple_framed_frame K n f): has_add (aff_quasi_framed_vec K n fr) := sorry
+instance a22 {f : aff_tuple_frame K n} (fr : aff_tuple_framed_frame K n f): has_zero (aff_quasi_framed_vec K n fr)  := sorry
+instance a23 {f : aff_tuple_frame K n} (fr : aff_tuple_framed_frame K n f): has_neg (aff_quasi_framed_vec K n fr)  := sorry
+instance a24 {f : aff_tuple_frame K n} (fr : aff_tuple_framed_frame K n f): add_comm_group (aff_quasi_framed_vec K n fr) := sorry
+instance a25 {f : aff_tuple_frame K n} (fr : aff_tuple_framed_frame K n f): has_scalar K (aff_quasi_framed_vec K n fr) := sorry
+instance a26 {f : aff_tuple_frame K n} (fr : aff_tuple_framed_frame K n f) : mul_action K (aff_quasi_framed_vec K n fr) := 
+    ⟨sorry, sorry⟩
+instance a27 {f : aff_tuple_frame K n} (fr : aff_tuple_framed_frame K n f): distrib_mul_action K (aff_quasi_framed_vec K n fr) := 
+    sorry
+instance a28 {f : aff_tuple_frame K n} (fr : aff_tuple_framed_frame K n f) : semimodule K (aff_quasi_framed_vec K n fr)
+    := ⟨sorry, sorry⟩
+instance a29 {f : aff_tuple_frame K n} (fr : aff_tuple_framed_frame K n f) : has_vadd (aff_quasi_framed_vec K n fr) (aff_quasi_framed_pt K n fr) := sorry
+instance a210 {f : aff_tuple_frame K n} (fr : aff_tuple_framed_frame K n f) : has_vsub (aff_quasi_framed_vec K n fr) (aff_quasi_framed_pt K n fr) := sorry
+instance a211 {f : aff_tuple_frame K n} (fr : aff_tuple_framed_frame K n f) : add_action (aff_quasi_framed_vec K n fr) (aff_quasi_framed_pt K n fr) := sorry--⟨aff_group_action K n, aff_zero_sadd K n, aff_add_sadd K n⟩
+instance a212 {f : aff_tuple_frame K n} (fr : aff_tuple_framed_frame K n f): affine_space 
+    (aff_quasi_framed_vec K n fr) 
+    (aff_quasi_framed_pt K n fr) := 
+    sorry
+
+def aff_quasi_frame
+
 end aff_fr

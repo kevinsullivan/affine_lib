@@ -46,11 +46,25 @@ mk ::
     (basis : (fin n) → aff_vec_coord_tuple K n) 
     (proof_is_basis : is_basis K basis) 
 
+inductive affine_coordinate_frame
+(K : Type w)
+(n : ℕ)
+[inhabited K]
+[field K]
+| tuple (base : affine_tuple_coordinate_frame K n) 
+: affine_coordinate_frame
+| derived 
+    (origin : aff_pt_coord_tuple K n) 
+    (basis : (fin n) → aff_vec_coord_tuple K n) 
+    (proof_is_basis : is_basis K basis) 
+(base : affine_coordinate_frame)
+: affine_coordinate_frame
+/-
 structure affine_derived_coordinate_frame extends 
     affine_tuple_coordinate_frame K n :=
 mk ::
     (base : affine_tuple_coordinate_frame K n)
-
+-/
 instance: has_lift (affine_derived_coordinate_frame K n) (affine_tuple_coordinate_frame K n) := ⟨sorry⟩
 
 /-
@@ -85,12 +99,12 @@ with aff_coord_vec : affine_coordinate_frame X K V ι → Type
 | mk (tuple : aff_vec_coord_tuple K n)
 -/
 
-structure aff_coord_pt (fr : affine_tuple_coordinate_frame K n) 
+structure aff_coord_pt (fr : affine_coordinate_frame K n) 
             extends aff_pt_coord_tuple K n :=
    -- (tuple : aff_pt_coord_tuple K n)
    mk ::
 
-structure aff_coord_vec (fr : affine_tuple_coordinate_frame K n) 
+structure aff_coord_vec (fr : affine_coordinate_frame K n) 
             extends aff_vec_coord_tuple K n  :=
    -- (tuple : aff_vec_coord_tuple K n)
    mk ::
@@ -108,7 +122,7 @@ def frame_basis : affine_frame X K V ι → (ι → V) :=
 
 
 variables 
-    (fr : affine_tuple_coordinate_frame K n) 
+    (fr : affine_coordinate_frame K n) 
     (cv1 cv2 : aff_coord_vec K n fr) 
     (cp1 cp2 : aff_coord_pt  K n fr)
 
@@ -290,7 +304,7 @@ def pt_plus_vec
     [module K V] 
     [vector_space K V] 
     [affine_space V X]
-    {fr : affine_tuple_coordinate_frame K n} :
+    {fr : affine_coordinate_frame K n} :
     (aff_coord_pt K n fr) → 
     (aff_coord_vec K n fr) → 
     (aff_coord_pt K n fr) 
@@ -311,7 +325,7 @@ def pt_minus_vec
     [module K V] 
     [vector_space K V] 
     [affine_space V X]
-    {fr : affine_tuple_coordinate_frame K n} :
+    {fr : affine_coordinate_frame K n} :
     (aff_coord_pt K n fr) → 
     (aff_coord_vec K n fr) → 
     (aff_coord_pt K n fr) 
@@ -353,7 +367,7 @@ def std_basis : fin n → aff_vec_coord_tuple K n :=
 lemma std_is_basis : is_basis K (std_basis K n) := sorry
 
 def aff_coord_space_std_frame : 
-    affine_tuple_coordinate_frame K n := 
+    affine_coordinate_frame K n := 
            ⟨(pt_zero K n) 
            ,(std_basis K n) 
            , (std_is_basis K n)⟩

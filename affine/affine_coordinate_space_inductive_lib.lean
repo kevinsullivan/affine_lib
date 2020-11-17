@@ -47,16 +47,22 @@ space without a frame on it. We use this space to construct
 a coordinatized space, where all frames are expressed explicitly
 in terms of a specific frame, often/such as the standard frame.
 -/
+def pppp
+    (K : Type v)
+    (n : ℕ)  
+    [inhabited K] 
+    [field K]  :=
+    affine_space_type 
+        (aff_pt_coord_tuple K n)
+        K
+        (aff_vec_coord_tuple K n)
+
 
 def affine_tuple_nspace
     (K : Type v)
     (n : ℕ)  
     [inhabited K] 
     [field K] 
-    [add_comm_group (aff_vec_coord_tuple K n)] 
-    [module K (aff_vec_coord_tuple K n)] 
-    [vector_space K (aff_vec_coord_tuple K n)] 
-    [affine_space (aff_vec_coord_tuple K n) (aff_pt_coord_tuple K n)]
     := 
     affine_space_type 
         (aff_pt_coord_tuple K n)

@@ -114,12 +114,62 @@ def affine_coord_space.mk_with_standard
     : affine_coord_space K n (affine_coordinate_frame.standard K n)
     := ⟨⟩
 
+def affine_coord_space.mk_point
+    (sp : affine_coord_space K n fr)
+    (val : vector K n)
+    : aff_coord_pt K n fr
+    := ⟨⟨[1]++val.1,sorry,sorry⟩⟩
+
+def affine_coord_space.mk_vec
+    (sp : affine_coord_space K n fr)
+    (val : vector K n)
+    : aff_coord_vec K n fr
+    := ⟨⟨[0]++val.1,sorry,sorry⟩⟩
+
+    --:= ⟨⟩
+
+/-
+slight issue here, 
+because the type of a derived frame does not contain the original frame,
+i don't raise an explicit type error if the space's frame and frame's base frame don't match
+fix for now is just to supply a coord tuple frame
+-/
+
+def affine_coord_space.mk_frame
+    (sp : affine_coord_space K n fr)
+    (pt : aff_coord_pt K n fr)
+    (basis : affine_coord_basis K n fr)
+    
+    := 
+        (affine_coordinate_frame.derived pt.1 (λ i:fin n,(basis i).1) sorry)
+
+
+def affine_coord_space.mk_tuple_frame
+    (sp : affine_coord_space K n fr)
+    (pt : aff_coord_pt K n fr)
+    (basis : affine_coord_basis K n fr)
+    : affine_tuple_coordinate_frame K n
+    := 
+        ⟨pt.1, (λ i:fin n,(basis i).1),sorry⟩
+
 def affine_coord_space.mk_derived
     (sp : affine_coord_space K n fr)
     (pt : aff_coord_pt K n fr)
     (basis : affine_coord_basis K n fr)
     : affine_coord_space K n 
         (affine_coordinate_frame.derived pt.1 (λ i:fin n,(basis i).1) sorry fr)
+    := ⟨⟩
+
+def affine_coordinate_frame.get_coords
+    : affine_coordinate_frame K n → affine_tuple_coordinate_frame K n
+| (affine_coordinate_frame.tuple b) := b
+| (affine_coordinate_frame.derived o b _ _) := ⟨o,b,sorry⟩
+
+def affine_coord_space.mk_derived_from_coords
+    (sp : affine_coord_space K n fr)
+    (f : affine_tuple_coordinate_frame K n)
+    : affine_coord_space K n 
+        (affine_coordinate_frame.derived f.1 (λ i:fin n,(f.2 i)) sorry fr)
     := ⟨⟩
 
 
