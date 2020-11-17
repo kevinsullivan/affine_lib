@@ -41,7 +41,7 @@ structure affine_frame  :=
 (basis : ι → V) 
 (proof_is_basis : is_basis K basis)
 
-
+#check affine_frame
 /-
 mutual inductive affine_coordinate_frame, aff_coord_pt, aff_coord_vec
 with affine_coordinate_frame : Type

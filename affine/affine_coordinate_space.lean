@@ -1,6 +1,6 @@
 import .list_as_k_tuple linear_algebra.affine_space.basic
 import linear_algebra.basis
-import .affine_space_type
+--import .affine_space_type
 
 
 universes u v w x

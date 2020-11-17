@@ -36,10 +36,28 @@ variables
 An affine frame comprises an origin point
 and a basis for the vector space.
 -/
-structure affine_frame  :=
+structure vector_basis :=
+    (map : ι → V) 
+    (proof_is_basis : is_basis K map) 
+
+
+inductive affine_frame
+    (X : Type u) 
+    (K : Type v) 
+    (V : Type w) 
+    (ι : Type*)
+    [inhabited K] 
+    [field K] 
+    [add_comm_group V] 
+    [module K V] 
+    [vector_space K V] 
+    [affine_space V X] --: Type
+| standard : affine_frame
+| derived
+(original : affine_frame)
 (origin : X) 
-(basis : ι → V) 
-(proof_is_basis : is_basis K basis)
+(basis : vector_basis K V ι )
+: affine_frame
 
 
 /-
@@ -205,10 +223,12 @@ rw one_smul_cons,
 exact a_1,
 end
 -/
+
 lemma vec_mul_smul_coord : ∀ g h : K, ∀ x : aff_coord_vec X K V n ι fr, (g * h) • x = g • h • x := sorry
 
 
-instance : mul_action K (aff_coord_vec X K V n ι fr) := ⟨sorry, vec_mul_smul_coord X K V n ι fr⟩
+instance : mul_action K (aff_coord_vec X K V n ι fr) := 
+    ⟨sorry, vec_mul_smul_coord X K V n ι fr⟩
 
 
 instance : distrib_mul_action K (aff_coord_vec X K V n ι fr) := 
@@ -301,6 +321,13 @@ instance afc : affine_space
 /-
 KEEP?
 -/
+def affine_coord_tuple_space_type (K : Type v) (n : ℕ) [field K] [inhabited K] := 
+    affine_space_type 
+        (aff_pt_coord_tuple K n)
+        K
+        (aff_vec_coord_tuple K n)
+
+
 
 /-
 -/
