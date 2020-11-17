@@ -69,3 +69,22 @@ def der_basis := affine_coord_space.basis der_sp
 #check der_basis 1 -ᵥ basis 1
 #check der_origin -ᵥ der_origin
 #check der_origin -ᵥ origin
+
+
+def base_Rn_fr := affine_coordinate_frame.base_frame 
+                    (affine_coord_space.frame Rn)
+
+def base_der_sp_fr := affine_coordinate_frame.base_frame 
+                    (affine_coord_space.frame der_sp)
+
+def base_Rn := affine_coord_space.get_base_space Rn
+
+def base_der_sp := affine_coord_space.get_base_space der_sp
+
+
+def base_vec := affine_coord_space.mk_vec base_der_sp ⟨[0,0,0], by refl⟩
+
+#check base_vec +ᵥ basis 2 -- expected: pass or no??
+
+#check (affine_coord_space.frame base_der_sp)
+--#reduce (affine_coord_space.frame base_der_sp)
