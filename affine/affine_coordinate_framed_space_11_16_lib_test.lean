@@ -80,11 +80,37 @@ def base_der_sp_fr := affine_coordinate_frame.base_frame
 def base_Rn := affine_coord_space.get_base_space Rn
 
 def base_der_sp := affine_coord_space.get_base_space der_sp
-
+--def base_der_sp_fr := affine_coord_space.frame base_der_sp
+def Rn_fr := affine_coord_space.frame Rn
 
 def base_vec := affine_coord_space.mk_vec base_der_sp ⟨[0,0,0], by refl⟩
+
+lemma eqs : Rn_fr = base_der_sp_fr
+    := by refl
 
 #check base_vec +ᵥ basis 2 -- expected: pass or no??
 
 #check (affine_coord_space.frame base_der_sp)
 --#reduce (affine_coord_space.frame base_der_sp)
+
+
+def Rn_pt1'' := aff_lib.affine_coord_space.mk_point Rn ⟨[1,-1,1], by refl⟩
+def Rn_vec1'' := aff_lib.affine_coord_space.mk_vec Rn ⟨[0,1,0], by refl⟩
+def Rn_vec2'' := aff_lib.affine_coord_space.mk_vec Rn ⟨[0,0,1], by refl⟩
+def Rn_vec3'' := aff_lib.affine_coord_space.mk_vec Rn ⟨[1,0,0], by refl⟩
+--combine derived frame func into mk derived space
+
+def other_der_fr := affine_coord_space.mk_frame 
+    Rn 
+    Rn_pt1'' 
+    (λ i : fin 3, vector.nth (⟨[Rn_vec1'', Rn_vec3'', Rn_vec2''], sorry⟩ : vector _ 3) i)
+    sorry
+
+def other_der_sp := affine_coord_space.mk_derived_from_coords Rn (affine_coordinate_frame.get_coords other_der_fr)
+
+
+def der_to_other_der_path := affine_coord_space.find_transform_path
+    der_sp other_der_sp
+
+#check der_to_other_der_path.from_
+#check der_to_other_der_path.to_

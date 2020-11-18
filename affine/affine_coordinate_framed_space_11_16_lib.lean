@@ -241,7 +241,35 @@ def affine_coord_space.mk_derived_from_coords
         (affine_coordinate_frame.derived f.1 (λ i:fin n,(f.2 i)) sorry fr)
     := ⟨⟩
 
+structure transform_path
+    {K : Type v}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] :=
+    mk:: 
+    (from_ : list (affine_tuple_coordinate_frame K n))
+    (to_ : list (affine_tuple_coordinate_frame K n))
 
+def affine_coordinate_frame.build_path
+    {K : Type v}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    :  affine_coordinate_frame K n → list (affine_tuple_coordinate_frame K n)
+| (affine_coordinate_frame.tuple b) := [b]
+| (affine_coordinate_frame.derived o b p f) := ⟨o,b,p⟩::(affine_coordinate_frame.build_path f)
+
+def affine_coord_space.find_transform_path
+    {K : Type v}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {fr1 : affine_coordinate_frame K n}
+    (from_sp : affine_coord_space K n fr1)
+    {fr2 : affine_coordinate_frame K n}
+    (to_sp : affine_coord_space K n fr2)
+    : transform_path
+    := ⟨affine_coordinate_frame.build_path fr1, affine_coordinate_frame.build_path fr2⟩
 
 
 
