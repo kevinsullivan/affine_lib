@@ -59,7 +59,8 @@ def der_fr := affine_coord_space.mk_frame
 
 #check option
 
-def der_sp := affine_coord_space.mk_derived_from_coords Rn (affine_coordinate_frame.get_coords der_fr)
+def der_sp := 
+    affine_coord_space.mk_derived_from_coords Rn (affine_coordinate_frame.get_coords der_fr)
 
 def der_origin := affine_coord_space.origin der_sp
 def der_basis := affine_coord_space.basis der_sp
@@ -79,17 +80,40 @@ def base_der_sp_fr := affine_coordinate_frame.base_frame
 
 def base_Rn := affine_coord_space.get_base_space Rn
 
+/-
+Rn base space -> make derived space "der_sp" from derived frame
+-> get base space OF der_sp, again Rn
+base_der_sp == Rn
+-/
 def base_der_sp := affine_coord_space.get_base_space der_sp
 --def base_der_sp_fr := affine_coord_space.frame base_der_sp
 def Rn_fr := affine_coord_space.frame Rn
 
 def base_vec := affine_coord_space.mk_vec base_der_sp ⟨[0,0,0], by refl⟩
-
-lemma eqs : Rn_fr = base_der_sp_fr
+lemma eqsp : Rn = base_der_sp := by refl
+lemma eqs : Rn_fr = base_der_sp_fr -- expected pass
     := by refl
+lemma eqs : der_fr = base_der_sp_fr --expected fail
+    := by refl
+/-
+base_vec ∈ base_der_sp.
+basis 2 ∈ Rn
+however, Rn == base_der_sp
+-/
 
-#check base_vec +ᵥ basis 2 -- expected: pass or no??
+#check (affine_coord_space.frame base_der_sp)
+#check (affine_coord_space.frame Rn)
+lemma eqfr : (affine_coord_space.frame base_der_sp) = (affine_coord_space.frame Rn) := by refl
 
+def base_vec_rn := affine_coord_space.mk_vec Rn ⟨[0,0,0], by refl⟩
+#check has_vadd.vadd base_vec /-+ᵥ-/ base_vec_rn -- expected: pass or no??
+/-
+none of the overloads are applicable
+error for aff_fr.pt_plus_vec
+type mismatch at application
+  aff_fr.pt_plus_vec base_vec
+term
+-/
 #check (affine_coord_space.frame base_der_sp)
 --#reduce (affine_coord_space.frame base_der_sp)
 
