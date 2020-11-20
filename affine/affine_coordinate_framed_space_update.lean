@@ -3,6 +3,15 @@ import linear_algebra.basis
 import .affine_coordinate_space
 import data.real.basic
 
+/-
+This file contains
+affine_tuple_coord_frame
+affine_coord_frame
+aff_coord_pt
+aff_coord_vec
+Also all instances necessary. Missing some proofs 11/20
+-/
+
 
 
 open list
@@ -36,7 +45,7 @@ variables
 An affine frame comprises an origin point
 and a basis for the vector space.
 -/
-structure affine_tuple_coordinate_frame
+structure affine_tuple_coord_frame
 (K : Type w)
 (n : ℕ)
 [inhabited K]
@@ -46,70 +55,70 @@ mk ::
     (basis : (fin n) → aff_vec_coord_tuple K n) 
     (proof_is_basis : is_basis K basis) 
 
-inductive affine_coordinate_frame
+inductive affine_coord_frame
 (K : Type w)
 (n : ℕ)
 [inhabited K]
 [field K]
-| tuple (base : affine_tuple_coordinate_frame K n) 
-: affine_coordinate_frame
+| tuple (base : affine_tuple_coord_frame K n) 
+: affine_coord_frame
 | derived 
     (origin : aff_pt_coord_tuple K n) 
     (basis : (fin n) → aff_vec_coord_tuple K n) 
     (proof_is_basis : is_basis K basis) 
-(base : affine_coordinate_frame)
-: affine_coordinate_frame
+(base : affine_coord_frame)
+: affine_coord_frame
 /-
-structure affine_derived_coordinate_frame extends 
-    affine_tuple_coordinate_frame K n :=
+structure affine_derived_coord_frame extends 
+    affine_tuple_coord_frame K n :=
 mk ::
-    (base : affine_tuple_coordinate_frame K n)
+    (base : affine_tuple_coord_frame K n)
 -/
-instance: has_lift (affine_derived_coordinate_frame K n) (affine_tuple_coordinate_frame K n) := ⟨sorry⟩
+instance: has_lift (affine_derived_coord_frame K n) (affine_tuple_coord_frame K n) := ⟨sorry⟩
 
 /-
-inductive affine_coordinate_frame 
+inductive affine_coord_frame 
 (K : Type w)
 (n : ℕ)
 [inhabited K]
-[field K] : affine_tuple_coordinate_frame K n → Type
+[field K] : affine_tuple_coord_frame K n → Type
 | standard 
-: affine_coordinate_frame
+: affine_coord_frame
 --(origin : X) 
 --(basis : (fin n) → aff_vec_coord_tuple K n) 
---(proof_is_basis : is_basis K basis) : affine_coordinate_frame
+--(proof_is_basis : is_basis K basis) : affine_coord_frame
 | derived 
     (origin : aff_pt_coord_tuple K n) 
     (basis : (fin n) → aff_vec_coord_tuple K n) 
     (proof_is_basis : is_basis K basis) 
-    (fr : affine_coordinate_frame)
-    : affine_coordinate_frame
+    (fr : affine_coord_frame)
+    : affine_coord_frame
 -/
 /-
-mutual inductive affine_coordinate_frame, aff_coord_pt, aff_coord_vec
-with affine_coordinate_frame : Type
+mutual inductive affine_coord_frame, aff_coord_pt, aff_coord_vec
+with affine_coord_frame : Type
 | std_frame 
 | gen_frame 
     (origin : aff_coord_pt) 
     (basis : ι → aff_coord_vec) 
     (proof_is_basis : is_basis K basis)
-with aff_coord_pt : affine_coordinate_frame X K V ι →  Type
+with aff_coord_pt : affine_coord_frame X K V ι →  Type
 | mk (tuple : aff_pt_coord_tuple K n)
-with aff_coord_vec : affine_coordinate_frame X K V ι → Type
+with aff_coord_vec : affine_coord_frame X K V ι → Type
 | mk (tuple : aff_vec_coord_tuple K n)
 -/
 
-structure aff_coord_pt (fr : affine_coordinate_frame K n) 
+structure aff_coord_pt (fr : affine_coord_frame K n) 
             extends aff_pt_coord_tuple K n :=
    -- (tuple : aff_pt_coord_tuple K n)
    mk ::
 
-structure aff_coord_vec (fr : affine_coordinate_frame K n) 
+structure aff_coord_vec (fr : affine_coord_frame K n) 
             extends aff_vec_coord_tuple K n  :=
    -- (tuple : aff_vec_coord_tuple K n)
    mk ::
 /-
-def affine_coordinate_frame_origin (frame : affine_coordinate_frame X K V ι) :=
+def affine_coord_frame_origin (frame : affine_coord_frame X K V ι) :=
 match frame with
 | std_frame := _
 | gen_frame o b pf := o
@@ -122,7 +131,7 @@ def frame_basis : affine_frame X K V ι → (ι → V) :=
 
 
 variables 
-    (fr : affine_coordinate_frame K n) 
+    (fr : affine_coord_frame K n) 
     (cv1 cv2 : aff_coord_vec K n fr) 
     (cp1 cp2 : aff_coord_pt  K n fr)
 
@@ -304,7 +313,7 @@ def pt_plus_vec
     [module K V] 
     [vector_space K V] 
     [affine_space V X]
-    {fr : affine_coordinate_frame K n} :
+    {fr : affine_coord_frame K n} :
     (aff_coord_pt K n fr) → 
     (aff_coord_vec K n fr) → 
     (aff_coord_pt K n fr) 
@@ -325,7 +334,7 @@ def pt_minus_vec
     [module K V] 
     [vector_space K V] 
     [affine_space V X]
-    {fr : affine_coordinate_frame K n} :
+    {fr : affine_coord_frame K n} :
     (aff_coord_pt K n fr) → 
     (aff_coord_vec K n fr) → 
     (aff_coord_pt K n fr) 
@@ -352,7 +361,10 @@ KEEP?
 
 /-
 Code to manufacture a standard basis for a given affine space.
+
+Unused 11/20 - pushed into lib for now
 -/
+/-
 abbreviation zero := zero_vector K n
 
 def list.to_basis_vec : fin n → list K := λ x, (zero K n).update_nth (x.1 + 1) 1
@@ -367,11 +379,11 @@ def std_basis : fin n → aff_vec_coord_tuple K n :=
 lemma std_is_basis : is_basis K (std_basis K n) := sorry
 
 def aff_coord_space_std_frame : 
-    affine_coordinate_frame K n := 
+    affine_coord_frame K n := 
            ⟨(pt_zero K n) 
            ,(std_basis K n) 
            , (std_is_basis K n)⟩
-
+-/
 --affine_frame (aff_coord_pt fr_n) K (aff_coord_pt fr_n) (iota)
 
 
