@@ -295,13 +295,13 @@ def affine_coord_space.get_base_space
 
 def derived_space_2_base := aff_lib.affine_coord_space.get_base_space derived_space_2
 
-example : derived_space_2_base = derived_space := rfl
+example : derived_space_2_base = derived_space := rfl       -- nope
 
 def derived_space_base := aff_lib.affine_coord_space.get_base_space derived_space
 
 def a_fully_framed_affine_space_base := aff_lib.affine_coord_space.get_base_space a_fully_framed_affine_space
 
-def another_base := aff_lib.affine_coord_space.get_base_space a_fully_framed_affine_space_base
+def another_base := aff_lib.affine_coord_space.get_base_space a_fully_framed_affine_space
 
 def a_quasi_framed_affine_space_base := aff_lib.affine_coord_space.get_base_space a_fully_framed_affine_space
 
@@ -316,27 +316,6 @@ def a_raw_framed_affine_space_base := aff_lib.affine_coord_space.get_base_space 
         (aff_coord_vec X K V n (fin n) fr)
 -/
 
-/-
--/
-
-
-/- 
-
-TODO: Keep?
-
-Given an arbitrary affine space, return (turn it 
-into) an affine coordinate space by specifying a
-point in as.X to serve as the origin and a basis
-in terms of as.V to serve as a basis.
--/
-
---structure affine_coordinate_space_type
-
---def mk_raw 
---    ⟨ ⟩ 
---def mk_real_n := mk_raw standard...
-
---def mk_der
 
 /-
 inductive affine_coordinate_space_type
@@ -344,22 +323,4 @@ inductive affine_coordinate_space_type
 | mk_der (acs : affine_coordinate_space_type) (acf: affine_coordinate_frame)
 -/
 
-/-
-def radimcs := affine_coord_space_type.mk_raw 
-    (as : affine_space) -- a "raw" affine space, no frame
-    (o : origin)        -- a "raw" point in as.X to serve as origin
-    (b: basis)          -- a set of "raw" basis vectors from as.V
-
-def framed_origin := radimcs.get_framed_origin    -- get me framed origin point
-def framed_vector_0 := radimcs.get_framed_basis_vector 0    -- get me first framed basis vector
-def new_framed_point := framed_origin + framed_vector
-
-def new_frame := frame.mk new_framed_point <framed_vector_0, ..., >
-def new_point_new_frame := point.mk new_frame <coods> 
--/
-
-/-
-sp_derived_n ...
-sp_derived_n.origin : (aff_coord_pt fr_n-1)
--/
 
