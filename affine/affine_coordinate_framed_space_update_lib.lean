@@ -146,6 +146,26 @@ def affine_coord_space.frame
     := 
         fr
 
+def affine_coord_vec.frame
+    {K : Type v}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {fr : affine_coord_frame K n}
+    (v : aff_coord_vec K n fr)
+    := 
+        fr
+
+def affine_coord_point.frame
+    {K : Type v}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {fr : affine_coord_frame K n}
+    (v : aff_coord_pt K n fr)
+    := 
+        fr
+
 abbreviation affine_coord_space.standard_space
     := affine_coord_space K n (affine_coord_frame.standard K n)
 
@@ -269,6 +289,34 @@ def affine_coord_space.mk_derived
     : affine_coord_space K n 
         (affine_coord_frame.derived pt.1 (λ i:fin n,(basis i).1) sorry fr)
     := ⟨⟩
+
+def coord_helper 
+    {K : Type v}
+    {n : ℕ}
+    : list K → vector K n
+| (h::t) := ⟨t,sorry⟩
+| [] := ⟨[],sorry⟩
+def affine_coord_vec.get_coords 
+    {K : Type v}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {fr : affine_coord_frame K n}
+    (v : aff_coord_vec K n fr)
+    : vector K n
+    :=
+    @coord_helper K n v.1.1
+
+def affine_coord_pt.get_coords 
+    {K : Type v}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {fr : affine_coord_frame K n}
+    (v : aff_coord_pt K n fr)
+    : vector K n
+    :=
+    @coord_helper K n v.1.1
 
 def affine_coord_frame.get_coords
     {K : Type v}

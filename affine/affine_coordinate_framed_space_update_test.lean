@@ -141,3 +141,98 @@ def der_to_other_der_path := affine_coord_space.find_transform_path
 
 #check der_to_other_der_path.from_
 #check der_to_other_der_path.to_
+
+--create a "base space", R1 with a standard frame
+def sp1 := aff_lib.affine_coord_space.mk_with_standard ℝ 1
+--create a point and vector in that space to turn into a frame
+def pt1' := aff_lib.affine_coord_space.mk_point sp1 ⟨[1], by refl⟩
+def vec1' := aff_lib.affine_coord_space.mk_vec sp1 ⟨[2], by refl⟩
+--create a derived frame using the point and set of vectors
+def derived_fr := affine_coord_space.mk_frame 
+    sp1 
+    pt1' 
+    (affine_coord_space.mk_basis ⟨[vec1'], sorry⟩)
+    sorry
+--create a space equipped with a new frame
+def derived_sp := affine_coord_space.mk_derived_from_coords
+    sp1
+    (affine_coord_frame.get_coords derived_fr)
+--get the base space equipped with the base frame
+--THIS IS THE SAME AS sp1
+def base_sp := affine_coord_space.get_base_space derived_sp
+--make a point in this base space, WHICH IS THE SAME AS SP1
+def base_vec1 := aff_lib.affine_coord_space.mk_vec base_sp ⟨[1], by refl⟩
+--add to vectors together which are EXPLICITLY in sp1
+#check has_add.add vec1'  vec1' 
+--add to vectors together which are expressed in the same frame
+-- but frames do not pass dependent type check
+-- ERROR : frames are not "equal equal", only "equal up to computation"
+/-
+error for has_vadd.vadd
+failed to synthesize type class instance for
+⊢ has_vadd (aff_fr.aff_coord_vec ℝ 1 (affine_coord_frame.standard ℝ 1))
+    (aff_fr.aff_coord_vec ℝ 1
+       (affine_coord_frame.base_frame
+          (aff_fr.affine_coord_frame.derived (affine_coord_frame.get_coords derived_fr).origin
+             (λ (i : fin 1), (affine_coord_frame.get_coords derived_fr).basis i)
+             derived_sp._proof_1
+-/
+#check vec1' +ᵥ base_vec1
+--correctly equal up to computation
+#check (by refl : 
+            affine_coord_space.frame sp1 = 
+            affine_coord_space.frame base_sp)
+-- ERROR : correctly NOT equal up to computation
+#check (by refl : 
+            affine_coord_space.frame sp1 = 
+            affine_coord_space.frame derived_sp)
+
+
+/-
+RELEVANT TYPE DEFINITIONS:
+SPACE, FRAME, POINT, VECTOR
+variables 
+    (K : Type v) 
+    (n : ℕ) 
+    [inhabited K] 
+    [field K] 
+    --(fr : affine_tuple_coord_frame K n)
+    (fr : affine_coord_frame K n)
+
+def affine_coord_space :=
+    affine_space_type 
+        (aff_coord_pt K n fr)
+        K
+        (aff_coord_vec K n fr)
+
+structure affine_tuple_coord_frame
+(K : Type w)
+(n : ℕ)
+[inhabited K]
+[field K]  :=
+mk ::
+    (origin : aff_pt_coord_tuple K n) 
+    (basis : (fin n) → aff_vec_coord_tuple K n) 
+    (proof_is_basis : is_basis K basis) 
+
+inductive affine_coord_frame
+(K : Type w)
+(n : ℕ)
+[inhabited K]
+[field K]
+| tuple (base : affine_tuple_coord_frame K n) 
+: affine_coord_frame
+| derived 
+    (origin : aff_pt_coord_tuple K n) 
+    (basis : (fin n) → aff_vec_coord_tuple K n) 
+    (proof_is_basis : is_basis K basis) 
+(base : affine_coord_frame)
+: affine_coord_frame
+
+structure aff_coord_pt (fr : affine_coord_frame K n) 
+            extends aff_pt_coord_tuple K n :=
+   mk ::
+structure aff_coord_vec (fr : affine_coord_frame K n) 
+            extends aff_vec_coord_tuple K n  :=
+   mk ::
+-/
