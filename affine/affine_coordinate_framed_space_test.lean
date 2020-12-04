@@ -40,10 +40,10 @@ abbreviation K_dim_raw_std_fr_pt := aff_coord_pt aff_pt_coords K aff_vec_coords 
 /-
 Create unframed standard basis vectors and origin points.
 -/
-def aff_vec_coords1 : aff_vec_coords := ⟨[0,1,0,0],sorry,sorry⟩
-def aff_vec_coords2 : aff_vec_coords := ⟨[0,0,1,0],sorry,sorry⟩
-def aff_vec_coordsdim : aff_vec_coords := ⟨[0,0,0,1],sorry,sorry⟩
-def aff_pt_coords1 : aff_pt_coords := ⟨[1,0,0,0],sorry,sorry⟩
+def aff_pt_coords1 : aff_pt_coords :=       ⟨[1,0,0,0],sorry,sorry⟩
+def aff_vec_coords1 : aff_vec_coords :=     ⟨[0,1,0,0],sorry,sorry⟩
+def aff_vec_coords2 : aff_vec_coords :=     ⟨[0,0,1,0],sorry,sorry⟩
+def aff_vec_coordsdim : aff_vec_coords :=   ⟨[0,0,0,1],sorry,sorry⟩
 
 
 /-
