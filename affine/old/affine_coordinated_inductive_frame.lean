@@ -3,7 +3,7 @@ import linear_algebra.basis
 import .affine_coordinate_space
 import data.real.basic
 
-
+set_option trace.app_builder true
 
 open list
 open vecl
@@ -26,7 +26,7 @@ variables
     [inhabited K] 
     [field K] 
     [add_comm_group V] 
-    [module K V] 
+  --  [module K V] 
     [vector_space K V] 
     [affine_space V X]
     [is_basis K v] 
@@ -36,25 +36,149 @@ variables
 An affine frame comprises an origin point
 and a basis for the vector space.
 -/
+structure vector_basis :=
+    (map : ι → V) 
+    (proof_is_basis : is_basis K map) 
+
+/-
+inductive affine_frame
+    (X : Type u) 
+    (K : Type v) 
+    (V : Type w) 
+    (ι : Type*)
+    [inhabited K] 
+    [field K] 
+    [add_comm_group V] 
+    [module K V] 
+    [vector_space K V] 
+    [affine_space V X] --: Type
+| standard : affine_frame
+| derived
+(original : affine_frame)
+(origin : X) 
+(basis : vector_basis K V ι )
+: affine_frame
+-/
+/-
+structure affine_frame  :=
+(origin : X) 
+(basis : ι → V) 
+(proof_is_basis : is_basis K basis)
+-/
+/-
+inductive affine_frame
+| tuple
+(origin : aff_pt_coord_tuple K n) 
+(basis : ι → aff_vec_coord_tuple K n) 
+(proof_is_basis : is_basis K basis) : affine_frame
+| from_tuple
+()
+
+first you need a tuple frame
+then you need points constructed from
+-/
+
+#check aff_pt_coord_tuple K n
+
 structure affine_frame  :=
 (origin : X) 
 (basis : ι → V) 
 (proof_is_basis : is_basis K basis)
 
-#check affine_frame
-/-
-mutual inductive affine_coordinate_frame, aff_coord_pt, aff_coord_vec
-with affine_coordinate_frame : Type
-| std_frame 
+def affine_tuple_frame 
+    (K : Type v)
+    (n : ℕ)
+    [inhabited K] 
+    [field K] 
+    :=
+    affine_frame 
+        (aff_pt_coord_tuple K n) K (aff_vec_coord_tuple K n) (fin n)
+
+structure aff_tuple_framed_pt (fr : affine_tuple_frame K n) 
+    extends aff_pt_coord_tuple K n :=
+   -- (tuple : aff_pt_coord_tuple K n)
+   mk ::
+
+structure aff_tuple_framed_vec (fr : affine_tuple_frame K n) extends aff_vec_coord_tuple K n :=
+   -- (tuple : aff_pt_coord_tuple K n)
+   mk ::
+
+instance (fr : affine_tuple_frame K n): has_add (aff_tuple_framed_vec K n fr) := sorry
+instance (fr : affine_tuple_frame K n): has_zero (aff_tuple_framed_vec K n fr) := sorry
+instance (fr : affine_tuple_frame K n): has_neg (aff_tuple_framed_vec K n fr) := sorry
+instance aff_comm_group_coord (fr : affine_tuple_frame K n): add_comm_group (aff_tuple_framed_vec K n fr) := sorry
+instance (fr : affine_tuple_frame K n) : has_scalar K (aff_tuple_framed_vec K n fr) := sorry
+instance (fr : affine_tuple_frame K n) : mul_action K (aff_tuple_framed_vec K n fr) := 
+    ⟨sorry, sorry⟩
+instance (fr : affine_tuple_frame K n) : distrib_mul_action K (aff_tuple_framed_vec K n fr) := 
+    sorry
+instance aff_semimod_coord (fr : affine_tuple_frame K n) : semimodule K (aff_tuple_framed_vec K n fr)
+    := ⟨sorry, sorry⟩
+instance (fr : affine_tuple_frame K n)  : has_vadd (aff_tuple_framed_vec K n fr) (aff_tuple_framed_pt K n fr) := sorry
+instance (fr : affine_tuple_frame K n)  : has_vsub (aff_tuple_framed_vec K n fr) (aff_tuple_framed_pt K n fr) := sorry
+instance (fr : affine_tuple_frame K n)  : add_action (aff_tuple_framed_vec K n fr) (aff_tuple_framed_pt K n fr) := sorry--⟨aff_group_action K n, aff_zero_sadd K n, aff_add_sadd K n⟩
+instance afc (fr : affine_tuple_frame K n)  : affine_space 
+    (aff_tuple_framed_vec K n fr) 
+    (aff_tuple_framed_pt K n fr) := 
+    sorry
+
+def affine_tuple_framed_frame
+    {K : Type v}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    (f : affine_tuple_frame K n)
+   -- [add_comm_group (aff_tuple_framed_vec K n f)] 
+    --[module K (aff_tuple_framed_vec K n f)]
+    --[affine_space (aff_tuple_framed_vec K n f) (aff_tuple_framed_pt K n f)]
+    :=
+    affine_frame 
+        (aff_tuple_framed_pt K n f) K (aff_tuple_framed_vec K n f) (fin n)
+
+
+structure affine_framed_pt
+    {f : affine_tuple_frame K n}
+    (fr : affine_tuple_framed_frame f) extends aff_pt_coord_tuple K n
+    := 
+mk ::
+
+structure affine_framed_vec
+    {f : affine_tuple_frame K n}
+    (fr : affine_tuple_framed_frame f) extends aff_vec_coord_tuple K n
+    := 
+mk ::
+
+
+mutual inductive
+ affine_coordinate_frame, 
+ aff_coord_pt, 
+ aff_coord_vec 
+ 
+    (K : Type w)
+    [inhabited K] 
+    [field K] 
+    --[add_comm_group (aff_vec_coord_tuple K n)] 
+   -- [module K (aff_vec_coord_tuple K n)] 
+  --  [vector_space K (aff_vec_coord_tuple K n)] 
+   -- [affine_space (aff_vec_coord_tuple K n) (aff_pt_coord_tuple K n)]
+    /-
+with affine_coordinate_frame : Type v
+| tuple
+(origin : aff_pt_coord_tuple K n) 
+--(basis : ι → aff_vec_coord_tuple K n) 
+--(proof_is_basis : is_basis K basis) 
+: affine_coordinate_frame-//-
 | gen_frame 
     (origin : aff_coord_pt) 
     (basis : ι → aff_coord_vec) 
-    (proof_is_basis : is_basis K basis)
-with aff_coord_pt : affine_coordinate_frame X K V ι →  Type
-| mk (tuple : aff_pt_coord_tuple K n)
-with aff_coord_vec : affine_coordinate_frame X K V ι → Type
-| mk (tuple : aff_vec_coord_tuple K n)
--/
+    (proof_is_basis : is_basis K basis) : affine_coordinate_frame-/
+with aff_coord_pt :  aff_pt_coord_tuple K n → Type v
+| mk (tuple : aff_pt_coord_tuple K n) 
+: aff_coord_pt tuple
+with aff_coord_vec : aff_vec_coord_tuple K n → Type v
+| mk (tuple : aff_vec_coord_tuple K n) 
+: aff_coord_vec  tuple
+
 
 structure aff_coord_pt (fr : affine_frame X K V ι) extends aff_pt_coord_tuple K n :=
    -- (tuple : aff_pt_coord_tuple K n)
@@ -205,10 +329,12 @@ rw one_smul_cons,
 exact a_1,
 end
 -/
+
 lemma vec_mul_smul_coord : ∀ g h : K, ∀ x : aff_coord_vec X K V n ι fr, (g * h) • x = g • h • x := sorry
 
 
-instance : mul_action K (aff_coord_vec X K V n ι fr) := ⟨sorry, vec_mul_smul_coord X K V n ι fr⟩
+instance : mul_action K (aff_coord_vec X K V n ι fr) := 
+    ⟨sorry, vec_mul_smul_coord X K V n ι fr⟩
 
 
 instance : distrib_mul_action K (aff_coord_vec X K V n ι fr) := 
@@ -301,6 +427,13 @@ instance afc : affine_space
 /-
 KEEP?
 -/
+def affine_coord_tuple_space_type (K : Type v) (n : ℕ) [field K] [inhabited K] := 
+    affine_space_type 
+        (aff_pt_coord_tuple K n)
+        K
+        (aff_vec_coord_tuple K n)
+
+
 
 /-
 -/

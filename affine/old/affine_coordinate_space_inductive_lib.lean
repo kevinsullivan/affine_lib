@@ -4,6 +4,7 @@ universes u v w
 
 namespace aff_lib
 
+open aff_fr
 variables 
     (X : Type u) 
     (K : Type v) 
@@ -22,9 +23,22 @@ variables
     [affine_space V X]
     [is_basis K v] 
     [affine_space V X]
+    (fr : affine_frame X K V ι)
 
-open aff_fr
+inductive pt_type
+    (K : Type v) 
+    (n : ℕ) 
+    [inhabited K] 
+    [field K] 
 
+
+def typea
+  : Type* := 
+        {t : Type* // 
+            t = (aff_vec_coord_tuple K n)
+            ∨ 
+            t = (aff_vec_coord_tuple K n) 
+        }
 
 --
 /-
@@ -33,25 +47,73 @@ space without a frame on it. We use this space to construct
 a coordinatized space, where all frames are expressed explicitly
 in terms of a specific frame, often/such as the standard frame.
 -/
-def affine_tuple_space
+def pppp
+    (K : Type v)
+    (n : ℕ)  
+    [inhabited K] 
+    [field K]  :=
+    affine_space_type 
+        (aff_pt_coord_tuple K n)
+        K
+        (aff_vec_coord_tuple K n)
+
+
+def affine_tuple_nspace
     (K : Type v)
     (n : ℕ)  
     [inhabited K] 
     [field K] 
-    [add_comm_group (aff_vec_coord_tuple K n)] 
-    [module K (aff_vec_coord_tuple K n)] 
-    [vector_space K (aff_vec_coord_tuple K n)] 
-    [affine_space (aff_vec_coord_tuple K n) (aff_pt_coord_tuple K n)]
     := 
     affine_space_type 
         (aff_pt_coord_tuple K n)
         K
         (aff_vec_coord_tuple K n)
 
+#check affine_tuple_nspace
+
+def affine_framed_tuple_nspace 
+   -- {X : Type u} {K : Type v} {V : Type w}
+    {K : Type v}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    [add_comm_group (aff_vec_coord_tuple K n)] 
+    [module K (aff_vec_coord_tuple K n)] 
+    [vector_space K (aff_vec_coord_tuple K n)] 
+    [affine_space (aff_vec_coord_tuple K n) (aff_pt_coord_tuple K n)]
+    (fr : affine_frame (aff_pt_coord_tuple K n) K (aff_vec_coord_tuple K n) (fin n) )  
+    := 
+    affine_space_type 
+        (aff_coord_pt (aff_pt_coord_tuple K n) K (aff_vec_coord_tuple K n) n (fin n) fr)
+        K
+        (aff_coord_vec (aff_pt_coord_tuple K n) K (aff_vec_coord_tuple K n) n (fin n) fr)
+
+
+
+variable ff : affine_frame (aff_pt_coord_tuple ℝ n) ℝ (aff_vec_coord_tuple ℝ n) (fin n)
+
+noncomputable def t : affine_framed_tuple_nspace ff:= ⟨⟩
+
 /-
 We define a type for a coordinate space. Frames of this coordinate space
 are defined using an arbitrary indexing set.
 -/
+
+structure derived_affine_coordinate_space 
+    {X : Type u}
+    {K : Type v}
+    {V : Type w}
+    {n : ℕ}
+    [inhabited K]
+    [field K] 
+    [add_comm_group V] 
+    [module K V]  
+    [affine_space V X] 
+    (fr : affine_frame X K V (fin n))
+    extends affine_space_type (aff_coord_pt X K V n (fin n) fr) K (aff_coord_vec X K V n (fin n) fr) :=
+    mk ::
+
+
 def affine_coord_space
     {X : Type u} {K : Type v} {V : Type w} {ι : Type*}
     [inhabited K] 
@@ -68,9 +130,40 @@ def affine_coord_space
         K
         (aff_coord_vec X K V n ι fr)
 
+
+inductive framed_affine_coordinate_space
+    {X : Type u}
+    {K : Type v}
+    {V : Type w}
+    {n : ℕ}
+    [inhabited K]
+    [field K] 
+    [add_comm_group V] 
+    [module K V]  
+    [affine_space V X] 
+    [add_comm_group (aff_vec_coord_tuple K n)] 
+    [module K (aff_vec_coord_tuple K n)] 
+    [vector_space K (aff_vec_coord_tuple K n)] 
+    [affine_space (aff_vec_coord_tuple K n) (aff_pt_coord_tuple K n)]
+    --(f : affine_frame (aff_pt_coord_tuple K n) K (aff_vec_coord_tuple K n) (fin n))
+    :  Type
+--| uncoordinatized_tuple (sp : affine_tuple_nspace K n) 
+--    : affine_coordinate_space
+| framed_tuple  (fr : affine_frame X K V (fin n))
+    --is the type too weak here? the points and vectors of the frame are not 
+    --explicitly "belonging to" the space
+    --however, this tuple space is most evidently unique given K, n
+    
+    --(fr_sp : derived_affine_coordinate_space f)
+        : framed_affine_coordinate_space
+| framed_coordinatized : affine_coordinate_space
+
+
+
 /-
 A coordinate space whose indexing set is, again, a set of natural numbers
 -/
+/-
 def affine_coord_nspace
     {X : Type u} {K : Type v} {V : Type w}
     [inhabited K] 
@@ -86,7 +179,7 @@ def affine_coord_nspace
         (aff_coord_pt X K V n (fin n) fr)
         K
         (aff_coord_vec X K V n (fin n) fr)
-
+-/
 /-
 Helper method to retrieve the origin of coordinate space defined in
 terms of a particular frame (which has an origin that we need to retrieve)

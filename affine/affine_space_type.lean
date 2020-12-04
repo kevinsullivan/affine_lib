@@ -14,6 +14,7 @@ proofs that confirm that the specified
 type does actually constitute an affine
 space type.
 -/
+
 structure affine_space_type
     --(id : ℕ)
     (X : Type u)

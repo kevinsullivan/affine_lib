@@ -1,29 +1,29 @@
 import .list_as_k_tuple linear_algebra.affine_space.basic
 import linear_algebra.basis
-import .affine_space_type
+--import .affine_space_type
 
 
 universes u v w x
 
 variables 
-    -- (id : ℕ)
-    (X : Type u) 
+    -- (id : ℕ) all commented out 11/15/20 
+  --  (X : Type u) 
     (K : Type v) 
-    (V : Type w) 
+  --  (V : Type w) 
     (n : ℕ) 
-    (k : K)
-    (ι : Type*)
-    (s : finset ι) 
-    (g : ι → K) 
-    (v : ι → V) 
+  --  (k : K)
+  --  (ι : Type*)
+  --  (s : finset ι) 
+  --  (g : ι → K) 
+   -- (v : ι → V) 
     [inhabited K] 
     [field K] 
-    [add_comm_group V] 
-    [module K V] 
-    [vector_space K V] 
-    [affine_space V X]
-    [is_basis K v] 
-    [affine_space V X]
+  --  [add_comm_group V] 
+  --  [module K V] 
+  --  [vector_space K V] 
+  --  [affine_space V X] commented out 11/15/20 - this REALLY does not go here!
+  --  [is_basis K v] 
+  --  [affine_space V X]
 
 
 open list
