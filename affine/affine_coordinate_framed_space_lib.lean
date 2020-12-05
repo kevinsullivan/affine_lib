@@ -1,6 +1,7 @@
-import .affine_coordinate_framed_space_update
+import .affine_coordinate_framed_space
 import .affine_space_type
 import .list_as_k_tuple
+import linear_algebra.matrix
 universes u v w
 /-
 This file defines the following types:
@@ -46,15 +47,30 @@ variables
     --(fr : affine_tuple_coord_frame K n)
     (fr : affine_coord_frame K n)
 
+attribute [reducible]
 def affine_coord_space :=
     affine_space_type 
         (aff_coord_pt K n fr)
         K
         (aff_coord_vec K n fr)
 
+attribute [reducible]
+def affine_coord_space.pt_type 
+    (sp : affine_coord_space K n fr)
+    :=
+        (aff_coord_pt K n fr) 
+
+attribute [reducible]
+def affine_coord_space.vec_type 
+    (sp : affine_coord_space K n fr)
+    :=
+        (aff_coord_vec K n fr) 
+
+attribute [reducible]
 def affine_tuple_basis :=
     (fin n) → aff_vec_coord_tuple K n
 
+attribute [reducible]
 def affine_coord_basis :=
     (fin n) → aff_coord_vec K n fr
 
@@ -77,6 +93,8 @@ def std_basis : fin n → aff_vec_coord_tuple K n :=
 def affine_coord_frame.standard : affine_coord_frame K n := 
     (affine_coord_frame.tuple ⟨pt_zero K n, std_basis K n, sorry⟩)
 
+-- This is type of frame when retrieved from a base space
+attribute [reducible]
 def affine_coord_frame.base_frame 
     {K : Type v}
     {n : ℕ}
@@ -86,6 +104,7 @@ def affine_coord_frame.base_frame
 | (affine_coord_frame.tuple base) := affine_coord_frame.standard K n
 | (affine_coord_frame.derived _ _ _ fr) := fr
 
+attribute [reducible]
 def affine_coord_frame.origin_coords
     {K : Type v}
     {n : ℕ}
@@ -96,6 +115,7 @@ def affine_coord_frame.origin_coords
 | (affine_coord_frame.derived o _ _ _) := o
 
 
+attribute [reducible]
 def affine_coord_frame.basis_coords 
     {K : Type v}
     {n : ℕ}
@@ -109,6 +129,7 @@ def affine_coord_frame.basis_coords
 Helper method to retrieve the origin of ℕ-indexed coord space defined in
 terms of a particular frame (which has an origin that we need to retrieve)
 -/
+attribute [reducible]
 def affine_coord_space.origin
     {K : Type v}
     {n : ℕ}
@@ -124,6 +145,7 @@ def affine_coord_space.origin
 Helper method to retrieve the basis of coord space defined in
 terms of a particular frame (which has a basis that we need to retrieve)
 -/
+attribute [reducible]
 def affine_coord_space.basis
     {K : Type v}
     {n : ℕ}
@@ -136,6 +158,7 @@ def affine_coord_space.basis
         λ i : fin n, ⟨(affine_coord_frame.basis_coords (affine_coord_frame.base_frame fr)) i⟩
 
 
+attribute [reducible]
 def affine_coord_space.frame
     {K : Type v}
     {n : ℕ}
@@ -146,6 +169,7 @@ def affine_coord_space.frame
     := 
         fr
 
+attribute [reducible]
 def affine_coord_vec.frame
     {K : Type v}
     {n : ℕ}
@@ -156,6 +180,7 @@ def affine_coord_vec.frame
     := 
         fr
 
+attribute [reducible]
 def affine_coord_point.frame
     {K : Type v}
     {n : ℕ}
@@ -169,11 +194,12 @@ def affine_coord_point.frame
 abbreviation affine_coord_space.standard_space
     := affine_coord_space K n (affine_coord_frame.standard K n)
 
+attribute [reducible]
 def affine_coord_space.mk_with_standard
     : affine_coord_space.standard_space K n
     := ⟨⟩
 
-
+attribute [reducible]
 def affine_coord_space.get_base_space
     {K : Type v}
     {n : ℕ}
@@ -185,6 +211,7 @@ def affine_coord_space.get_base_space
     :=
         ⟨⟩
 
+attribute [reducible]
 def affine_coord_space.mk_coord_point
     {K : Type v}
     {n : ℕ}
@@ -196,6 +223,7 @@ def affine_coord_space.mk_coord_point
     : aff_pt_coord_tuple K n
     := ⟨[1]++val.1,sorry,sorry⟩
 
+attribute [reducible]
 def affine_coord_space.mk_coord_vec
     {K : Type v}
     {n : ℕ}
@@ -207,6 +235,7 @@ def affine_coord_space.mk_coord_vec
     : aff_vec_coord_tuple K n
     := ⟨[0]++val.1,sorry,sorry⟩
 
+attribute [reducible]
 def affine_coord_space.mk_point
     {K : Type v}
     {n : ℕ}
@@ -218,6 +247,7 @@ def affine_coord_space.mk_point
     : aff_coord_pt K n fr
     := ⟨⟨[1]++val.1,sorry,sorry⟩⟩
 
+attribute [reducible]
 def affine_coord_space.mk_vec
     {K : Type v}
     {n : ℕ}
@@ -234,9 +264,11 @@ def affine_coord_space.mk_vec
 /-
 slight issue here, 
 because the type of a derived frame does not contain the original frame,
-i don't raise an explicit type error if the space's frame and frame's base frame don't match
+i don't raise an explicit type error if the space's frame
+ and frame's base frame don't match
 fix for now is just to supply a coord tuple frame
 -/
+attribute [reducible]
 def affine_coord_space.mk_basis
     {K : Type v}
     {n : ℕ}
@@ -249,7 +281,7 @@ def affine_coord_space.mk_basis
     := 
         λ i : fin n, vecs.nth i
     
-
+attribute [reducible]
 def affine_coord_space.mk_frame
     {K : Type v}
     {n : ℕ}
@@ -263,7 +295,7 @@ def affine_coord_space.mk_frame
     := 
         (affine_coord_frame.derived pt.1 (λ i:fin n,(basis i).1) sorry)
 
-
+attribute [reducible]
 def affine_coord_space.mk_tuple_frame
     {K : Type v}
     {n : ℕ}
@@ -277,6 +309,7 @@ def affine_coord_space.mk_tuple_frame
     := 
         ⟨pt.1, (λ i:fin n,(basis i).1),sorry⟩
 
+attribute [reducible]
 def affine_coord_space.mk_derived
     {K : Type v}
     {n : ℕ}
@@ -290,12 +323,15 @@ def affine_coord_space.mk_derived
         (affine_coord_frame.derived pt.1 (λ i:fin n,(basis i).1) sorry fr)
     := ⟨⟩
 
+attribute [reducible]
 def coord_helper 
     {K : Type v}
     {n : ℕ}
     : list K → vector K n
 | (h::t) := ⟨t,sorry⟩
 | [] := ⟨[],sorry⟩
+
+attribute [reducible]
 def affine_coord_vec.get_coords 
     {K : Type v}
     {n : ℕ}
@@ -307,6 +343,7 @@ def affine_coord_vec.get_coords
     :=
     @coord_helper K n v.1.1
 
+attribute [reducible]
 def affine_coord_pt.get_coords 
     {K : Type v}
     {n : ℕ}
@@ -318,6 +355,52 @@ def affine_coord_pt.get_coords
     :=
     @coord_helper K n v.1.1
 
+attribute [reducible]
+def affine_tuple_vec.get_coords 
+    {K : Type v}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    (v : aff_vec_coord_tuple K n )
+    : vector K n
+    :=
+    @coord_helper K n v.1
+
+attribute [reducible]
+def affine_tuple_pt.get_coords 
+    {K : Type v}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    (v : aff_pt_coord_tuple K n )
+    : vector K n
+    :=
+    @coord_helper K n v.1
+
+attribute [reducible]    
+def affine_tuple_vec.as_matrix
+    {K : Type v}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    (v : aff_vec_coord_tuple K n )
+    : matrix (fin n) (fin 1) K
+    :=
+    λ i one, (@coord_helper K n v.1).nth i
+
+attribute [reducible]
+def affine_tuple_pt.as_matrix
+    {K : Type v}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    (v : aff_pt_coord_tuple K n )
+    : matrix (fin n) (fin 1) K
+    :=
+    λ i one, (@coord_helper K n v.1).nth i
+
+
+attribute [reducible]
 def affine_coord_frame.get_coords
     {K : Type v}
     {n : ℕ}
@@ -327,6 +410,7 @@ def affine_coord_frame.get_coords
 | (affine_coord_frame.tuple b) := b
 | (affine_coord_frame.derived o b _ _) := ⟨o,b,sorry⟩
 
+attribute [reducible]
 def affine_coord_space.mk_derived_from_coords
     {K : Type v}
     {n : ℕ}
@@ -339,6 +423,7 @@ def affine_coord_space.mk_derived_from_coords
         (affine_coord_frame.derived f.1 (λ i:fin n,(f.2 i)) sorry fr)
     := ⟨⟩
 
+attribute [reducible]
 def affine_coord_space.mk_from_frame
     {K : Type v}
     {n : ℕ}
@@ -357,6 +442,7 @@ structure transform_path
     (from_ : list (affine_tuple_coord_frame K n))
     (to_ : list (affine_tuple_coord_frame K n))
 
+attribute [reducible]
 def affine_coord_frame.build_path
     {K : Type v}
     {n : ℕ}
@@ -366,6 +452,7 @@ def affine_coord_frame.build_path
 | (affine_coord_frame.tuple b) := [b]
 | (affine_coord_frame.derived o b p f) := ⟨o,b,p⟩::(affine_coord_frame.build_path f)
 
+attribute [reducible]
 def affine_coord_space.find_transform_path
     {K : Type v}
     {n : ℕ}
