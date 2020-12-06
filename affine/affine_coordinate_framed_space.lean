@@ -12,8 +12,6 @@ aff_coord_vec
 Also all instances necessary. Missing some proofs 11/20
 -/
 
-
-
 open list
 open vecl
 
@@ -242,6 +240,10 @@ def vecptadd := r3_der2_pt1 +ᵥ r3_der2_vec2 --expected : pass
 def vecptsub := r3_der2_pt1 -ᵥ r3_der2_vec2 --expected : pass
 def ptvecsub := r3_der2_vec2 -ᵥ r3_der2_pt1 -- expected : pass
 -/
+
+/-
+TODO: SULLIVAN: 12/5/2020. Replace add_torsor with affine_space below when import works.
+-/
 def pt_plus_vec
     {X : Type u} 
     {K : Type v} 
@@ -253,7 +255,8 @@ def pt_plus_vec
     [add_comm_group V] 
     [module K V] 
     [vector_space K V] 
-    [affine_space V X]
+--    [affine_space V X]
+    [add_torsor V X]
     {fr : affine_coord_frame K n} :
     (aff_coord_pt K n fr) → 
     (aff_coord_vec K n fr) → 
@@ -262,7 +265,7 @@ def pt_plus_vec
 
 notation
  pt +ᵥ v := pt_plus_vec pt v
- 
+
 def pt_minus_vec
     {X : Type u} 
     {K : Type v} 
@@ -274,7 +277,8 @@ def pt_minus_vec
     [add_comm_group V] 
     [module K V] 
     [vector_space K V] 
-    [affine_space V X]
+--    [affine_space V X]
+    [add_torsor V X]
     {fr : affine_coord_frame K n} :
     (aff_coord_pt K n fr) → 
     (aff_coord_vec K n fr) → 
@@ -285,9 +289,12 @@ notation
  pt -ᵥ v := pt_minus_vec pt v
 
 
-def prf : affine_space (aff_coord_vec K n fr) (aff_coord_pt  K n fr) := sorry
+def prf : 
+-- affine_space (aff_coord_vec K n fr) (aff_coord_pt  K n fr) := sorry
+add_torsor (aff_coord_vec K n fr) (aff_coord_pt  K n fr) := sorry
 
-instance afc : affine_space 
+--instance afc : affine_space 
+instance afc : add_torsor 
     (aff_coord_vec K n fr) 
     (aff_coord_pt  K n fr) := 
     prf K n fr
