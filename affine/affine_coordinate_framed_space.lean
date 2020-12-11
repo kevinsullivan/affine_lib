@@ -3,6 +3,7 @@ import linear_algebra.basis
 import .affine_coordinate_space
 import data.real.basic
 
+open_locale affine
 /-
 This file contains
 affine_tuple_coord_frame
@@ -11,6 +12,8 @@ aff_coord_pt
 aff_coord_vec
 Also all instances necessary. Missing some proofs 11/20
 -/
+
+
 
 open list
 open vecl
@@ -21,31 +24,51 @@ universes u v w
 
 variables 
     -- (id : ℕ)
+    (X : Type u) 
     (K : Type v) 
+    (V : Type w) 
     (n : ℕ) 
---    (k : K)
+    (k : K)
+    (ι : Type*)
+    (s : finset ι) 
+    (g : ι → K) 
+    (v : ι → V) 
     [inhabited K] 
-    [field K]
+    [field K] 
+    [add_comm_group V] 
+    [module K V] 
+    [vector_space K V] 
+    [affine_space V X]
+    [is_basis K v] 
+    [affine_space V X]
+
 /-
 An affine frame comprises an origin point
 and a basis for the vector space.
 -/
-structure affine_tuple_coord_frame :=
+structure affine_tuple_coord_frame
+(K : Type w)
+(n : ℕ)
+[inhabited K]
+[field K]  :=
+mk ::
     (origin : aff_pt_coord_tuple K n) 
     (basis : (fin n) → aff_vec_coord_tuple K n) 
     (proof_is_basis : is_basis K basis) 
 
-
 inductive affine_coord_frame
+(K : Type w)
+(n : ℕ)
+[inhabited K]
+[field K]
 | tuple (base : affine_tuple_coord_frame K n) 
 : affine_coord_frame
 | derived 
     (origin : aff_pt_coord_tuple K n) 
     (basis : (fin n) → aff_vec_coord_tuple K n) 
     (proof_is_basis : is_basis K basis) 
-    (base : affine_coord_frame)
+(base : affine_coord_frame)
 : affine_coord_frame
-
 /-
 structure affine_derived_coord_frame extends 
     affine_tuple_coord_frame K n :=
@@ -53,7 +76,6 @@ mk ::
     (base : affine_tuple_coord_frame K n)
 -/
 --instance: has_lift (affine_derived_coord_frame K n) (affine_tuple_coord_frame K n) := ⟨sorry⟩
---def affine_coordinate_frame → matrix 
 
 
 structure aff_coord_pt (fr : affine_coord_frame K n) 
@@ -158,9 +180,7 @@ end
 -/
 def vec_add_coord : aff_coord_vec K n fr → aff_coord_vec K n fr → aff_coord_vec K n fr :=
     λ x y, ⟨⟨ladd x.1.l y.1.l, list_sum_fixed K n x.1 y.1, sum_fst_fixed K n x.1 y.1⟩⟩
-
 def vec_zero_coord : aff_coord_vec K n fr := ⟨⟨zero_vector K n, len_zero K n, head_zero K n⟩⟩
-
 def vec_neg_coord : aff_coord_vec K n fr → aff_coord_vec K n fr
 | ⟨⟨l, len, fst⟩⟩ := ⟨⟨vecl_neg l, vec_len_neg K n ⟨l, len, fst⟩, head_neg_0 K n ⟨l, len, fst⟩⟩⟩
 
@@ -169,7 +189,6 @@ def vec_neg_coord : aff_coord_vec K n fr → aff_coord_vec K n fr
 instance : has_add (aff_coord_vec K n fr) := ⟨vec_add_coord K n fr⟩
 instance : has_zero (aff_coord_vec K n fr) := ⟨vec_zero_coord K n fr⟩
 instance : has_neg (aff_coord_vec K n fr) := ⟨vec_neg_coord K n fr⟩
-
 @[ext]
 def vec_scalar_coord : K → aff_coord_vec K n fr → aff_coord_vec K n fr :=
     λ a x, ⟨⟨scalar_mul a x.1.1, trans (scale_len a x.1.1) x.1.2, sorry⟩⟩
@@ -240,10 +259,6 @@ def vecptadd := r3_der2_pt1 +ᵥ r3_der2_vec2 --expected : pass
 def vecptsub := r3_der2_pt1 -ᵥ r3_der2_vec2 --expected : pass
 def ptvecsub := r3_der2_vec2 -ᵥ r3_der2_pt1 -- expected : pass
 -/
-
-/-
-TODO: SULLIVAN: 12/5/2020. Replace add_torsor with affine_space below when import works.
--/
 def pt_plus_vec
     {X : Type u} 
     {K : Type v} 
@@ -255,8 +270,7 @@ def pt_plus_vec
     [add_comm_group V] 
     [module K V] 
     [vector_space K V] 
---    [affine_space V X]
-    [add_torsor V X]
+    [affine_space V X]
     {fr : affine_coord_frame K n} :
     (aff_coord_pt K n fr) → 
     (aff_coord_vec K n fr) → 
@@ -266,6 +280,28 @@ def pt_plus_vec
 notation
  pt +ᵥ v := pt_plus_vec pt v
 
+ 
+def vec_mul_scalar
+    {X : Type u} 
+    {K : Type v} 
+    {V : Type w} 
+    {n : ℕ}
+    {ι : Type*}
+    [inhabited K] 
+    [field K] 
+    [add_comm_group V] 
+    [module K V] 
+    [vector_space K V] 
+    [affine_space V X]
+    {fr : affine_coord_frame K n} :
+    (aff_coord_vec K n fr) → 
+    K → 
+    (aff_coord_vec K n fr) 
+| v s := s • v
+
+notation
+ v • s := vec_mul_scalar v s
+ 
 def pt_minus_vec
     {X : Type u} 
     {K : Type v} 
@@ -277,24 +313,20 @@ def pt_minus_vec
     [add_comm_group V] 
     [module K V] 
     [vector_space K V] 
---    [affine_space V X]
-    [add_torsor V X]
+    [affine_space V X]
     {fr : affine_coord_frame K n} :
     (aff_coord_pt K n fr) → 
     (aff_coord_vec K n fr) → 
     (aff_coord_pt K n fr) 
 | p v := aff_group_action_coord K n fr (vec_neg_coord K n fr v) p
-.
+
 notation
  pt -ᵥ v := pt_minus_vec pt v
 
 
-def prf : 
--- affine_space (aff_coord_vec K n fr) (aff_coord_pt  K n fr) := sorry
-add_torsor (aff_coord_vec K n fr) (aff_coord_pt  K n fr) := sorry
+def prf : affine_space (aff_coord_vec K n fr) (aff_coord_pt  K n fr) := sorry
 
---instance afc : affine_space 
-instance afc : add_torsor 
+instance afc : affine_space 
     (aff_coord_vec K n fr) 
     (aff_coord_pt  K n fr) := 
     prf K n fr
