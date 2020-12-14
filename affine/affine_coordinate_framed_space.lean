@@ -3,7 +3,7 @@ import linear_algebra.basis
 import .affine_coordinate_space
 import data.real.basic
 
-open_locale affine
+-- open_locale affine
 /-
 This file contains
 affine_tuple_coord_frame
