@@ -15,7 +15,7 @@ type does actually constitute an affine
 space type.
 -/
 
-open_locale affine
+--open_locale affine
 
 structure affine_space_type
     --(id : ℕ)
