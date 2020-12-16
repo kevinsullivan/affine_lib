@@ -434,8 +434,8 @@ def affine_coord_space.mk_from_frame
     := ⟨ ⟩
 
 structure transform_path
-    {K : Type v}
-    {n : ℕ}
+    (K : Type v)
+    (n : ℕ)
     [inhabited K] 
     [field K] :=
     mk:: 
@@ -462,7 +462,7 @@ def affine_coord_space.find_transform_path
     (from_sp : affine_coord_space K n fr1)
     {fr2 : affine_coord_frame K n}
     (to_sp : affine_coord_space K n fr2)
-    : transform_path
+    : transform_path K n
     := ⟨affine_coord_frame.build_path fr1, affine_coord_frame.build_path fr2⟩
 
 
