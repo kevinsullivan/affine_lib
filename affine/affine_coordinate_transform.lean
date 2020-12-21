@@ -466,3 +466,58 @@ structure affine_equiv (k P₁ P₂ : Type*) {V₁ V₂ : Type*} [ring k]
 (linear : V₁ ≃ₗ[k] V₂)
 (map_vadd' : ∀ (p : P₁) (v : V₁), to_equiv (v +ᵥ p) = linear v +ᵥ to_equiv p)
 -/
+
+/-
+universes u 
+variables 
+    (K : Type u)
+    (n : ℕ )
+    [inhabited K]
+    [field K]
+    (fr1 : affine_coord_frame K n) 
+    (fr2 : affine_coord_frame K n) 
+    (cv1 cv2 : aff_coord_vec K n fr1) 
+    (cp1 cp2 : aff_coord_pt  K n fr2)
+
+abbreviation
+    affine_coord_space_transform
+    (sp1 : affine_coord_space K n fr1)
+    (sp2 : affine_coord_space K n fr2)
+    := 
+    affine_coord_frame_transform K n fr1 fr2
+-/
+
+notation t1⬝t2 := t1.trans t2
+
+variables 
+    (fr3 : affine_coord_frame K n)
+    (s1 : affine_coord_space K n fr1)
+    (s2 : affine_coord_space K n fr2)
+    (s3 : affine_coord_space K n fr3)
+    (t1 : affine_coord_space_transform K n fr1 fr2 s1 s2)
+    (t2 : affine_coord_space_transform K n fr2 fr3 s2 s3)
+    (p1 : aff_coord_pt K n fr1)
+    (p2 : aff_coord_pt K n fr2)
+#check t1⬝t2
+
+#check t1 p1
+#check t1 p2
+
+def tran_times_vec 
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {fr1 : affine_coord_frame K n}
+   -- (from_sp : affine_coord_space K n fr1)
+    {fr2 : affine_coord_frame K n}
+   -- (to_sp : affine_coord_space K n fr2)
+   (tr : affine_coord_frame_transform K n fr1 fr2)
+   (p : aff_coord_vec K n fr1)
+   : aff_coord_vec K n fr2
+   := tr (p +ᵥ (⟨pt_zero K n⟩ : aff_coord_pt K n fr1))
+        -ᵥ (⟨pt_zero K n⟩ : aff_coord_pt K n fr2)
+
+
+notation t1⬝t2 := tran_times_vec t1 t2
+notation t1⬝t2 := t1.to_equiv t2
