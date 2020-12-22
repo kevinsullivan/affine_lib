@@ -488,6 +488,7 @@ abbreviation
 -/
 
 notation t1⬝t2 := t1.trans t2
+notation t1•t2 := t1.trans t2
 
 variables 
     (fr3 : affine_coord_frame K n)
@@ -521,3 +522,27 @@ def tran_times_vec
 
 notation t1⬝t2 := tran_times_vec t1 t2
 notation t1⬝t2 := t1.to_equiv t2
+
+def affine_coord_space_transform.domain_frame
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {fr1 : affine_coord_frame K n}
+    {from_sp : affine_coord_space K n fr1}
+    {fr2 : affine_coord_frame K n}
+    {to_sp : affine_coord_space K n fr2}
+    (tr : affine_coord_space_transform K n fr1 fr2 from_sp to_sp)
+    := fr1
+
+def affine_coord_space_transform.codomain_frame
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {fr1 : affine_coord_frame K n}
+    {from_sp : affine_coord_space K n fr1}
+    {fr2 : affine_coord_frame K n}
+    {to_sp : affine_coord_space K n fr2}
+    (tr : affine_coord_space_transform K n fr1 fr2 from_sp to_sp)
+    := fr2
