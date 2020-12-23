@@ -43,6 +43,8 @@ simp only [length, add_cons_cons, length_sum l₁ l₂],
 exact ((length l₁).min_succ_succ (length l₂)).symm,
 end
 
+@[simp] theorem zip_with_cons_cons {α β γ} (f : α → β → γ) (a : α) (b : β) (l₁ : list α) (l₂ : list β) :
+  list.zip_with f (a :: l₁) (b :: l₂) = f a b :: list.zip_with f l₁ l₂ := rfl
 
 /-- the empty list is of length 0 -/
 @[simp] lemma len_nil : length ([] : list α) = 0 := rfl
@@ -126,10 +128,16 @@ end
 lemma ladd_assoc : ∀ x y z : list k, ladd (ladd x y) z = ladd x (ladd y z) :=
 begin
 intros x y z,
-cases x, refl,
-cases y, refl,
-cases z, refl,
-sorry,
+induction x generalizing y z,
+simp only [add_nil_left, add_nil_right],
+induction y generalizing z,
+simp only [add_nil_left, add_nil_right],
+cases z,
+simp only [add_nil_left, add_nil_right],
+rw ladd at x_ih y_ih ⊢,
+repeat {rw zip_with_cons_cons},
+rw add_assoc,
+rw x_ih,
 end
 
 lemma zero_ladd : ∀ x : list k, ladd (zero_vector k (length x - 1)) x = x :=
@@ -258,15 +266,15 @@ end
 
 lemma ladd_comm : ∀ x y : list k, ladd x y = ladd y x :=
 begin
-intros,
-induction x,
-rw [add_nil_left, add_nil_right],
-induction y,
-rw [add_nil_right, add_nil_left],
-change (x_hd + y_hd) :: (ladd x_tl y_tl) = (y_hd + x_hd) :: (ladd y_tl x_tl),
-rw add_comm,
-refine congr rfl _,
-sorry -- double induction doesn't do what we want it to
+intros l l',
+  induction l with hd tl hl generalizing l',
+  
+  rw [add_nil_left, add_nil_right],
+  
+  cases l' with hd' tl',
+  rw [add_nil_left, add_nil_right],
+  rw ladd at hl ⊢,
+  rw [zip_with_cons_cons, zip_with_cons_cons, hl, add_comm]
 end
 
 lemma ladd_comm' : ∀ x y : list k, ∀ n : ℕ, (x.length + y.length = n) → x.length = y.length → ladd x y = ladd y x :=
