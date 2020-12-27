@@ -61,6 +61,14 @@ def zero_vector (k : Type*) [ring k] : ℕ → list k
 | 0 := [0]
 | (nat.succ n) := 0 :: (zero_vector n)
 
+lemma field_zero_sep : ∀ n : ℕ, n ≠ 0 → zero_vector k n = 0 :: zero_vector k (n - 1) :=
+begin
+intros n h,
+induction n with n',
+{contradiction},
+{refl}
+end
+
 /-- returns a list multiplied element-wise by a scalar. -/
 def scalar_mul : k → list k → list k
 | x [] := []
@@ -84,6 +92,36 @@ begin
 induction xl,
 refl,
 rw [scalar_cons, one_mul, xl_ih],
+end
+
+/-- scaling by 0 returns the zero vector -/
+lemma zero_smul_cons : xl ≠ [] → scalar_mul 0 xl = zero_vector k (xl.length - 1) :=
+begin
+intros,
+induction xl,
+contradiction,
+cases xl_tl,
+have h₁ : scalar_mul 0 [xl_hd] = [0*xl_hd] := rfl,
+have h₂ : zero_vector k ([xl_hd].length - 1) = [0] := rfl,
+rw [h₁, h₂, zero_mul],
+
+rw [scalar_cons, field_zero_sep],
+have h₄ : (xl_hd :: xl_tl_hd :: xl_tl_tl).length - 1 - 1 = (xl_tl_hd :: xl_tl_tl).length - 1 := rfl,
+rw [h₄, xl_ih, zero_mul],
+repeat {contradiction},
+end
+
+/-- scaling the zero vector with anything returns the zero vector -/
+lemma smul_zero_cons : scalar_mul x (zero_vector k n) = zero_vector k n :=
+begin
+induction n with n',
+have h₁ : zero_vector k 0 = [0] := rfl,
+have h₂ : scalar_mul x [0] = [x*0] := rfl,
+rw [h₁, h₂, mul_zero],
+
+have h₃ : n'.succ - 1 = n' := rfl,
+rw [field_zero_sep, scalar_cons, mul_zero, h₃, n_ih],
+contradiction
 end
 
 /-- scaling is consistent with ring multiplication -/
@@ -115,14 +153,6 @@ induction xl,
   have t : vecl_neg (xl_hd :: xl_tl) = (-xl_hd :: vecl_neg xl_tl) := rfl,
   simp only [t, len_cons, xl_ih],
 },
-end
-
-lemma field_zero_sep : ∀ n : ℕ, n ≠ 0 → zero_vector k n = 0 :: zero_vector k (n - 1) :=
-begin
-intros n h,
-induction n with n',
-{contradiction},
-{refl}
 end
 
 lemma ladd_assoc : ∀ x y z : list k, ladd (ladd x y) z = ladd x (ladd y z) :=
@@ -277,14 +307,24 @@ intros l l',
   rw [zip_with_cons_cons, zip_with_cons_cons, hl, add_comm]
 end
 
-lemma ladd_comm' : ∀ x y : list k, ∀ n : ℕ, (x.length + y.length = n) → x.length = y.length → ladd x y = ladd y x :=
+lemma smul_ladd : scalar_mul x (ladd xl yl) = ladd (scalar_mul x xl) (scalar_mul x yl) :=
 begin
-intros,
-induction n,
-have f : x.length = 0 := nat.eq_zero_of_add_eq_zero_right a,
-have f' : x = [] := eq_nil_of_length_eq_zero f,
-rw [f', add_nil_left, add_nil_right],
-sorry
+induction xl generalizing yl,
+refl,
+
+cases yl,
+refl,
+
+rw [add_cons_cons, scalar_cons, scalar_cons, scalar_cons, add_cons_cons, left_distrib, xl_ih]
+end
+
+lemma ladd_smul : scalar_mul (x + y) xl = ladd (scalar_mul x xl) (scalar_mul y xl) :=
+begin
+induction xl,
+refl,
+
+repeat {rw scalar_cons},
+rw [add_cons_cons, right_distrib, xl_ih]
 end
 
 #check zip_with
