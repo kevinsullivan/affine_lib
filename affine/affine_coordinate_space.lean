@@ -572,13 +572,47 @@ end
 lemma aff_add_free : ∀ a : aff_pt_coord_tuple K n, ∀ g h : aff_vec_coord_tuple K n, g +ᵥ a = h +ᵥ a → g = h :=
 begin
 intros a g h h₀,
-cases a,
-cases g,
-cases h,
-sorry
+--dsimp [has_vadd.vadd, aff_group_action] at h₀,
+have h₁ : a.1.length = g.1.length := eq.trans a.2 (eq.symm g.2),
+have h₂ : a.1.length = h.1.length := eq.trans a.2 (eq.symm h.2),
+have h₃ : a.1 ≠ nil := by {have a_len_fixed := a.2, intro bad, rw bad at a_len_fixed, contradiction},
+have h₄ : (g +ᵥ a).1 = (h +ᵥ a).1 := by rw h₀,
+have h₅ := ladd_free g.1 h.1 a.1 h₁ h₂ h₃ h₄,
+ext,
+split,
+intro a_1,
+rw h₅ at a_1,
+exact a_1,
+
+intro a_1,
+rw h₅,
+exact a_1,
 end
 
-lemma aff_vadd_vsub : ∀ a b : aff_pt_coord_tuple K n, a -ᵥ b +ᵥ b = a :=
+lemma aff_vadd_vsub : ∀ (x : aff_vec_coord_tuple K n) (a : aff_pt_coord_tuple K n), x +ᵥ a -ᵥ a = x := 
+begin
+intros,
+cases x,
+cases a,
+have h₁ : ladd a_l (vecl_neg a_l) = ladd (vecl_neg a_l) a_l := by rw ladd_comm,
+have h₂ : a_l.length = x_l.length := eq.trans a_len_fixed (eq.symm x_len_fixed),
+have h₃ : a_l ≠ nil := by {intro bad, rw bad at a_len_fixed, contradiction},
+
+ext,
+dsimp [has_vadd.vadd, aff_group_action, has_vsub.vsub, aff_group_sub],
+split,
+intro a_1,
+rw [ladd_assoc, h₁, ladd_left_neg, h₂, ladd_zero] at a_1,
+exact a_1,
+exact h₃,
+
+intro a_1,
+rw [ladd_assoc, h₁, ladd_left_neg, h₂, ladd_zero],
+exact a_1,
+exact h₃
+end
+
+lemma aff_vsub_vadd : ∀ a b : aff_pt_coord_tuple K n, (a -ᵥ b) +ᵥ b = a :=
 begin
 intros,
 cases a,
@@ -599,10 +633,15 @@ exact a_1,
 exact h₂
 end
 
+instance : nonempty (aff_pt_coord_tuple K n) := ⟨pt_zero K n⟩
+
 instance aff_torsor : add_torsor (aff_vec_coord_tuple K n) (aff_pt_coord_tuple K n) := 
-begin
-sorry
-end
+⟨aff_group_action K n, 
+aff_zero_sadd K n,
+aff_add_sadd K n,
+aff_group_sub K n,
+aff_vsub_vadd K n, 
+aff_vadd_vsub K n⟩
 
 /-
 "THEOREM:" these sets of scalar tuples with the operations defined on them
