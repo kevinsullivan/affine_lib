@@ -501,17 +501,103 @@ instance : has_vadd (aff_vec_coord_tuple K n) (aff_pt_coord_tuple K n) := ⟨aff
 
 instance : has_vsub (aff_vec_coord_tuple K n) (aff_pt_coord_tuple K n) := ⟨aff_group_sub K n⟩
 
-lemma aff_zero_sadd : ∀ x : aff_pt_coord_tuple K n, (0 : aff_vec_coord_tuple K n) +ᵥ x = x := sorry
+lemma aff_zero_sadd : ∀ x : aff_pt_coord_tuple K n, (0 : aff_vec_coord_tuple K n) +ᵥ x = x :=
+begin
+intros,
+rw vec_zero_is,
+cases x,
+have h₁ : n = length x_l - 1 := by {rw x_len_fixed, refl},
+dsimp [vec_zero],
+ext,
+split,
+intro a_1,
+dsimp [has_vadd.vadd, aff_group_action] at a_1 ⊢,
+rw [h₁, zero_ladd] at a_1,
+exact a_1,
 
-lemma aff_add_sadd : ∀ x y : aff_vec_coord_tuple K n, ∀ a : aff_pt_coord_tuple K n, x +ᵥ (y +ᵥ a) = x + y +ᵥ a := sorry
+intro a_1,
+dsimp [has_vadd.vadd, aff_group_action] at a_1 ⊢,
+rw [h₁, zero_ladd],
+exact a_1
+end
+
+lemma aff_add_sadd : ∀ x y : aff_vec_coord_tuple K n, ∀ a : aff_pt_coord_tuple K n, x +ᵥ (y +ᵥ a) = x + y +ᵥ a :=
+begin
+intros,
+cases x,
+cases y,
+cases a,
+ext,
+dsimp [has_vadd.vadd, aff_group_action, has_add.add, vec_add],
+split,
+intro a_1,
+rw ladd_assoc,
+exact a_1,
+
+intro a_1,
+rw ladd_assoc at a_1,
+exact a_1
+end
 
 instance : add_action (aff_vec_coord_tuple K n) (aff_pt_coord_tuple K n) := ⟨aff_group_action K n, aff_zero_sadd K n, aff_add_sadd K n⟩
 
-lemma aff_add_trans : ∀ a b : aff_pt_coord_tuple K n, ∃ x : aff_vec_coord_tuple K n, x +ᵥ a = b := sorry
+lemma aff_add_trans : ∀ a b : aff_pt_coord_tuple K n, ∃ x : aff_vec_coord_tuple K n, x +ᵥ a = b :=
+begin
+intros,
+fapply exists.intro,
+exact b -ᵥ a,
+cases a,
+cases b,
+have h₁ : a_l.length = b_l.length := by {transitivity, exact a_len_fixed, symmetry, exact b_len_fixed},
+have h₂ : a_l ≠ nil :=
+    begin
+    intro bad,
+    rw bad at a_len_fixed,
+    contradiction
+    end,
+ext,
+dsimp [has_vsub.vsub, aff_group_sub, has_vadd.vadd, aff_group_action],
+split,
+intro a_1,
+rw [ladd_assoc, ladd_left_neg, h₁, ladd_zero] at a_1,
+exact a_1,
+exact h₂,
 
-lemma aff_add_free : ∀ a : aff_pt_coord_tuple K n, ∀ g h : aff_vec_coord_tuple K n, g +ᵥ a = h +ᵥ a → g = h := sorry
+intro a_1,
+rw [ladd_assoc, ladd_left_neg, h₁, ladd_zero],
+exact a_1,
+exact h₂
+end
 
-lemma aff_vadd_vsub : ∀ a b : aff_pt_coord_tuple K n, a -ᵥ b +ᵥ b = a := sorry
+lemma aff_add_free : ∀ a : aff_pt_coord_tuple K n, ∀ g h : aff_vec_coord_tuple K n, g +ᵥ a = h +ᵥ a → g = h :=
+begin
+intros a g h h₀,
+cases a,
+cases g,
+cases h,
+sorry
+end
+
+lemma aff_vadd_vsub : ∀ a b : aff_pt_coord_tuple K n, a -ᵥ b +ᵥ b = a :=
+begin
+intros,
+cases a,
+cases b,
+have h₁ : b_l.length = a_l.length := eq.trans b_len_fixed (eq.symm a_len_fixed),
+have h₂ : b_l ≠ nil := by {intro bad, rw bad at b_len_fixed, contradiction},
+ext,
+dsimp [has_vsub.vsub, aff_group_sub, has_vadd.vadd, aff_group_action],
+split,
+intro a_1,
+rw [ladd_assoc, ladd_left_neg, h₁, ladd_zero] at a_1,
+exact a_1,
+exact h₂,
+
+intro a_1,
+rw [ladd_assoc, ladd_left_neg, h₁, ladd_zero],
+exact a_1,
+exact h₂
+end
 
 instance aff_torsor : add_torsor (aff_vec_coord_tuple K n) (aff_pt_coord_tuple K n) := 
 begin

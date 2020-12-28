@@ -307,6 +307,18 @@ intros l l',
   rw [zip_with_cons_cons, zip_with_cons_cons, hl, add_comm]
 end
 
+lemma ladd_free : ∀ (xl yl zl : list k), zl.length = xl.length → zl.length = yl.length → zl ≠ nil → ladd xl zl = ladd yl zl → xl = yl :=
+begin
+intros xl yl zl x_len y_len z_cons h₀,
+have h₁ : ladd (ladd xl zl) (vecl_neg zl) = ladd (ladd yl zl) (vecl_neg zl) := by rw h₀,
+repeat {rw ladd_assoc at h₁},
+have h₂ : ladd zl (vecl_neg zl) = ladd (vecl_neg zl) zl := by rw ladd_comm,
+have h₃ : xl.length = yl.length := eq.trans (eq.symm x_len) y_len,
+rw [h₂, ladd_left_neg, x_len, ladd_zero, h₃, ladd_zero] at h₁,
+exact h₁,
+exact z_cons
+end
+
 lemma smul_ladd : scalar_mul x (ladd xl yl) = ladd (scalar_mul x xl) (scalar_mul x yl) :=
 begin
 induction xl generalizing yl,
