@@ -565,9 +565,14 @@ do have the structure of an affine space.
 
 instance aff_coord_is : 
     affine_space 
-        (aff_vec_coord_tuple K n) 
-        (aff_pt_coord_tuple K n) := 
-    aff_torsor K n
+        (aff_coord_vec K n fr) 
+        (aff_coord_pt K n fr) := 
+    ⟨aff_group_action_coord K n fr, 
+aff_zero_sadd_coord K n fr,
+aff_add_sadd_coord K n fr,
+aff_group_sub_coord K n fr,
+aff_vsub_vadd_coord K n fr, 
+aff_vadd_vsub_coord K n fr⟩
 
 def pt_plus_vec
     {X : Type u} 
@@ -632,13 +637,5 @@ def pt_minus_vec
 
 notation
  pt -ᵥ v := pt_minus_vec pt v
-
-
-def prf : affine_space (aff_coord_vec K n fr) (aff_coord_pt  K n fr) := sorry
-
-instance afc : affine_space 
-    (aff_coord_vec K n fr) 
-    (aff_coord_pt  K n fr) := 
-    prf K n fr
 
 end aff_fr

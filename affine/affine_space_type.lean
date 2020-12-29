@@ -1,6 +1,8 @@
 import linear_algebra.affine_space.basic
 
 universes u v w
+
+open_locale affine
 /-
 A polymorphic affine space type with
 explicit type parameters
