@@ -386,7 +386,7 @@ end
 
 instance aff_semimod_coord : semimodule K (aff_coord_vec K n fr) := ⟨vec_add_smul_coord K n fr, vec_zero_smul_coord K n fr⟩
 
-instance aff_module_coord : module K (aff_coord_vec K n fr) := sorry
+instance aff_module_coord : module K (aff_coord_vec K n fr) := ⟨vec_add_smul_coord K n fr, vec_zero_smul_coord K n fr⟩
 
 /-! ### group action of aff_vec_coord_tuple on aff_pt_coord_tuple -/
 
