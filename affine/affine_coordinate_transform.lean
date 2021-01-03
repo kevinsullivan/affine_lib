@@ -61,22 +61,6 @@ abbreviation col_matrix
     [field K] 
     := matrix (fin n) (fin 1) K
 
-attribute [reducible]
-abbreviation homogeneous_square_matrix
-    (K : Type u)
-    (n : ℕ)
-    [inhabited K] 
-    [field K] 
-    := matrix (fin (n+1)) (fin n ) K
- 
-attribute [reducible]
-abbreviation homogeneous_col_matrix
-    (K : Type u)
-    (n : ℕ)
-    [inhabited K] 
-    [field K] 
-    := matrix (fin (n+1)) (fin 1) K
-
 abbreviation 
     affine_coord_frame_transform 
     := 
@@ -112,7 +96,7 @@ def affine_pt_coord_tuple.as_matrix
     :=
     λ i one, (@aff_lib.coord_helper K n v.1).nth i
 
-
+#check fin 3
 
 attribute [reducible]
 def affine_coord_vec.to_matrix

@@ -91,24 +91,6 @@ variables
 def pt_zero_coord : aff_coord_pt K n fr := ⟨pt_zero K n⟩
 def zero_vector_coord : aff_coord_vec K n fr := ⟨vec_zero K n⟩
 
-/-- the length of the zero vector is n+1 -/
-lemma len_zero : length (zero_vector K n) = n + 1 :=
-begin
-induction n with n',
-refl,
-{
-have h₃ : nat.succ (n' + 1) = nat.succ n' + 1 := rfl,
-have h₄ : length (zero_vector K (nat.succ n')) = nat.succ (n' + 1) :=
-    by {rw eq.symm n_ih, refl},
-rw eq.symm h₃,
-exact h₄,
-}
-end
-
-/-- the head of the zero vector is zero -/
-lemma head_zero : head (zero_vector K n) = 0 := by {cases n, refl, refl}
-
-
 #check vec_add
 /-! ### abelian group operations -/
 def vec_add_coord : aff_coord_vec K n fr → aff_coord_vec K n fr → aff_coord_vec K n fr :=

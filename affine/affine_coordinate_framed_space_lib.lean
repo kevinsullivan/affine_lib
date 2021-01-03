@@ -93,6 +93,8 @@ def std_basis : fin n → aff_vec_coord_tuple K n :=
 def affine_coord_frame.standard : affine_coord_frame K n := 
     (affine_coord_frame.tuple ⟨pt_zero K n, std_basis K n, sorry⟩)
 
+def affine_tuple_coord_frame.standard : affine_tuple_coord_frame K n :=
+    ⟨pt_zero K n, std_basis K n, sorry⟩
 -- This is type of frame when retrieved from a base space
 attribute [reducible]
 def affine_coord_frame.base_frame 
@@ -442,6 +444,7 @@ structure transform_path
     (from_ : list (affine_tuple_coord_frame K n))
     (to_ : list (affine_tuple_coord_frame K n))
 
+
 attribute [reducible]
 def affine_coord_frame.build_path
     {K : Type v}
@@ -466,5 +469,37 @@ def affine_coord_space.find_transform_path
     := ⟨affine_coord_frame.build_path fr1, affine_coord_frame.build_path fr2⟩
 
 
+structure transform_path'
+    (K : Type v)
+    (n : ℕ)
+    [inhabited K] 
+    [field K] :=
+    mk:: 
+    (from_ : list (affine_coord_frame K n))
+    (to_ : list (affine_coord_frame K n))
+
+
+attribute [reducible]
+def affine_coord_frame.build_path'
+    {K : Type v}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    :  affine_coord_frame K n → list (affine_coord_frame K n)
+| (affine_coord_frame.tuple b) := [(affine_coord_frame.tuple b)]
+| (affine_coord_frame.derived o b p f) := (affine_coord_frame.derived o b p f)::(affine_coord_frame.build_path' f)
+
+attribute [reducible]
+def affine_coord_space.find_transform_path'
+    {K : Type v}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {fr1 : affine_coord_frame K n}
+    (from_sp : affine_coord_space K n fr1)
+    {fr2 : affine_coord_frame K n}
+    (to_sp : affine_coord_space K n fr2)
+    : transform_path' K n
+    := ⟨affine_coord_frame.build_path' fr1, affine_coord_frame.build_path' fr2⟩
 
 end aff_lib

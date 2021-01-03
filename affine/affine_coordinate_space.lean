@@ -654,6 +654,67 @@ instance aff_coord_is :
         (aff_pt_coord_tuple K n) := 
     aff_torsor K n
 
+
+def pt_plus_vec
+    {X : Type u} 
+    {K : Type v} 
+    {V : Type w} 
+    {n : ℕ}
+    {ι : Type*}
+    [inhabited K] 
+    [field K] 
+    [add_comm_group V] 
+    [module K V] 
+    [vector_space K V] 
+    [affine_space V X] :
+    (aff_pt_coord_tuple K n) → 
+    (aff_vec_coord_tuple K n) → 
+    (aff_pt_coord_tuple K n) 
+| p v := aff_group_action K n v p
+
+notation
+ pt +ᵥ v := pt_plus_vec pt v
+
+ 
+def vec_mul_scalar
+    {X : Type u} 
+    {K : Type v} 
+    {V : Type w} 
+    {n : ℕ}
+    {ι : Type*}
+    [inhabited K] 
+    [field K] 
+    [add_comm_group V] 
+    [module K V] 
+    [vector_space K V] 
+    [affine_space V X] :
+    (aff_vec_coord_tuple K n) → 
+    K → 
+    (aff_vec_coord_tuple K n) 
+| v s := s • v
+
+notation
+ v • s := vec_mul_scalar v s
+ 
+def pt_minus_vec
+    {X : Type u} 
+    {K : Type v} 
+    {V : Type w} 
+    {n : ℕ}
+    {ι : Type*}
+    [inhabited K] 
+    [field K] 
+    [add_comm_group V] 
+    [module K V] 
+    [vector_space K V] 
+    [affine_space V X]:
+    (aff_pt_coord_tuple K n) → 
+    (aff_vec_coord_tuple K n) → 
+    (aff_pt_coord_tuple K n) 
+| p v := aff_group_action K n (vec_neg K n v) p
+
+notation
+ pt -ᵥ v := pt_minus_vec pt v
 /-
 NEW FILE
 -/
