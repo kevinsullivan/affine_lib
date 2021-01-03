@@ -208,9 +208,9 @@ def col_matrix.as_list
     (coords : col_matrix K n)
     : list K → ℕ → list K
 | l nat.zero := l
-| l (nat.succ n) := 
-    let upd := (coords ⟨n+1,sorry⟩ 1)::l in
-        (col_matrix.as_list upd n)++upd
+| l (nat.succ k) := 
+    let upd := (coords ⟨k+1,sorry⟩ 1)::l in
+        (col_matrix.as_list upd k)++upd
 
 
 attribute [reducible]
@@ -222,9 +222,9 @@ def indexed.as_list
     (coords : fin n → K)
     : list K → ℕ → list K
 | l nat.zero := l
-| l (nat.succ n) := 
-    let upd := (coords ⟨n+1,sorry⟩)::l in
-        (indexed.as_list upd n)++upd
+| l (nat.succ k) := 
+    let upd := (coords ⟨k+1,sorry⟩)::l in
+        (indexed.as_list upd k)++upd
 
 attribute [reducible]
 def affine_coord_pt.from_matrix
