@@ -200,17 +200,60 @@ def affine_pt_coord_tuple.to_indexed
     λ i, (@aff_lib.coord_helper K n v.1).nth i
 
 attribute [reducible]
-def col_matrix.as_list
+def col_matrix.as_list_helper
     {K : Type u}
     {n : ℕ}
     [inhabited K] 
     [field K] 
     (coords : col_matrix K n)
-    : list K → ℕ → list K
-| l nat.zero := l
-| l (nat.succ k) := 
-    let upd := (coords ⟨k+1,sorry⟩ 1)::l in
-        (col_matrix.as_list upd k)++upd
+    : fin n → list K
+| ⟨nat.zero,p⟩ := [(coords ⟨nat.zero,p⟩ 1)]
+| ⟨nat.succ k,p⟩ := 
+    --append current index to result of recursive step and return
+    let kp : k < n := begin
+      have h₁ : k < k.succ := begin
+        rw eq.symm (nat.one_add k),
+        simp only [nat.succ_pos', lt_add_iff_pos_left]
+      end,
+      apply has_lt.lt.trans,
+      exact h₁,
+      exact p
+    end in
+    let upd := [(coords ⟨k, kp⟩ 1)] in
+    have (⟨k, kp⟩ : fin n) < (⟨k.succ,p⟩ : fin n), from begin
+      simp only [subtype.mk_lt_mk],
+      rw eq.symm (nat.one_add k),
+      simp only [nat.succ_pos', lt_add_iff_pos_left]
+    end,
+    --have t : a < (a + b), from sorry,
+    (col_matrix.as_list_helper ⟨k,kp⟩)++upd --$ λ _, sorry
+using_well_founded {rel_tac := λ _ _, `[exact ⟨_, measure_wf (λi, i.val)⟩]}
+
+attribute [reducible]
+def col_matrix.as_list
+  {K : Type u}
+  {n : ℕ}
+  [inhabited K]
+  [field K]
+  : col_matrix K n → list K
+:= begin
+  intro mat,
+  cases n with n',
+  exact [],
+  have h₁ : n' < n'+1 := 
+    begin
+      by linarith,
+    end,
+  have h₂ : n'.succ = n'+1 :=
+    begin
+      simp 
+    end,
+  have h₃ : n' < n'.succ :=
+    begin
+      simp [h₁, h₂ ]
+    end,
+  exact (col_matrix.as_list_helper mat (⟨n',h₃⟩ : fin (nat.succ n'))),
+end
 
 
 attribute [reducible]
@@ -236,7 +279,7 @@ def affine_coord_pt.from_matrix
     (coords : col_matrix K n)
     : aff_coord_pt K n fr
     := 
-    ⟨⟨[1]++(col_matrix.as_list coords [] n),sorry,sorry⟩⟩
+    ⟨⟨[1]++(col_matrix.as_list coords), sorry, rfl⟩⟩
 
 attribute [reducible]
 def affine_coord_vec.from_matrix
@@ -248,7 +291,7 @@ def affine_coord_vec.from_matrix
     (coords : col_matrix K n)
     : aff_coord_vec K n fr
     := 
-    ⟨⟨[0]++(col_matrix.as_list coords [] n),sorry,sorry⟩⟩
+    ⟨⟨[0]++(col_matrix.as_list coords),sorry,rfl⟩⟩
 
 attribute [reducible]
 def affine_coord_pt.from_indexed
@@ -260,7 +303,7 @@ def affine_coord_pt.from_indexed
     (coords : fin n → K)
     : aff_coord_pt K n fr
     := 
-    ⟨⟨[1]++(indexed.as_list coords [] n),sorry,sorry⟩⟩
+    ⟨⟨[1]++(indexed.as_list coords [] n),sorry,rfl⟩⟩
 
 attribute [reducible]
 def affine_coord_vec.from_indexed
@@ -272,7 +315,7 @@ def affine_coord_vec.from_indexed
     (coords : fin n → K)
     : aff_coord_vec K n fr
     := 
-    ⟨⟨[0]++(indexed.as_list coords [] n),sorry,sorry⟩⟩
+    ⟨⟨[0]++(indexed.as_list coords [] n),sorry,rfl⟩⟩
 
 
 attribute [reducible]
@@ -284,7 +327,7 @@ def affine_pt_coord_tuple.from_indexed
     (coords : fin n → K)
     : aff_pt_coord_tuple K n
     := 
-    ⟨[1]++(indexed.as_list coords [] n),sorry,sorry⟩
+    ⟨[1]++(indexed.as_list coords [] n),sorry,rfl⟩
 
 attribute [reducible]
 def affine_vec_coord_tuple.from_indexed
@@ -295,7 +338,7 @@ def affine_vec_coord_tuple.from_indexed
     (coords : fin n → K)
     : aff_vec_coord_tuple K n
     := 
-    ⟨[0]++(indexed.as_list coords [] n),sorry,sorry⟩
+    ⟨[0]++(indexed.as_list coords [] n),sorry,rfl⟩
   
 --#check 
 --(rfl :(matrix (fin n) (fin 1) K) = (col_matrix K n))
@@ -378,7 +421,7 @@ undo coordinates:
 (x + B^O)
 -/
 
-#check list.fold
+--#check list.fold
 #check list
 
 /-
@@ -406,8 +449,16 @@ noncomputable def affine_coord_space.to_base_space
                                       (affine_coord_frame.base_frame fr1)
                                       der_sp
                                       (affine_coord_space.get_base_space der_sp)
-    := ⟨ sorry, sorry, sorry⟩
-    
+    := ⟨begin
+      cases fr1,
+      have h₁ : affine_coord_frame.base_frame (affine_coord_frame.tuple fr1) = affine_coord_frame.standard K n := rfl,
+      rw h₁,
+      sorry,
+
+      have h₁ : affine_coord_frame.base_frame (affine_coord_frame.derived fr1_origin fr1_basis fr1_proof_is_basis fr1_base) = fr1_base := rfl,
+      rw h₁,
+      sorry
+    end, sorry, sorry⟩
 
 attribute [reducible]
 noncomputable def affine_coord_space.to_derived_space
@@ -504,9 +555,9 @@ def affine_coord_space_transform.codomain_space
     (tr : affine_coord_space_transform K n fr1 fr2 from_sp to_sp)
 -/
 
-variables (a1 a2 : aff_pt_coord_tuple K n)
+variables (a_1 a_2 : aff_pt_coord_tuple K n)
 
-#check a1 -ᵥ a2
+#check a_1 -ᵥ a_2
 
 attribute [reducible]
 noncomputable def affine_tuple_space.to_base_space
@@ -746,7 +797,7 @@ variables
 #check t1⬝t2
 
 #check t1 p1
-#check t1 p2
+#check t1 p2  -- There is supposed to be an error here. It means the type-checking is working!
 
 def tran_times_vec 
     {K : Type u}

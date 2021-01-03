@@ -83,9 +83,23 @@ abbreviation zero := vecl.zero_vector K n
 
 def list.to_basis_vec : fin n → list K := λ x, (zero K n).update_nth (x.1 + 1) 1
 
-lemma len_basis_vec_fixed (x : fin n) : (list.to_basis_vec K n x).length = n + 1 := sorry
+lemma len_basis_vec_fixed (x : fin n) : (list.to_basis_vec K n x).length = n + 1 :=
+by rw [list.to_basis_vec, list.update_nth_length, aff_fr.len_zero]
 
-lemma head_basis_vec_fixed (x : fin n) : (list.to_basis_vec K n x).head = 0 := sorry
+lemma head_basis_vec_fixed (x : fin n) : (list.to_basis_vec K n x).head = 0 :=
+begin
+    have h₁ : list.to_basis_vec K n x = (zero K n).update_nth (x.1 + 1) 1 := rfl,
+    have h₂ : ∀ (hd a : K) (tl : list K) (n' : ℕ), ((hd :: tl).update_nth (n' + 1) a).head = (hd :: tl).head := by {intros, rw list.update_nth, refl},
+    rw h₁,
+    induction n with n',
+    have h₃ : zero K 0 = [0] := rfl,
+    rw [h₃, h₂],
+    refl,
+
+    have h₄ : zero K n'.succ = 0 :: zero K n' := rfl,
+    rw [h₄, h₂],
+    refl
+end
 
 def std_basis : fin n → aff_vec_coord_tuple K n :=
 λ x, ⟨list.to_basis_vec K n x, len_basis_vec_fixed K n x, head_basis_vec_fixed K n x⟩
