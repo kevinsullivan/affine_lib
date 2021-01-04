@@ -257,17 +257,60 @@ end
 
 
 attribute [reducible]
-def indexed.as_list
+def indexed.as_list_helper
     {K : Type u}
     {n : ℕ}
     [inhabited K] 
     [field K] 
     (coords : fin n → K)
-    : list K → ℕ → list K
-| l nat.zero := l
-| l (nat.succ k) := 
-    let upd := (coords ⟨k+1,sorry⟩)::l in
-        (indexed.as_list upd k)++upd
+    : fin n → list K
+| ⟨nat.zero,p⟩ := [(coords ⟨nat.zero,p⟩)]
+| ⟨nat.succ k,p⟩ := 
+    --append current index to result of recursive step and return
+    let kp : k < n := begin
+      have h₁ : k < k.succ := begin
+        rw eq.symm (nat.one_add k),
+        simp only [nat.succ_pos', lt_add_iff_pos_left]
+      end,
+      apply has_lt.lt.trans,
+      exact h₁,
+      exact p
+    end in
+    let upd := [(coords ⟨k, kp⟩)] in
+    have (⟨k, kp⟩ : fin n) < (⟨k.succ,p⟩ : fin n), from begin
+      simp only [subtype.mk_lt_mk],
+      rw eq.symm (nat.one_add k),
+      simp only [nat.succ_pos', lt_add_iff_pos_left]
+    end,
+    --have t : a < (a + b), from sorry,
+    (indexed.as_list_helper ⟨k,kp⟩)++upd --$ λ _, sorry
+using_well_founded {rel_tac := λ _ _, `[exact ⟨_, measure_wf (λi, i.val)⟩]}
+
+attribute [reducible]
+def indexed.as_list
+  {K : Type u}
+  {n : ℕ}
+  [inhabited K]
+  [field K]
+  : (fin n → K) → list K
+:= begin
+  intro mat,
+  cases n with n',
+  exact [],
+  have h₁ : n' < n'+1 := 
+    begin
+      by linarith,
+    end,
+  have h₂ : n'.succ = n'+1 :=
+    begin
+      simp 
+    end,
+  have h₃ : n' < n'.succ :=
+    begin
+      simp [h₁, h₂ ]
+    end,
+  exact (indexed.as_list_helper mat (⟨n',h₃⟩ : fin (nat.succ n'))),
+end
 
 attribute [reducible]
 def affine_coord_pt.from_matrix
@@ -303,7 +346,7 @@ def affine_coord_pt.from_indexed
     (coords : fin n → K)
     : aff_coord_pt K n fr
     := 
-    ⟨⟨[1]++(indexed.as_list coords [] n),sorry,rfl⟩⟩
+    ⟨⟨[1]++(indexed.as_list coords),sorry,rfl⟩⟩
 
 attribute [reducible]
 def affine_coord_vec.from_indexed
@@ -315,7 +358,7 @@ def affine_coord_vec.from_indexed
     (coords : fin n → K)
     : aff_coord_vec K n fr
     := 
-    ⟨⟨[0]++(indexed.as_list coords [] n),sorry,rfl⟩⟩
+    ⟨⟨[0]++(indexed.as_list coords),sorry,rfl⟩⟩
 
 
 attribute [reducible]
@@ -327,7 +370,7 @@ def affine_pt_coord_tuple.from_indexed
     (coords : fin n → K)
     : aff_pt_coord_tuple K n
     := 
-    ⟨[1]++(indexed.as_list coords [] n),sorry,rfl⟩
+    ⟨[1]++(indexed.as_list coords),sorry,rfl⟩
 
 attribute [reducible]
 def affine_vec_coord_tuple.from_indexed
@@ -338,7 +381,7 @@ def affine_vec_coord_tuple.from_indexed
     (coords : fin n → K)
     : aff_vec_coord_tuple K n
     := 
-    ⟨[0]++(indexed.as_list coords [] n),sorry,rfl⟩
+    ⟨[0]++(indexed.as_list coords),sorry,rfl⟩
   
 --#check 
 --(rfl :(matrix (fin n) (fin 1) K) = (col_matrix K n))
