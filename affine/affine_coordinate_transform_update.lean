@@ -225,8 +225,7 @@ def col_matrix.as_list_helper
       rw eq.symm (nat.one_add k),
       simp only [nat.succ_pos', lt_add_iff_pos_left]
     end,
-    --have t : a < (a + b), from sorry,
-    (col_matrix.as_list_helper ⟨k,kp⟩)++upd --$ λ _, sorry
+    (col_matrix.as_list_helper ⟨k,kp⟩)++upd
 using_well_founded {rel_tac := λ _ _, `[exact ⟨_, measure_wf (λi, i.val)⟩]}
 
 attribute [reducible]
@@ -322,7 +321,27 @@ def affine_coord_pt.from_matrix
     (coords : col_matrix K n)
     : aff_coord_pt K n fr
     := 
-    ⟨⟨[1]++(col_matrix.as_list coords), sorry, rfl⟩⟩
+    ⟨⟨[1]++(col_matrix.as_list coords), begin
+      suffices h₁ : (col_matrix.as_list coords).length = n, from begin
+        have h₂ : ([1] ++ col_matrix.as_list coords).length = [1].length + (col_matrix.as_list coords).length := begin
+          simp only [list.length, zero_add, list.singleton_append],
+          rw add_comm
+        end,
+        rw h₂,
+        simp only [list.length, zero_add],
+        rw [h₁, add_comm]
+      end,
+      induction n with n',
+      simp only [list.length],
+      have h₁ : coords.as_list = coords.as_list_helper (⟨n',_⟩ : fin (nat.succ n')) := rfl,
+      rw h₁,
+      cases n' with n'',
+      refl,
+      have h₂ : coords.as_list_helper ⟨n''.succ, _⟩ = (coords.as_list_helper ⟨n'',_⟩)++[(coords ⟨n'', _⟩ 1)] := rfl,
+      rw h₂,
+      have h₃ : ∀ (coords : col_matrix K n''.succ), coords.as_list = coords.as_list_helper ⟨n'',_⟩ := by {intros, refl},
+      sorry,
+    end, rfl⟩⟩
 
 attribute [reducible]
 def affine_coord_vec.from_matrix
