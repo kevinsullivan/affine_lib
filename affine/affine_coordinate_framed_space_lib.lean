@@ -84,7 +84,7 @@ abbreviation zero := vecl.zero_vector K n
 def list.to_basis_vec : fin n → list K := λ x, (zero K n).update_nth (x.1 + 1) 1
 
 lemma len_basis_vec_fixed (x : fin n) : (list.to_basis_vec K n x).length = n + 1 :=
-by rw [list.to_basis_vec, list.update_nth_length, aff_fr.len_zero]
+by rw [list.to_basis_vec, list.update_nth_length, len_zero]
 
 lemma head_basis_vec_fixed (x : fin n) : (list.to_basis_vec K n x).head = 0 :=
 begin
@@ -105,7 +105,26 @@ def std_basis : fin n → aff_vec_coord_tuple K n :=
 λ x, ⟨list.to_basis_vec K n x, len_basis_vec_fixed K n x, head_basis_vec_fixed K n x⟩
 
 def affine_coord_frame.standard : affine_coord_frame K n := 
-    (affine_coord_frame.tuple ⟨pt_zero K n, std_basis K n, sorry⟩)
+    (affine_coord_frame.tuple ⟨pt_zero K n, std_basis K n, begin
+        rw is_basis,
+        split,
+        rw linear_independent,
+        simp only [finsupp.total, finsupp.lsum, ⊥, add_equiv.coe_mk],
+        ext,
+        split,
+        intro h,
+        sorry,
+        intro h,
+        sorry,
+
+        simp only [submodule.span, set.range, ⊤, set.univ, Inf],
+        ext,
+        split,
+        intro h,
+        exact true.intro,
+        intro h,
+        sorry
+    end⟩)
 
 def affine_tuple_coord_frame.standard : affine_tuple_coord_frame K n :=
     ⟨pt_zero K n, std_basis K n, sorry⟩
@@ -237,7 +256,14 @@ def affine_coord_space.mk_coord_point
     (sp : affine_coord_space K n fr)
     (val : vector K n)
     : aff_pt_coord_tuple K n
-    := ⟨[1]++val.1,sorry,sorry⟩
+    := ⟨[1]++val.1,begin
+        have h₁ : ([1] ++ val.1).length = [1].length + val.1.length := by {rw [list.singleton_append, vecl.len_cons, add_comm], refl},
+        rw [h₁, val.2, add_comm],
+        refl
+    end,begin
+        rw list.singleton_append,
+        refl
+    end⟩
 
 attribute [reducible]
 def affine_coord_space.mk_coord_vec
@@ -249,7 +275,14 @@ def affine_coord_space.mk_coord_vec
     (sp : affine_coord_space K n fr)
     (val : vector K n)
     : aff_vec_coord_tuple K n
-    := ⟨[0]++val.1,sorry,sorry⟩
+    := ⟨[0]++val.1,begin
+        have h₁ : ([0] ++ val.1).length = [0].length + val.1.length := by {rw [list.singleton_append, vecl.len_cons, add_comm], refl},
+        rw [h₁, val.2, add_comm],
+        refl
+    end,begin
+        rw list.singleton_append,
+        refl
+    end⟩
 
 attribute [reducible]
 def affine_coord_space.mk_point
@@ -261,7 +294,14 @@ def affine_coord_space.mk_point
     (sp : affine_coord_space K n fr)
     (val : vector K n)
     : aff_coord_pt K n fr
-    := ⟨⟨[1]++val.1,sorry,sorry⟩⟩
+    := ⟨⟨[1]++val.1,begin
+        have h₁ : ([1] ++ val.1).length = [1].length + val.1.length := by {rw [list.singleton_append, vecl.len_cons, add_comm], refl},
+        rw [h₁, val.2, add_comm],
+        refl
+    end,begin
+        rw list.singleton_append,
+        refl
+    end⟩⟩
 
 attribute [reducible]
 def affine_coord_space.mk_vec
@@ -273,7 +313,14 @@ def affine_coord_space.mk_vec
     (sp : affine_coord_space K n fr)
     (val : vector K n)
     : aff_coord_vec K n fr
-    := ⟨⟨[0]++val.1,sorry,sorry⟩⟩
+    := ⟨⟨[0]++val.1,begin
+        have h₁ : ([0] ++ val.1).length = [0].length + val.1.length := by {rw [list.singleton_append, vecl.len_cons, add_comm], refl},
+        rw [h₁, val.2, add_comm],
+        refl
+    end,begin
+        rw list.singleton_append,
+        refl
+    end⟩⟩
 
     --:= ⟨⟩
 
@@ -346,6 +393,16 @@ def coord_helper
     : list K → vector K n
 | (h::t) := ⟨t,sorry⟩
 | [] := ⟨[],sorry⟩
+
+def coord_helper'
+    {K : Type v}
+    (l : list K)
+    : vector K (l.length - 1)
+:= begin
+    cases l with h t,
+    exact ⟨[],rfl⟩,
+    exact ⟨t,rfl⟩
+end
 
 attribute [reducible]
 def affine_coord_vec.get_coords 
