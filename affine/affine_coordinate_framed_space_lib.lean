@@ -386,22 +386,44 @@ def affine_coord_space.mk_derived
         (affine_coord_frame.derived pt.1 (λ i:fin n,(basis i).1) sorry fr)
     := ⟨⟩
 
+/-
+[0] + rest of list
+[1] + rest of list
+strip out coordinates from aff_coord_pt and turn it into a vector
+aff_coord_vec
+aff_coord_vec.list
+=> vector
+
+(l : list K)
+(len_fixed : l.length = n + 1)
+
+-/
+/-
 attribute [reducible]
 def coord_helper 
     {K : Type v}
     {n : ℕ}
-    : list K → vector K n
+    (l : list K)
+    (pf : l.length = n+1)
+    :  vector K n
 | (h::t) := ⟨t,sorry⟩
 | [] := ⟨[],sorry⟩
-
-def coord_helper'
+-/
+attribute [reducible]
+def coord_helper
     {K : Type v}
-    (l : list K)
-    : vector K (l.length - 1)
+    {n : ℕ }
+    (l : list K)--aff_coord_pt SO list is NEVER 0
+    (pf : l.length = n + 1)
+    : vector K n
 := begin
     cases l with h t,
-    exact ⟨[],rfl⟩,
-    exact ⟨t,rfl⟩
+    contradiction,
+    exact ⟨t,begin
+        have h₁ : t.length = (h :: t).length - 1 := rfl,
+        rw [h₁, pf],
+        refl
+    end⟩
 end
 
 attribute [reducible]
@@ -414,7 +436,7 @@ def affine_coord_vec.get_coords
     (v : aff_coord_vec K n fr)
     : vector K n
     :=
-    @coord_helper K n v.1.1
+    coord_helper v.1.1 v.1.2
 
 attribute [reducible]
 def affine_coord_pt.get_coords 
@@ -426,7 +448,7 @@ def affine_coord_pt.get_coords
     (v : aff_coord_pt K n fr)
     : vector K n
     :=
-    @coord_helper K n v.1.1
+    coord_helper v.1.1 v.1.2
 
 attribute [reducible]
 def affine_tuple_vec.get_coords 
@@ -437,7 +459,7 @@ def affine_tuple_vec.get_coords
     (v : aff_vec_coord_tuple K n )
     : vector K n
     :=
-    @coord_helper K n v.1
+    coord_helper v.1 v.2
 
 attribute [reducible]
 def affine_tuple_pt.get_coords 
@@ -448,7 +470,7 @@ def affine_tuple_pt.get_coords
     (v : aff_pt_coord_tuple K n )
     : vector K n
     :=
-    @coord_helper K n v.1
+    coord_helper v.1 v.2
 
 attribute [reducible]    
 def affine_tuple_vec.as_matrix
@@ -459,7 +481,7 @@ def affine_tuple_vec.as_matrix
     (v : aff_vec_coord_tuple K n )
     : matrix (fin n) (fin 1) K
     :=
-    λ i one, (@coord_helper K n v.1).nth i
+    λ i one, (coord_helper  v.1 v.2).nth i
 
 attribute [reducible]
 def affine_tuple_pt.as_matrix
@@ -470,7 +492,7 @@ def affine_tuple_pt.as_matrix
     (v : aff_pt_coord_tuple K n )
     : matrix (fin n) (fin 1) K
     :=
-    λ i one, (@coord_helper K n v.1).nth i
+    λ i one, (coord_helper v.1 v.2).nth i
 
 
 attribute [reducible]

@@ -340,7 +340,8 @@ def affine_coord_pt.from_matrix
       have h₂ : coords.as_list_helper ⟨n''.succ, _⟩ = (coords.as_list_helper ⟨n'',_⟩)++[(coords ⟨n'', _⟩ 1)] := rfl,
       rw h₂,
       have h₃ : ∀ (coords : col_matrix K n''.succ), coords.as_list = coords.as_list_helper ⟨n'',_⟩ := by {intros, refl},
-      sorry,
+      rw h₁,
+      
     end, rfl⟩⟩
 
 attribute [reducible]
