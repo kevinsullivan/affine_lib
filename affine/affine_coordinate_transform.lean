@@ -1,9 +1,14 @@
 import .affine_coordinate_framed_space_lib --linear_algebra.affine_space.basic
 import 
+    linear_algebra.affine_space.basic
     linear_algebra.affine_space.affine_equiv 
     linear_algebra.nonsingular_inverse
     linear_algebra.matrix
 --    linear_algebra.
+
+open_locale affine
+
+namespace aff_trans
 
 open aff_fr
 open aff_lib
@@ -18,33 +23,6 @@ variables
     (cv1 cv2 : aff_coord_vec K n fr1) 
     (cp1 cp2 : aff_coord_pt  K n fr2)
 
-/-
-
-def affine_coord_frame.build_path
-    {K : Type v}
-    {n : ℕ}
-    [inhabited K] 
-    [field K] 
-    :  affine_coord_frame K n → 
-        list (affine_tuple_coord_frame K n)
-| (affine_coord_frame.tuple b) := [b]
-| (affine_coord_frame.derived o b p f) := 
-    ⟨o,b,p⟩::(affine_coord_frame.build_path f)
-
-def affine_coord_space.find_transform_path
-    {K : Type v}
-    {n : ℕ}
-    [inhabited K] 
-    [field K] 
-    {fr1 : affine_coord_frame K n}
-    (from_sp : affine_coord_space K n fr1)
-    {fr2 : affine_coord_frame K n}
-    (to_sp : affine_coord_space K n fr2)
-    : transform_path
-    := ⟨affine_coord_frame.build_path fr1, 
-    affine_coord_frame.build_path fr2⟩
-
--/
 attribute [reducible]
 abbreviation square_matrix
     (K : Type u)
@@ -67,13 +45,61 @@ abbreviation
     (aff_coord_pt K n fr1) 
     ≃ᵃ[K] 
     (aff_coord_pt K n fr2)
-
+    
 abbreviation
     affine_coord_space_transform
     (sp1 : affine_coord_space K n fr1)
     (sp2 : affine_coord_space K n fr2)
     := 
     affine_coord_frame_transform K n fr1 fr2
+
+variables 
+    (sp1 : affine_coord_space K n fr1)
+    (sp2 : affine_coord_space K n fr2)
+  (a1 : affine_coord_frame_transform K n fr1 fr2)
+  (a2 : affine_coord_space_transform K n fr1 fr2 sp1 sp2)
+
+
+abbreviation
+    affine_tuple_space_transform
+    := 
+    (aff_pt_coord_tuple K n)
+    ≃ᵃ[K] 
+    (aff_pt_coord_tuple K n)
+
+/-
+abbreviation
+    affine_coord_space_transform
+    (sp1 : affine_coord_space K n fr1)
+    (sp2 : affine_coord_space K n fr2)
+    := 
+    affine_coord_frame_transform K n fr1 fr2
+-/
+structure 
+  affine_tuple_space_tagged_transform
+    (K : Type u)
+    (n : ℕ)
+    [inhabited K] 
+    [field K] 
+    --{fr1 : affine_coord_frame K n} 
+    --{fr2 : affine_coord_frame K n} 
+  := 
+    (fr1 : affine_coord_frame K n) 
+    (fr2 : affine_coord_frame K n) 
+    (sp1 : affine_coord_space K n fr1)
+    (sp2 : affine_coord_space K n fr2)
+    (tr : affine_tuple_space_transform K n)
+
+@[trans] def trans
+    (K : Type u)
+    (n : ℕ)
+    [inhabited K] 
+    [field K] 
+     (t1 : affine_tuple_space_tagged_transform K n) 
+     (t2 : affine_tuple_space_tagged_transform K n) : affine_tuple_space_tagged_transform K n :=
+⟨t1.fr1, t2.fr2, t1.sp1, t2.sp2, t1.tr.trans t2.tr⟩ 
+
+
 
 def affine_vec_coord_tuple.as_matrix
     {K : Type u}
@@ -83,7 +109,7 @@ def affine_vec_coord_tuple.as_matrix
     (v : aff_vec_coord_tuple K n)
     : col_matrix K n
     :=
-    λ i one, (@aff_lib.coord_helper K n v.1).nth i
+    λ i one, (@aff_lib.coord_helper K n v.1 v.2).nth i
 
 attribute [reducible]
 def affine_pt_coord_tuple.as_matrix
@@ -94,7 +120,7 @@ def affine_pt_coord_tuple.as_matrix
     (v : aff_pt_coord_tuple K n)
     : col_matrix K n
     :=
-    λ i one, (@aff_lib.coord_helper K n v.1).nth i
+    λ i one, (@aff_lib.coord_helper K n v.1 v.2).nth i
 
 #check fin 3
 
@@ -125,17 +151,165 @@ def affine_coord_pt.to_matrix
     --λ i one, (@aff_lib.coord_helper K n v.1.1).nth i
 
 attribute [reducible]
-def col_matrix.as_list
+def affine_coord_vec.to_indexed
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {fr : affine_coord_frame K n}
+    (v : aff_coord_vec K n fr)
+    : fin n → K
+    :=
+    λ i, (@aff_lib.coord_helper K n v.1.1 v.1.2).nth i
+    --λ i one, (@aff_lib.coord_helper K n v.1.1).nth i
+
+attribute [reducible]
+def affine_coord_pt.to_indexed
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {fr : affine_coord_frame K n}
+    (v : aff_coord_pt K n fr)
+    : fin n → K 
+    :=
+    λ i, (@aff_lib.coord_helper K n v.1.1 v.1.2).nth i
+    --λ i one, (@aff_lib.coord_helper K n v.1.1).nth i
+
+attribute [reducible]
+def affine_vec_coord_tuple.to_indexed
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    (v : aff_vec_coord_tuple K n )
+    : fin n → K 
+    :=
+    λ i, (@aff_lib.coord_helper K n v.1 v.2).nth i
+    --λ i one, (@aff_lib.coord_helper K n v.1.1).nth i
+
+attribute [reducible]
+def affine_pt_coord_tuple.to_indexed
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    (v : aff_pt_coord_tuple K n )
+    : fin n → K 
+    :=
+    λ i, (@aff_lib.coord_helper K n v.1 v.2).nth i
+
+attribute [reducible]
+def col_matrix.as_list_helper
     {K : Type u}
     {n : ℕ}
     [inhabited K] 
     [field K] 
     (coords : col_matrix K n)
-    : list K → ℕ → list K
-| l nat.zero := l
-| l (nat.succ k) := 
-    let upd := (coords ⟨k+1,sorry⟩ 1)::l in
-        (col_matrix.as_list upd k)++upd
+    : fin n → list K
+| ⟨nat.zero,p⟩ := [(coords ⟨nat.zero,p⟩ 1)]
+| ⟨nat.succ k,p⟩ := 
+    --append current index to result of recursive step and return
+    let kp : k < n := begin
+      have h₁ : k < k.succ := begin
+        rw eq.symm (nat.one_add k),
+        simp only [nat.succ_pos', lt_add_iff_pos_left]
+      end,
+      apply has_lt.lt.trans,
+      exact h₁,
+      exact p
+    end in
+    let upd := [(coords ⟨k, kp⟩ 1)] in
+    have (⟨k, kp⟩ : fin n) < (⟨k.succ,p⟩ : fin n), from begin
+      simp only [subtype.mk_lt_mk],
+      rw eq.symm (nat.one_add k),
+      simp only [nat.succ_pos', lt_add_iff_pos_left]
+    end,
+    (col_matrix.as_list_helper ⟨k,kp⟩)++upd
+using_well_founded {rel_tac := λ _ _, `[exact ⟨_, measure_wf (λi, i.val)⟩]}
+
+attribute [reducible]
+def col_matrix.as_list
+  {K : Type u}
+  {n : ℕ}
+  [inhabited K]
+  [field K]
+  : col_matrix K n → list K
+:= begin
+  intro mat,
+  cases n with n',
+  exact [],
+  have h₁ : n' < n'+1 := 
+    begin
+      by linarith,
+    end,
+  have h₂ : n'.succ = n'+1 :=
+    begin
+      simp 
+    end,
+  have h₃ : n' < n'.succ :=
+    begin
+      simp [h₁, h₂ ]
+    end,
+  exact (col_matrix.as_list_helper mat (⟨n',h₃⟩ : fin (nat.succ n'))),
+end
+
+
+attribute [reducible]
+def indexed.as_list_helper
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    (coords : fin n → K)
+    : fin n → list K
+| ⟨nat.zero,p⟩ := [(coords ⟨nat.zero,p⟩)]
+| ⟨nat.succ k,p⟩ := 
+    --append current index to result of recursive step and return
+    let kp : k < n := begin
+      have h₁ : k < k.succ := begin
+        rw eq.symm (nat.one_add k),
+        simp only [nat.succ_pos', lt_add_iff_pos_left]
+      end,
+      apply has_lt.lt.trans,
+      exact h₁,
+      exact p
+    end in
+    let upd := [(coords ⟨k, kp⟩)] in
+    have (⟨k, kp⟩ : fin n) < (⟨k.succ,p⟩ : fin n), from begin
+      simp only [subtype.mk_lt_mk],
+      rw eq.symm (nat.one_add k),
+      simp only [nat.succ_pos', lt_add_iff_pos_left]
+    end,
+    --have t : a < (a + b), from sorry,
+    (indexed.as_list_helper ⟨k,kp⟩)++upd --$ λ _, sorry
+using_well_founded {rel_tac := λ _ _, `[exact ⟨_, measure_wf (λi, i.val)⟩]}
+
+attribute [reducible]
+def indexed.as_list
+  {K : Type u}
+  {n : ℕ}
+  [inhabited K]
+  [field K]
+  : (fin n → K) → list K
+:= begin
+  intro mat,
+  cases n with n',
+  exact [],
+  have h₁ : n' < n'+1 := 
+    begin
+      by linarith,
+    end,
+  have h₂ : n'.succ = n'+1 :=
+    begin
+      simp 
+    end,
+  have h₃ : n' < n'.succ :=
+    begin
+      simp [h₁, h₂ ]
+    end,
+  exact (indexed.as_list_helper mat (⟨n',h₃⟩ : fin (nat.succ n'))),
+end
 
 attribute [reducible]
 def affine_coord_pt.from_matrix
@@ -147,7 +321,28 @@ def affine_coord_pt.from_matrix
     (coords : col_matrix K n)
     : aff_coord_pt K n fr
     := 
-    ⟨⟨[1]++(col_matrix.as_list coords [] n),sorry,sorry⟩⟩
+    ⟨⟨[1]++(col_matrix.as_list coords), begin
+      suffices h₁ : (col_matrix.as_list coords).length = n, from begin
+        have h₂ : ([1] ++ col_matrix.as_list coords).length = [1].length + (col_matrix.as_list coords).length := begin
+          simp only [list.length, zero_add, list.singleton_append],
+          rw add_comm
+        end,
+        rw h₂,
+        simp only [list.length, zero_add],
+        rw [h₁, add_comm]
+      end,
+      induction n with n',
+      simp only [list.length],
+      have h₁ : coords.as_list = coords.as_list_helper (⟨n',_⟩ : fin (nat.succ n')) := rfl,
+      rw h₁,
+      cases n' with n'',
+      refl,
+      have h₂ : coords.as_list_helper ⟨n''.succ, _⟩ = (coords.as_list_helper ⟨n'',_⟩)++[(coords ⟨n'', _⟩ 1)] := rfl,
+      rw h₂,
+      have h₃ : ∀ (coords : col_matrix K n''.succ), coords.as_list = coords.as_list_helper ⟨n'',_⟩ := by {intros, refl},
+      rw h₁,
+      
+    end, rfl⟩⟩
 
 attribute [reducible]
 def affine_coord_vec.from_matrix
@@ -159,45 +354,59 @@ def affine_coord_vec.from_matrix
     (coords : col_matrix K n)
     : aff_coord_vec K n fr
     := 
-    ⟨⟨[0]++(col_matrix.as_list coords [] n),sorry,sorry⟩⟩
+    ⟨⟨[0]++(col_matrix.as_list coords),sorry,rfl⟩⟩
 
---#check 
---(rfl :(matrix (fin n) (fin 1) K) = (col_matrix K n))
-   -- (matrix (fin n) (fin 1) K)=(matrix (fin n) (fin 1) K))
-/-
-instance 
-    {K : Type u}
-    {n : ℕ}
-    [inhabited K] 
-    [field K] 
-    {fr : affine_coord_frame K n}
-    : has_lift (aff_coord_pt K n fr)
-                (matrix (fin n) (fin 1) K)
-    := ⟨affine_coord_pt.as_matrix⟩ 
-instance 
-    {K : Type u}
-    {n : ℕ}
-    [inhabited K] 
-    [field K] 
-    {fr : affine_coord_frame K n}
-    : has_lift (aff_coord_vec K n fr)
-                (matrix (fin n) (fin 1) K)
-    := ⟨affine_coord_vec.as_matrix⟩ 
--/
-/-
-invalid definition, a declaration named 
-'matrix.has_lift' has already been declaredL
--/
-/-
-def affine_coord_frame.get_origin_as_col_matrix
+attribute [reducible]
+def affine_coord_pt.from_indexed
     {K : Type u}
     {n : ℕ}
     [inhabited K] 
     [field K] 
     (fr : affine_coord_frame K n)
-    : col_matrix K n
-    :=
--/
+    (coords : fin n → K)
+    : aff_coord_pt K n fr
+    := 
+    ⟨⟨[1]++(indexed.as_list coords),sorry,rfl⟩⟩
+
+attribute [reducible]
+def affine_coord_vec.from_indexed
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    (fr : affine_coord_frame K n)
+    (coords : fin n → K)
+    : aff_coord_vec K n fr
+    := 
+    ⟨⟨[0]++(indexed.as_list coords),sorry,rfl⟩⟩
+
+
+attribute [reducible]
+def affine_pt_coord_tuple.from_indexed
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    (coords : fin n → K)
+    : aff_pt_coord_tuple K n
+    := 
+    ⟨[1]++(indexed.as_list coords),sorry,rfl⟩
+
+attribute [reducible]
+def affine_vec_coord_tuple.from_indexed
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    (coords : fin n → K)
+    : aff_vec_coord_tuple K n
+    := 
+    ⟨[0]++(indexed.as_list coords),sorry,rfl⟩
+  
+--#check 
+--(rfl :(matrix (fin n) (fin 1) K) = (col_matrix K n))
+   -- (matrix (fin n) (fin 1) K)=(matrix (fin n) (fin 1) K))
+
 attribute [reducible]
 def affine_coord_frame.get_basis_matrix
     {K : Type u}
@@ -227,101 +436,34 @@ def affine_coord_frame.get_origin_matrix
     affine_pt_coord_tuple.as_matrix
         (aff_lib.affine_coord_frame.origin_coords 
             fr)
---should convert the origin point to a vector beforehand
---by subtracting 0,0,0?
-attribute [reducible]
-def affine_coord_frame.to_homogeneous_matrix
-    {K : Type u}
-    {n : ℕ}
-    [inhabited K] 
-    [field K] 
-    (fr : affine_coord_frame K n)
-    : square_matrix K (n+1)
-    := λ i j,
-        if i.1 < n+1 ∧ j.1 < n+1 then 
-        (affine_coord_frame.get_basis_matrix fr) ⟨i.1,sorry⟩ ⟨j.1,sorry⟩
-        else if i.1 < n+1 then 
-        (affine_coord_frame.get_origin_matrix fr) ⟨i,sorry⟩ ⟨1,sorry⟩
-        else if j.1 < n+1 then
-        0
-        else 
-        1
 
 attribute [reducible]
-def affine_coord_vec.to_homogeneous_matrix
-    {K : Type u}
-    {n : ℕ}
-    [inhabited K] 
-    [field K] 
-    {fr : affine_coord_frame K n}
-    (v : aff_coord_vec K n fr)
-    : col_matrix K (n+1)
-    :=
-    λ i,
-    if i.1 < n+1 then
-    (affine_vec_coord_tuple.as_matrix v.1) ⟨i.1,sorry⟩
-    else 1
-    --λ i one, (@aff_lib.coord_helper K n v.1.1).nth i
-
-attribute [reducible]
-def affine_coord_pt.to_homogeneous_matrix
-    {K : Type u}
-    {n : ℕ}
-    [inhabited K] 
-    [field K] 
-    {fr : affine_coord_frame K n}
-    (v : aff_coord_pt K n fr)
-    : col_matrix K (n+1)
-    :=
-    λ i,
-    if i.1 < n+1 then
-    (affine_pt_coord_tuple.as_matrix v.1) ⟨i.1,sorry⟩
-    else 1
-    --λ i one, (@aff_lib.coord_helper K n v.1.1).nth i
-
-
-attribute [reducible]
-def affine_coord_pt.from_homogeneous_matrix
-    {K : Type u}
-    {n : ℕ}
-    [inhabited K] 
-    [field K] 
-    (fr : affine_coord_frame K n)
-    (coords : col_matrix K (n+1))
-    : aff_coord_pt K n fr
-    := 
-    ⟨⟨[1]++(col_matrix.as_list coords [] n),sorry,sorry⟩⟩
-
-attribute [reducible]
-def affine_coord_vec.from_homogeneous_matrix
-    {K : Type u}
-    {n : ℕ}
-    [inhabited K] 
-    [field K] 
-    (fr : affine_coord_frame K n)
-    (coords : col_matrix K (n+1))
-    : aff_coord_vec K n fr
-    := 
-    ⟨⟨[0]++(col_matrix.as_list coords [] n),sorry,sorry⟩⟩
-
-/-
-def affine_tuple_coord_frame.to_homogeneous_matrix
+def affine_tuple_coord_frame.get_basis_matrix
     {K : Type u}
     {n : ℕ}
     [inhabited K] 
     [field K] 
     (fr : affine_tuple_coord_frame K n)
-    : square_matrix K (n+1)
-    := λ i j,
-        if i.1 < n+1 ∧ j.1 < n+1 then 
-        (affine_coord_frame.get_basis_matrix fr) ⟨i.1,sorry⟩ ⟨j.1,sorry⟩
-        else if i.1 < n+1 then 
-        (affine_coord_frame.get_origin_matrix fr) ⟨i,sorry⟩ ⟨1,sorry⟩
-        else if j.1 < n+1 then
-        0
-        else 
-        1
--/
+    : square_matrix K n
+    := 
+    λ i j,
+    (aff_lib.affine_tuple_vec.get_coords  
+    (
+        (fr.basis) j))
+    .nth i
+
+
+attribute [reducible]
+def affine_tuple_coord_frame.get_origin_matrix
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    (fr : affine_tuple_coord_frame K n)
+    : col_matrix K n
+    := 
+    affine_pt_coord_tuple.as_matrix
+        (fr.origin)
 --def fold_transforms
 /-
 IS THIS IN MATHLIB ALREADY?
@@ -342,18 +484,8 @@ undo coordinates:
 (x + B^O)
 -/
 
-attribute [reducible]
-def affine_coord_frame.fold_homogeneous_transform_list
-    {K : Type u}
-    {n : ℕ}
-    [inhabited K] 
-    [field K] 
-    : square_matrix K (n) → list (square_matrix K (n)) → square_matrix K (n)
-| tr [] := tr
-| tr (h::t) := 
-    (affine_coord_frame.fold_homogeneous_transform_list 
-        (matrix.mul h tr)
-        t)
+--#check list.fold
+#check list
 
 /-
     (
@@ -365,147 +497,78 @@ def affine_coord_frame.fold_homogeneous_transform_list
         .map (λh,h⁻¹))
     )
 -/
-attribute [reducible]
-noncomputable def transform_path.flatten
-    {K : Type u}
-    {n : ℕ}
-    [inhabited K] 
-    [field K] 
-    (path : aff_lib.transform_path K n)
-    : list (square_matrix K (n+1))
-    := 
-    (
-    ((path.from_.map (λf,aff_fr.affine_coord_frame.tuple f))
-        .map affine_coord_frame.to_homogeneous_matrix)
-    ++
-    (((path.to_.map (λf,aff_fr.affine_coord_frame.tuple f))
-        .map affine_coord_frame.to_homogeneous_matrix)
-        .map (λh,h⁻¹))
-    )
+
+
 
 attribute [reducible]
-noncomputable def affine_coord_frame.compute_homogeneous_frame_transform
-    {K : Type u}
-    {n : ℕ}
-    [inhabited K] 
-    [field K] 
-    (path : aff_lib.transform_path K n)
-    : square_matrix K (n+1)
-    := 
-    affine_coord_frame.fold_homogeneous_transform_list
-    (square_matrix.eye K (n+1))
-    (transform_path.flatten path)
-    --([] : list (square_matrix K (n+1)))
-
---def affine_coord_space.to_transform
-attribute [reducible]
-noncomputable def affine_coord_space.build_transform
+noncomputable def affine_coord_space.to_base_space
     {K : Type u}
     {n : ℕ}
     [inhabited K] 
     [field K] 
     {fr1 : affine_coord_frame K n}
-    (from_sp : affine_coord_space K n fr1)
-    {fr2 : affine_coord_frame K n}
-    (to_sp : affine_coord_space K n fr2)
-    : affine_coord_space_transform K n fr1 fr2 from_sp to_sp
-    :=let tr := 
-        affine_coord_frame.compute_homogeneous_frame_transform
-        (affine_coord_space.find_transform_path from_sp to_sp) in
-    ⟨
-        ⟨
-        λ p1 : aff_coord_pt K n fr1,
-            affine_coord_pt.from_homogeneous_matrix fr2
-                (matrix.mul tr 
-                    (affine_coord_pt.to_homogeneous_matrix p1)), 
-        λ p2 : aff_coord_pt K n fr2,
-            affine_coord_pt.from_homogeneous_matrix fr1
-                (matrix.mul tr⁻¹
-                    (affine_coord_pt.to_homogeneous_matrix p2)), 
-                    sorry,sorry⟩
+    (der_sp : affine_coord_space K n fr1)
+    : affine_coord_space_transform K n fr1 
+                                      (affine_coord_frame.base_frame fr1)
+                                      der_sp
+                                      (affine_coord_space.get_base_space der_sp)
+    := ⟨begin
+      cases fr1,
+      have h₁ : affine_coord_frame.base_frame (affine_coord_frame.tuple fr1) = affine_coord_frame.standard K n := rfl,
+      rw h₁,
+      sorry,
 
-        ,
-        sorry,
-        sorry
-    ⟩
+      have h₁ : affine_coord_frame.base_frame (affine_coord_frame.derived fr1_origin fr1_basis fr1_proof_is_basis fr1_base) = fr1_base := rfl,
+      rw h₁,
+      sorry
+    end, sorry, sorry⟩
 
-/-
-def affine_coord_frame.to_equiv
-    {K : Type u}
-    {n : ℕ}
-    [inhabited K] 
-    [field K] 
-    (fr : affine_coord_frame K n)
-    :-/
-/-
-structure equiv (α : Sort*) (β : Sort*) :=
-(to_fun    : α → β)
-(inv_fun   : β → α)
-(left_inv  : left_inverse inv_fun to_fun)
-(right_inv : right_inverse inv_fun to_fun)
-
-structure affine_equiv (k P₁ P₂ : Type*) {V₁ V₂ : Type*} [ring k]
-  [add_comm_group V₁] [semimodule k V₁] [add_torsor V₁ P₁]
-  [add_comm_group V₂] [semimodule k V₂] [add_torsor V₂ P₂] extends P₁ ≃ P₂ :=
-(linear : V₁ ≃ₗ[k] V₂)
-(map_vadd' : ∀ (p : P₁) (v : V₁), to_equiv (v +ᵥ p) = linear v +ᵥ to_equiv p)
--/
-
-/-
-universes u 
-variables 
-    (K : Type u)
-    (n : ℕ )
-    [inhabited K]
-    [field K]
-    (fr1 : affine_coord_frame K n) 
-    (fr2 : affine_coord_frame K n) 
-    (cv1 cv2 : aff_coord_vec K n fr1) 
-    (cp1 cp2 : aff_coord_pt  K n fr2)
-
-abbreviation
-    affine_coord_space_transform
-    (sp1 : affine_coord_space K n fr1)
-    (sp2 : affine_coord_space K n fr2)
-    := 
-    affine_coord_frame_transform K n fr1 fr2
--/
-
-notation t1⬝t2 := t1.trans t2
-notation t1•t2 := t1.trans t2
-
-variables 
-    (fr3 : affine_coord_frame K n)
-    (s1 : affine_coord_space K n fr1)
-    (s2 : affine_coord_space K n fr2)
-    (s3 : affine_coord_space K n fr3)
-    (t1 : affine_coord_space_transform K n fr1 fr2 s1 s2)
-    (t2 : affine_coord_space_transform K n fr2 fr3 s2 s3)
-    (p1 : aff_coord_pt K n fr1)
-    (p2 : aff_coord_pt K n fr2)
-#check t1⬝t2
-
-#check t1 p1
-#check t1 p2
-
-def tran_times_vec 
+attribute [reducible]
+noncomputable def affine_coord_space.to_derived_space
     {K : Type u}
     {n : ℕ}
     [inhabited K] 
     [field K] 
     {fr1 : affine_coord_frame K n}
-   -- (from_sp : affine_coord_space K n fr1)
-    {fr2 : affine_coord_frame K n}
-   -- (to_sp : affine_coord_space K n fr2)
-   (tr : affine_coord_frame_transform K n fr1 fr2)
-   (p : aff_coord_vec K n fr1)
-   : aff_coord_vec K n fr2
-   := tr (p +ᵥ (⟨pt_zero K n⟩ : aff_coord_pt K n fr1))
-        -ᵥ (⟨pt_zero K n⟩ : aff_coord_pt K n fr2)
+    (der_sp : affine_coord_space K n fr1)
+    : affine_coord_space_transform K n
+                                      (affine_coord_frame.base_frame fr1)
+                                      fr1
+                                      (affine_coord_space.get_base_space der_sp)
+                                      der_sp
+    := ⟨ sorry, sorry, sorry⟩
+    
 
+attribute [reducible]
+noncomputable def affine_coord_space.to_standard_space
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {fr1 : affine_coord_frame K n}
+    (der_sp : affine_coord_space K n fr1)
+    : affine_coord_space_transform K n fr1 
+                                      (affine_coord_frame.standard K n)
+                                      der_sp
+                                      (affine_coord_space.mk_with_standard K n)
+    := ⟨ sorry, sorry, sorry⟩
 
-notation t1⬝t2 := tran_times_vec t1 t2
-notation t1⬝t2 := t1.to_equiv t2
+    
+
+attribute [reducible]
+noncomputable def affine_coord_space.from_standard_space
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {fr1 : affine_coord_frame K n}
+    (der_sp : affine_coord_space K n fr1)
+    : affine_coord_space_transform K n
+                                      (affine_coord_frame.standard K n )
+                                      fr1
+                                      (affine_coord_space.mk_with_standard K n)
+                                      der_sp
+    := ⟨ sorry, sorry, sorry⟩
 
 def affine_coord_space_transform.domain_frame
     {K : Type u}
@@ -530,3 +593,293 @@ def affine_coord_space_transform.codomain_frame
     {to_sp : affine_coord_space K n fr2}
     (tr : affine_coord_space_transform K n fr1 fr2 from_sp to_sp)
     := fr2
+
+def affine_coord_space_transform.domain_space
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {fr1 : affine_coord_frame K n}
+    {from_sp : affine_coord_space K n fr1}
+    {fr2 : affine_coord_frame K n}
+    {to_sp : affine_coord_space K n fr2}
+    (tr : affine_coord_space_transform K n fr1 fr2 from_sp to_sp)
+    := from_sp
+/-
+def affine_coord_space_transform.codomain_space
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {fr1 : affine_coord_frame K n}
+    {from_sp : affine_coord_space K n fr1}
+    {fr2 : affine_coord_frame K n}
+    {to_sp : affine_coord_space K n fr2}
+    (tr : affine_coord_space_transform K n fr1 fr2 from_sp to_sp)
+-/
+
+variables (a_1 a_2 : aff_pt_coord_tuple K n)
+
+#check a_1 -ᵥ a_2
+
+attribute [reducible]
+noncomputable def affine_tuple_space.to_base_space
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+   -- [affine_space (aff_vec_coord_tuple K n) (aff_pt_coord_tuple K n)]
+    (fr : affine_tuple_coord_frame K n)
+    : affine_tuple_space_transform K n
+    :=
+    ⟨
+      ⟨
+        λ p ,
+          ((fr.origin -ᵥ pt_zero K n) : aff_vec_coord_tuple K n) +ᵥ
+          (affine_pt_coord_tuple.from_indexed
+            (
+              (
+                matrix.mul_vec 
+                (affine_tuple_coord_frame.get_basis_matrix fr)
+                (affine_pt_coord_tuple.to_indexed p)
+              ) --: fin n → K
+            )
+          ),
+        λ p,
+          (vec_neg K n (affine_vec_coord_tuple.from_indexed
+            (
+              (
+                matrix.mul_vec 
+                (affine_tuple_coord_frame.get_basis_matrix fr)
+                (affine_vec_coord_tuple.to_indexed 
+                  ((fr.origin -ᵥ pt_zero K n) : aff_vec_coord_tuple K n))
+              ) --: fin n → K
+            )
+          )) +ᵥ
+          (affine_pt_coord_tuple.from_indexed
+            (
+              (
+                matrix.mul_vec 
+                (affine_tuple_coord_frame.get_basis_matrix fr)⁻¹
+                (affine_pt_coord_tuple.to_indexed p)
+              ) --: fin n → K
+            )
+          ),
+          sorry,
+          sorry
+      ⟩,
+      ⟨
+        λ v,
+          (affine_vec_coord_tuple.from_indexed
+            (
+              (
+                matrix.mul_vec 
+                (affine_tuple_coord_frame.get_basis_matrix fr)
+                (affine_vec_coord_tuple.to_indexed v)
+              ) --: fin n → K
+            )
+          )
+            ,
+        sorry,
+        sorry,
+        λ v,
+          (affine_vec_coord_tuple.from_indexed
+            (
+              (
+                matrix.mul_vec 
+                (affine_tuple_coord_frame.get_basis_matrix fr)⁻¹
+                (affine_vec_coord_tuple.to_indexed v)
+              ) --: fin n → K
+            )
+          ),
+        sorry,
+        sorry⟩ ,
+      sorry
+    ⟩
+
+
+
+
+attribute [reducible]
+noncomputable def affine_tuple_space.to_derived_space
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+   -- [affine_space (aff_vec_coord_tuple K n) (aff_pt_coord_tuple K n)]
+    (fr : affine_tuple_coord_frame K n)
+    : affine_tuple_space_transform K n
+    := 
+    (affine_tuple_space.to_base_space fr)⁻¹ 
+
+attribute [reducible]
+noncomputable def affine_tuple_space.standard_transform
+  := 
+  affine_tuple_space.to_derived_space (affine_tuple_coord_frame.standard K n)
+
+attribute [reducible]
+noncomputable def affine_tuple_space.to_base_space_tagged
+    {fr1 : affine_coord_frame K n}
+    (from_sp : affine_coord_space K n fr1)
+    {fr2 : affine_coord_frame K n}
+    (to_sp : affine_coord_space K n fr2)
+    : affine_tuple_space_tagged_transform K n
+    := ⟨fr1, fr2, from_sp, to_sp, affine_tuple_space.to_base_space (affine_coord_frame.get_coords fr1)⟩
+
+
+attribute [reducible]
+noncomputable def affine_tuple_space.to_derived_space_tagged
+    {fr1 : affine_coord_frame K n}
+    (from_sp : affine_coord_space K n fr1)
+    {fr2 : affine_coord_frame K n}
+    (to_sp : affine_coord_space K n fr2)
+    : affine_tuple_space_tagged_transform K n
+    := ⟨fr1, fr2, from_sp, to_sp, affine_tuple_space.to_derived_space (affine_coord_frame.get_coords fr2)⟩
+
+attribute [reducible]
+noncomputable def affine_tuple_space_transform.to_coord_transform
+    {fr1 : affine_coord_frame K n}
+    (from_sp : affine_coord_space K n fr1)
+    {fr2 : affine_coord_frame K n}
+    (to_sp : affine_coord_space K n fr2)
+    (tr : affine_tuple_space_transform K n)
+    :
+    affine_coord_space_transform K n fr1 fr2 from_sp to_sp
+    := 
+    ⟨
+      ⟨
+        λ p,⟨tr p.1⟩ ,
+        λ p,⟨tr⁻¹ p.1⟩,
+        sorry,
+        sorry 
+      ⟩ ,
+      ⟨
+        λ v,⟨tr.linear v.1⟩,
+        sorry,
+        sorry,
+        λ v,⟨tr.linear⁻¹ v.1⟩,
+        sorry,
+        sorry
+      ⟩,
+      sorry
+    ⟩
+
+attribute [reducible]
+noncomputable mutual def 
+  affine_coord_space.build_from_to_standard_transform,
+  affine_coord_space.fold_tuple_from_to_standard_transforms
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {initial_fr : affine_coord_frame K n}
+    (initial_sp : affine_coord_space K n initial_fr)
+with affine_coord_space.build_from_to_standard_transform : 
+  list (aff_fr.affine_coord_frame K n) → 
+                                  (affine_coord_space_transform K n
+                                      initial_fr
+                                      (affine_coord_frame.standard K n)
+                                      initial_sp
+                                      (affine_coord_space.mk_with_standard K n))
+| [] := 
+  let tr := (affine_tuple_space.to_base_space (affine_coord_frame.get_coords initial_fr)) in
+    affine_tuple_space_transform.to_coord_transform K n _ _ tr
+| (h::t) := 
+  let tr := (affine_tuple_space.to_base_space (affine_coord_frame.get_coords initial_fr)) in 
+  let trf := tr.trans (affine_coord_space.fold_tuple_from_to_standard_transforms t) in
+    affine_tuple_space_transform.to_coord_transform K n _ _ tr
+with affine_coord_space.fold_tuple_from_to_standard_transforms :
+  list (aff_fr.affine_coord_frame K n) → 
+                                  (affine_tuple_space_transform K n)
+| [] := (affine_tuple_space.standard_transform K n )
+| (h::t) := let tr := (affine_tuple_space.to_base_space (affine_coord_frame.get_coords initial_fr)) in 
+      tr.trans 
+          (affine_coord_space.fold_tuple_from_to_standard_transforms t)
+
+attribute [reducible]
+noncomputable mutual def 
+  affine_coord_space.build_standard_to_to_transform,
+  affine_coord_space.fold_tuple_to_to_standard_transforms
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {to_fr : affine_coord_frame K n}
+    (to_sp : affine_coord_space K n to_fr)
+with affine_coord_space.build_standard_to_to_transform : 
+  list (aff_fr.affine_coord_frame K n) → 
+                                  (affine_coord_space_transform K n
+                                      (affine_coord_frame.standard K n)
+                                      to_fr
+                                      (affine_coord_space.mk_with_standard K n))
+                                      to_sp
+| [] := 
+  let tr := (affine_tuple_space.to_base_space (affine_coord_frame.get_coords to_fr)) in
+    ((affine_tuple_space_transform.to_coord_transform K n to_sp (affine_coord_space.mk_with_standard K n) tr).symm)
+| (h::t) := 
+  let tr := (affine_tuple_space.to_derived_space (affine_coord_frame.get_coords to_fr)) in 
+  let trf := tr.trans (affine_coord_space.fold_tuple_to_to_standard_transforms t) in
+    (affine_tuple_space_transform.to_coord_transform K n to_sp (affine_coord_space.mk_with_standard K n) tr).symm
+with affine_coord_space.fold_tuple_to_to_standard_transforms :
+  list (aff_fr.affine_coord_frame K n) → 
+                                  (affine_tuple_space_transform K n)
+| [] := (affine_tuple_space.standard_transform K n )
+| (h::t) := 
+  let tr := (affine_tuple_space.to_derived_space (affine_coord_frame.get_coords to_fr)) in 
+      tr.trans 
+          (affine_coord_space.fold_tuple_to_to_standard_transforms t)
+
+attribute [reducible]
+noncomputable def affine_coord_space.build_transform
+    [inhabited (affine_coord_frame K n)]
+    (sp1 : affine_coord_space K n fr1)
+    (sp2 : affine_coord_space K n fr2)
+    : affine_coord_space_transform K n fr1 fr2 sp1 sp2
+    := 
+    let path := affine_coord_space.find_transform_path' sp1 sp2 in
+    --let from_head_eq_fr1 : fr1 = path.from_.head := sorry in
+    --let to_head_eq_fr2 : fr2 = path.to_.head := sorry in
+    let from_ := (affine_coord_space.build_from_to_standard_transform sp1 path.to_.tail) in
+    let to_ := (affine_coord_space.build_standard_to_to_transform sp2 path.to_.tail) in
+      from_.trans to_
+
+    --([] : list (square_matrix K (n+1)))
+
+notation t1⬝t2 := t1.trans t2
+notation t1•t2 := t1.trans t2
+
+variables 
+    (fr3 : affine_coord_frame K n)
+    (s1 : affine_coord_space K n fr1)
+    (s2 : affine_coord_space K n fr2)
+    (s3 : affine_coord_space K n fr3)
+    (t1 : affine_coord_space_transform K n fr1 fr2 s1 s2)
+    (t2 : affine_coord_space_transform K n fr2 fr3 s2 s3)
+    (p1 : aff_coord_pt K n fr1)
+    (p2 : aff_coord_pt K n fr2)
+#check t1⬝t2
+
+#check t1 p1
+#check t1 p2  -- There is supposed to be an error here. It means the type-checking is working!
+
+def tran_times_vec 
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    {fr1 : affine_coord_frame K n}
+   -- (from_sp : affine_coord_space K n fr1)
+    {fr2 : affine_coord_frame K n}
+   -- (to_sp : affine_coord_space K n fr2)
+   (tr : affine_coord_frame_transform K n fr1 fr2)
+   (p : aff_coord_vec K n fr1)
+   : aff_coord_vec K n fr2
+   := tr (p +ᵥ (⟨pt_zero K n⟩ : aff_coord_pt K n fr1))
+        -ᵥ (⟨pt_zero K n⟩ : aff_coord_pt K n fr2)
+
+#check t1.trans
+
+notation t1⬝t2 := tran_times_vec t1 t2
+notation t1⬝t2 := t1.to_equiv t2
+
+end aff_trans
