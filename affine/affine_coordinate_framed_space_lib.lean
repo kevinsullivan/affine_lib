@@ -2,6 +2,7 @@ import .affine_coordinate_framed_space
 import .affine_space_type
 import .list_as_k_tuple
 import linear_algebra.matrix
+import tactic.ext
 universes u v w
 /-
 This file defines the following types:
@@ -144,20 +145,103 @@ def affine_coord_frame.standard : affine_coord_frame K n :=
         rw is_basis,
         split,
         rw linear_independent,
-        simp only [finsupp.total, finsupp.lsum, ⊥, add_equiv.coe_mk],
-        ext,
-        split,
-        intro h,
-        sorry,
-        intro h,
+        /-
+        (finsupp.total (fin n) (aff_vec_coord_tuple K n) K (std_basis K n)).ker = ⊥
+        <-> ker(finsupp.total) = {vec_zero K n}          (1)
+        <-> x ∈ ker(finsupp.total) ↔ x ∈ {vec_zero K n}  (2)
+        x ∈ kernel of finsupp.total ↔ x = vec_zero K n   (3)
+
+        (1) ↑⊥ = {vec_zero K n}
+        (2) tactic.ext
+        (3) split, intros, dsimp
+
+        -/
+        have h₁ : has_coe_t.coe (⊥ : submodule K (aff_vec_coord_tuple K n)) = ({vec_zero K n} : set (aff_vec_coord_tuple K n)) := begin
+            dsimp only [has_coe_t.coe],
+            dsimp only [has_bot.bot],
+            dsimp only [has_zero.zero, add_monoid.zero, add_comm_monoid.zero, add_comm_group.zero],
+            dsimp only [vec_zero],
+            refl,
+        end,
+        
+        -- has_coe_to_sort.coe takes a submodule which has been coerced into a set, and returns the original submodule
+        -- take ⊥ from the original goal
+        -- use coe_sort_coe from submodule.lean on ⊥
+        -- ↥(has_coe_t.coe ⊥) = ⊥
+        -- ↥(has_coe_t.coe ker(finsupp.total)) = ker(finsupp.total)
+        -- first prove: has_coe_t.coe ker(finsupp.total) = has_coe_t.coe ⊥ 
+        -- same as showing ker(finsupp.total).carrier = ⊥.carrier
+        -- these should both be ({vec_zero K n} : set (aff_vec_coord_tuple K n))
+        -- once we prove that the carriers just contain the zero vector
+        -- then the carriers are equal, thus the original submodules are equal
+
+        have h₂ : has_coe_t.coe (finsupp.total (fin n) (aff_vec_coord_tuple K n) K (std_basis K n)).ker
+                  = ({⟨∅, (λ x, 0), begin
+                      intros,
+                      split,
+                      intro h,
+                      simp only [finset.not_mem_empty] at h,
+                      contradiction,
+                      intros,
+                      contradiction
+                  end⟩} : set (fin n →₀ K)) := sorry,
+        
+        have h₃ : has_coe_t.coe (⊥ : submodule K (fin n →₀ K)) = ({⟨∅, (λ x, 0), _⟩} : set (fin n →₀ K)) :=
+        begin
+            dsimp only [has_coe_t.coe],
+            dsimp only [has_bot.bot],
+            dsimp only [has_zero.zero, add_monoid.zero, add_comm_monoid.zero],
+            refl
+        end,
+
+        have h₄ : ∀ (a b : submodule K (aff_vec_coord_tuple K n)), has_coe_t.coe a = has_coe_t.coe b → a = b := sorry,
+        
+        have h₅ : has_coe_t.coe (finsupp.total (fin n) (aff_vec_coord_tuple K n) K (std_basis K n)).ker = has_coe_t.coe (⊥ : submodule K (fin n →₀ K)) := by rw [h₂, h₃],
+        
+        rw (h₄ ((finsupp.total (fin n) (aff_vec_coord_tuple K n) K (std_basis K n)).ker) (⊥ : submodule K (fin n →₀ K) h₅),
+
+        /-dsimp only [linear_map.ker], 
+        dsimp only [has_bot.bot], 
+        dsimp only [has_zero.zero, add_monoid.zero, add_comm_monoid.zero, add_comm_group.zero],
+        dsimp only [finsupp.total],-/
+        
+        
         sorry,
 
-        simp only [submodule.span, set.range, ⊤, set.univ, Inf],
-        ext,
-        split,
-        intro h,
-        exact true.intro,
-        intro h,
+        simp only [set.range, has_top.top, set.univ, submodule.span],
+        simp only [has_Inf.Inf],
+        /-
+        LEMMA LIST:
+        -- The intersection contains every vector
+            -- Every s in p contains every vector
+        -/
+        -- has_Inf (submodule K (aff_vec_coord_tuple K n))
+        -- has_Inf states that there is a smallest thing of this type
+        -- A submodule is a subset that is closed under addition and scalar multiplication.
+        -- submodule = subspaces of vector spaces
+        -- ℝ³ is a vector space
+        -- ⟨(1, 0, 0)⟩ = {x * (1,0,0) | x ∈ ℝ} ≅ ℝ
+        -- ⟨(1,0,0), (0,1,0)⟩ ≅ ℝ²
+        -- {b₁, b₂, ..., bₙ} is your basis
+        -- take a subset of your basis
+        -- the collection of linear combinations of elements of that subset forms a subspace
+        -- ℝⁿ is a subspace of itself, so is {(0,0,...,0)}
+        -- ⟨(1,0,0)⟩, ⟨(0,1,0)⟩
+
+        /-
+        B: (potential) basis
+        p: collection of all submodules that contain all elements of B
+        ⋂ s <- this intersection contains all s such that H holds
+        s is a submodule which contains B
+        
+        B = {(1,0,0),(0,1,0)}
+        ℝ³
+        we want B to be a basis
+        p = {⟨(1,0,0),(0,1,0)⟩, ⟨(1,0,0),(0,1,0),(0,0,1)⟩} = {⟨B⟩, ℝ³}
+        ⋂ s = ⟨B⟩ ∩ ℝ³ = ⟨B⟩ ≠ ℝ³
+        
+        
+        -/        
         sorry
     end⟩)
 
