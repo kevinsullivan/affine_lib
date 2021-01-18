@@ -54,6 +54,13 @@ abbreviation affine_coord_space :=
         K
         (aff_coord_vec K n fr)
 -/
+structure affine_tuple_space
+    extends
+    affine_space_type 
+        (aff_pt_coord_tuple K n)
+        K
+        (aff_vec_coord_tuple K n)
+
 
 structure affine_coord_space
     extends 
@@ -275,13 +282,11 @@ def affine_coord_space.get_base_space
         ⟨⟨⟩⟩
 
 attribute [reducible]
-def affine_coord_space.mk_coord_point
+def affine_coord_space.mk_tuple_point
     {K : Type v}
     {n : ℕ}
     [inhabited K] 
     [field K] 
-    {fr : affine_coord_frame K n}
-    (sp : affine_coord_space K n fr)
     (val : vector K n)
     : aff_pt_coord_tuple K n
     := ⟨[1]++val.1,begin
@@ -294,13 +299,11 @@ def affine_coord_space.mk_coord_point
     end⟩
 
 attribute [reducible]
-def affine_coord_space.mk_coord_vec
+def affine_coord_space.mk_tuple_vec
     {K : Type v}
     {n : ℕ}
     [inhabited K] 
     [field K] 
-    {fr : affine_coord_frame K n}
-    (sp : affine_coord_space K n fr)
     (val : vector K n)
     : aff_vec_coord_tuple K n
     := ⟨[0]++val.1,begin
@@ -313,7 +316,7 @@ def affine_coord_space.mk_coord_vec
     end⟩
 
 attribute [reducible]
-def affine_coord_space.mk_point
+def affine_coord_space.mk_coord_point
     {K : Type v}
     {n : ℕ}
     [inhabited K] 
@@ -332,7 +335,7 @@ def affine_coord_space.mk_point
     end⟩⟩
 
 attribute [reducible]
-def affine_coord_space.mk_vec
+def affine_coord_space.mk_coord_vec
     {K : Type v}
     {n : ℕ}
     [inhabited K] 

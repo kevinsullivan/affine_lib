@@ -72,7 +72,7 @@ structure affine_euclidean_rotation
   (normone : ∀ i : fin n, ∥r i∥ = 1)
   (b : ∀ i j : fin n, i≠j → ⟪r i,r j⟫ = 0)
 
-structure affine_euclidean_space.orientation
+structure affine_euclidean_orientation
   :=
   (r : affine_tuple_basis ℝ n)
   (normone : ∀ i : fin n, ∥r i∥ = 1)
@@ -379,12 +379,13 @@ instance lift_rotation : has_coe
   (affine_euclidean_rotation n) 
   (affine_euclidean_space_transform n fr1 fr1 sp1 sp1) :=
   ⟨affine_euclidean_rotation.as_transform n fr1 sp1⟩
+notation r`⬝`c := ↑r c
 
 variables 
   (rot : affine_euclidean_rotation n)
   
 #check (rot : affine_euclidean_space_transform n fr1 fr1 sp1 sp1).linear cv1
 #check (rot : affine_euclidean_space_transform n fr1 fr1 sp1 sp1) cp1
-#check rot cp1 --should this work?
+#check rot⬝cp1 --should this work?
 
 end eucl_lib
