@@ -127,7 +127,7 @@ undo coordinates:
 (x + B^O)
 -/
 
-
+/-
 attribute [reducible]
 noncomputable def affine_coord_space.to_base_space
     {K : Type u}
@@ -142,14 +142,18 @@ noncomputable def affine_coord_space.to_base_space
                                       (affine_coord_space.get_base_space der_sp)
     := ⟨begin
       cases fr1,
-      have h₁ : affine_coord_frame.base_frame (affine_coord_frame.tuple fr1) = affine_coord_frame.standard K n := rfl,
+      have h₁ : affine_coord_frame.base_frame (affine_coord_frame.tuple fr1) = 
+                affine_coord_frame.standard K n := rfl,
       rw h₁,
       sorry,
 
-      have h₁ : affine_coord_frame.base_frame (affine_coord_frame.derived fr1_origin fr1_basis fr1_proof_is_basis fr1_base) = fr1_base := rfl,
+      have h₁ : affine_coord_frame.base_frame 
+        (affine_coord_frame.derived fr1_origin fr1_basis fr1_proof_is_basis fr1_base) = fr1_base := rfl,
       rw h₁,
       sorry
     end, sorry, sorry⟩
+-/
+
 
 attribute [reducible]
 noncomputable def affine_tuple_space.to_base_space
@@ -184,7 +188,16 @@ noncomputable def affine_tuple_space.to_base_space
             )
           ),
         λ p,
-          (vec_neg K n (fr.origin -ᵥ pt_zero K n) : aff_vec_coord_tuple K n) +ᵥ
+          (vec_neg K n (affine_vec_coord_tuple.from_indexed
+            (
+              (
+                matrix.mul_vec 
+                (affine_tuple_coord_frame.get_basis_matrix fr)⁻¹
+                (affine_vec_coord_tuple.to_indexed 
+                  ((fr.origin -ᵥ pt_zero K n) : aff_vec_coord_tuple K n))
+              ) --: fin n → K
+            )
+          )) +ᵥ
           (affine_pt_coord_tuple.from_indexed
             (
               (
@@ -247,7 +260,7 @@ noncomputable def affine_tuple_space.standard_transform
   affine_tuple_space.to_derived_space (affine_tuple_coord_frame.standard K n)
 
 attribute [reducible]
-noncomputable def affine_tuple_space_transform.to_coord_transform
+def affine_tuple_space_transform.to_coord_transform
     {fr1 : affine_coord_frame K n}
     (from_sp : affine_coord_space K n fr1)
     {fr2 : affine_coord_frame K n}
