@@ -99,15 +99,8 @@ def affine_coord_space_transform.codomain_space
     {to_sp : affine_coord_space K n fr2}
     (tr : affine_coord_space_transform K n fr1 fr2 from_sp to_sp)
     := to_sp
-/-
-abbreviation
-    affine_coord_space_transform
-    (sp1 : affine_coord_space K n fr1)
-    (sp2 : affine_coord_space K n fr2)
-    := 
-    affine_coord_frame_transform K n fr1 fr2
--/
 
+    
 /-
 IS THIS IN MATHLIB ALREADY?
 NOT matrix.diag_one??
@@ -122,38 +115,6 @@ def square_matrix.eye
     := 
     λ i j,
     if i = j then 1 else 0
-/-
-undo coordinates:
-(x + B^O)
--/
-
-/-
-attribute [reducible]
-noncomputable def affine_coord_space.to_base_space
-    {K : Type u}
-    {n : ℕ}
-    [inhabited K] 
-    [field K] 
-    {fr1 : affine_coord_frame K n}
-    (der_sp : affine_coord_space K n fr1)
-    : affine_coord_space_transform K n fr1 
-                                      (affine_coord_frame.base_frame fr1)
-                                      der_sp
-                                      (affine_coord_space.get_base_space der_sp)
-    := ⟨begin
-      cases fr1,
-      have h₁ : affine_coord_frame.base_frame (affine_coord_frame.tuple fr1) = 
-                affine_coord_frame.standard K n := rfl,
-      rw h₁,
-      sorry,
-
-      have h₁ : affine_coord_frame.base_frame 
-        (affine_coord_frame.derived fr1_origin fr1_basis fr1_proof_is_basis fr1_base) = fr1_base := rfl,
-      rw h₁,
-      sorry
-    end, sorry, sorry⟩
--/
-
 
 attribute [reducible]
 noncomputable def affine_tuple_space.to_base_space
