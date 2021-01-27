@@ -587,6 +587,27 @@ def affine_tuple_pt.get_coords
     :=
     coord_helper v.1 v.2
 
+attribute [reducible]
+def affine_coord_space.std_origin_vector
+    (K : Type v)
+    (n : ℕ)
+    [inhabited K] 
+    [field K] 
+    : vector K n
+    :=
+    affine_tuple_pt.get_coords (pt_zero K n)
+
+attribute [reducible]
+def affine_coord_space.std_basis_vector
+    (K : Type v)
+    (n : ℕ)
+    (i : fin n)
+    [inhabited K] 
+    [field K] 
+    : vector K n
+    :=
+    affine_tuple_vec.get_coords ((std_basis K n) i)
+
 attribute [reducible]    
 def affine_tuple_vec.as_matrix
     {K : Type v}
@@ -957,7 +978,9 @@ def affine_coord_vec.from_matrix
     (coords : col_matrix K n)
     : aff_coord_vec K n fr
     := 
-    ⟨⟨[0]++(col_matrix.as_list coords),sorry,rfl⟩⟩
+    ⟨⟨[0]++(col_matrix.as_list coords),begin
+        
+    end,rfl⟩⟩
 
 attribute [reducible]
 def affine_coord_pt.from_indexed
@@ -1001,11 +1024,14 @@ def affine_vec_coord_tuple.from_indexed
     {n : ℕ}
     [inhabited K] 
     [field K] 
-    (coords : fin n → K)
-    : aff_vec_coord_tuple K n
+    : (fin n → K) → aff_vec_coord_tuple K n
     := 
-    ⟨[0]++(indexed.as_list coords),sorry,rfl⟩
-  
+    λ coords : fin n → K, ⟨[0]++(indexed.as_list coords),sorry,rfl⟩
+
+instance : has_coe (fin n → K) (aff_vec_coord_tuple K n) := ⟨affine_vec_coord_tuple.from_indexed⟩
+
+
+
 attribute [reducible]
 def affine_coord_frame.get_basis_matrix
     {K : Type u}

@@ -143,7 +143,7 @@ noncomputable def affine_tuple_space.to_base_euclidean_space
             (
               (
                 matrix.mul_vec 
-                (affine_tuple_coord_frame.get_basis_matrix fr)
+                (affine_tuple_coord_frame.get_basis_matrix fr)⁻¹
                 (affine_vec_coord_tuple.to_indexed 
                   ((fr.origin -ᵥ pt_zero ℝ n) : aff_vec_coord_tuple ℝ n))
               ) --: fin n → K
