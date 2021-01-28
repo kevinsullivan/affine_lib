@@ -100,6 +100,31 @@ def affine_coord_space_transform.codomain_space
     (tr : affine_coord_space_transform K n fr1 fr2 from_sp to_sp)
     := to_sp
 
+
+/-
+(
+                matrix.mul_vec 
+                (affine_tuple_coord_frame.get_basis_matrix fr)
+                (affine_vec_coord_tuple.to_indexed 
+                  ((fr.origin -ᵥ pt_zero K n) : aff_vec_coord_tuple K n))
+              ) --: 
+-/
+
+variables 
+  (a : square_matrix K n) 
+  (a_i : matrix (fin n) (fin n) K) 
+  (i : col_matrix K n) 
+  (i_i : fin n → K)
+
+
+#check matrix.mul_vec a_i i_i
+
+#check a_i
+
+#check  (matrix.mul_vec_lin a_i : _)
+#check  (matrix.mul_vec_lin a_i : _).map_add
+
+
     
 /-
 IS THIS IN MATHLIB ALREADY?
@@ -183,7 +208,10 @@ noncomputable def affine_tuple_space.to_base_space
             )
           )
             ,
-        sorry,
+        begin
+
+          --λs : (fin n → K)
+        end,
         sorry,
         λ v,
           (affine_vec_coord_tuple.from_indexed
