@@ -1,161 +1,43 @@
 import .list_as_k_tuple linear_algebra.affine_space.basic
 import linear_algebra.basis
---import .affine_space_type
-open_locale affine
 
+open_locale affine
 
 universes u v w x
 
 variables 
-    -- (id : ℕ) all commented out 11/15/20 
-  --  (X : Type u) 
     (K : Type v) 
-  --  (V : Type w) 
     (n : ℕ) 
-  --  (k : K)
-  --  (ι : Type*)
-  --  (s : finset ι) 
-  --  (g : ι → K) 
-   -- (v : ι → V) 
     [inhabited K] 
-    [field K] 
-  --  [add_comm_group V] 
-  --  [module K V] 
-  --  [vector_space K V] 
-  --  [affine_space V X] commented out 11/15/20 - this REALLY does not go here!
-  --  [is_basis K v] 
-  --  [affine_space V X]
-
+    [field K]
 
 open list
 open vecl
 
 
-/-- 
-We define the types of n-dimensional tuples that
-we will use to represent points and vectors in n-D
-affine coordinate spaces: namely by n+1-dimension 
-coordinate tuples. Tuples representing points have 
-1 as their first element and vectors by having 0 
-(in the given ring) as their first elements. The 
-rest of this file is largely concerned with proving
-that a pair of  such sets constitutes an affine space.
--/
 
 @[ext]
 structure aff_vec_coord_tuple :=
-(l : list K)
-(len_fixed : l.length = n + 1)
-(fst_zero : head l = 0)
+(vec : fin n → K)
 
 /-- type of affine points represented by coordinate tuples -/
 @[ext]
 structure aff_pt_coord_tuple :=
-(l : list K)
-(len_fixed : l.length = n + 1)
-(fst_one : head l = 1)
+(pt : fin n → K)
 
-/-
-Lots of Lemmas and proofs to follow. See end of file for the
-overall theorem that we've got ourselves an affine coordinate
-space.
--/
+
 
 variables (x y : aff_vec_coord_tuple K n) (a b : aff_pt_coord_tuple K n)
     
 
--- lemmas so that the following operations are well-defined
-/-- the length of the sum of two length n+1 vectors is n+1 -/
-lemma list_sum_fixed : length (ladd x.1 y.1) = n + 1 := 
-    by simp only [length_sum x.1 y.1, x.2, y.2, min_self]
-
-lemma aff_not_nil : x.1 ≠ [] := 
-begin
-intro h,
-have f : 0 ≠ n + 1 := ne.symm (nat.succ_ne_zero n),
-have len_x_nil : length x.1 = length nil := by rw h,
-have len_fixed : length nil = n + 1 := eq.trans (eq.symm len_x_nil) x.2,
-have bad : 0 = n + 1 := eq.trans (eq.symm len_nil) len_fixed,
-contradiction,
-end
-
-lemma aff_cons : ∃ x_hd : K, ∃ x_tl : list K, x.1 = x_hd :: x_tl :=
-begin
-cases x,
-cases x_l,
-{
-    have f : 0 ≠ n + 1 := ne.symm (nat.succ_ne_zero n),
-    have bad := eq.trans (eq.symm len_nil) x_len_fixed,
-    contradiction
-},
-{
-    apply exists.intro x_l_hd,
-    apply exists.intro x_l_tl,
-    exact rfl
-}
-end
-
-/-- head is compatible with addition -/
-lemma head_sum : head x.1 + head y.1 = head (ladd x.1 y.1) := 
-begin
-cases x,
-cases y,
-cases x_l,
-    have f : 0 ≠ n + 1 := ne.symm (nat.succ_ne_zero n),
-    have bad := eq.trans (eq.symm len_nil) x_len_fixed,
-    contradiction,
-cases y_l,
-    have f : 0 ≠ n + 1 := ne.symm (nat.succ_ne_zero n),
-    have bad := eq.trans (eq.symm len_nil) y_len_fixed,
-    contradiction,
-have head_xh : head (x_l_hd :: x_l_tl) = x_l_hd := rfl,
-have head_yh : head (y_l_hd :: y_l_tl) = y_l_hd := rfl,
-rw head_xh at x_fst_zero,
-rw head_yh at y_fst_zero,
-simp [x_fst_zero, y_fst_zero, add_cons_cons 0 0 x_l_tl y_l_tl],
-end
-
-/-- the head of the sum of two vectors is 0 -/
-lemma sum_fst_fixed : head (ladd x.1 y.1) = 0 :=
-    by simp only [eq.symm (head_sum K n x y), x.3, y.3]; exact add_zero 0
-
-/-- the length of the zero vector is n+1 -/
-lemma len_zero : length (zero_vector K n) = n + 1 :=
-begin
-induction n with n',
-refl,
-{
-have h₃ : nat.succ (n' + 1) = nat.succ n' + 1 := rfl,
-have h₄ : length (zero_vector K (nat.succ n')) = nat.succ (n' + 1) :=
-    by {rw eq.symm n_ih, refl},
-rw eq.symm h₃,
-exact h₄,
-}
-end
-
-/-- the head of the zero vector is zero -/
-lemma head_zero : head (zero_vector K n) = 0 := by {cases n, refl, refl}
-
-lemma vec_len_neg : length (vecl_neg x.1) = n + 1 := by {simp only [len_neg], exact x.2}
-
-lemma head_neg_0 : head (vecl_neg x.1) = 0 :=
-begin
-cases x,
-cases x_l,
-contradiction,
-rw neg_cons x_l_hd x_l_tl,
-have head_xh : head (x_l_hd :: x_l_tl) = x_l_hd := rfl,
-have head_0 : head (0 :: vecl_neg x_l_tl) = 0 := rfl,
-rw head_xh at x_fst_zero,
-simp only [x_fst_zero, neg_zero, head_0],
-end
+def fin_add : (fin n → K) → (fin n → K) → (fin n → K) := λ x y, (λ m : fin n, x m + y m)
 
 /-! ### abelian group operations -/
 def vec_add : aff_vec_coord_tuple K n → aff_vec_coord_tuple K n → aff_vec_coord_tuple K n :=
-    λ x y, ⟨ladd x.1 y.1, list_sum_fixed K n x y, sum_fst_fixed K n x y⟩
-def vec_zero : aff_vec_coord_tuple K n := ⟨zero_vector K n, len_zero K n, head_zero K n⟩
+    λ x y, ⟨λ m : fin n, x.1 m + y.1 m⟩
+def vec_zero : aff_vec_coord_tuple K n := ⟨λ m : fin n, 0⟩
 def vec_neg : aff_vec_coord_tuple K n → aff_vec_coord_tuple K n
-| ⟨l, len, fst⟩ := ⟨vecl_neg l, vec_len_neg K n ⟨l, len, fst⟩, head_neg_0 K n ⟨l, len, fst⟩⟩
+| x := ⟨λ m : fin n, -(x.1 m)⟩
 
 /-! ### type class instances for the abelian group operations -/
 instance : has_add (aff_vec_coord_tuple K n) := ⟨vec_add K n⟩
@@ -163,114 +45,46 @@ instance : has_zero (aff_vec_coord_tuple K n) := ⟨vec_zero K n⟩
 instance : has_neg (aff_vec_coord_tuple K n) := ⟨vec_neg K n⟩
 
 -- misc
-def pt_zero_f : ℕ → list K
-| 0 := [1]
-| (nat.succ n) := [1] ++ zero_vector K n
+def pt_zero : aff_pt_coord_tuple K n := ⟨λ m : fin n, 0⟩
 
-lemma pt_zero_len : length (pt_zero_f K n) = n + 1 :=
-begin
-induction n with n',
-refl,
-have h₁ : pt_zero_f K n'.succ = [1] ++ zero_vector K n' := rfl,
-have h₂ : ([1] ++ zero_vector K n').length = [1].length + (zero_vector K n').length := by {rw list.length_append, refl},
-have h₃ : [1].length = 1 := rfl,
-have h₄ : 1 + (n' + 1) = (n' + 1) + 1 := by rw add_comm,
-rw [h₁, h₂, h₃, len_zero, h₄]
-end
+lemma vec_zero_id : (0 : aff_vec_coord_tuple K n) = vec_zero K n := rfl
 
-lemma pt_zero_hd : head (pt_zero_f K n) = 1 := by {cases n, refl, refl} 
-
-def pt_zero : aff_pt_coord_tuple K n := ⟨pt_zero_f K n, pt_zero_len K n, pt_zero_hd K n⟩
-
-lemma vec_zero_is : (0 : aff_vec_coord_tuple K n) = vec_zero K n := rfl
-
-lemma vec_zero_list' : (0 : aff_vec_coord_tuple K n).1 = zero_vector K n := rfl
+lemma vec_zero_is_zero (m : fin n) : (vec_zero K n).vec m = 0 := rfl
 
 -- properties necessary to show aff_vec_coord_tuple K n is an instance of add_comm_group
 #print add_comm_group
-lemma vec_add_assoc : ∀ x y z : aff_vec_coord_tuple K n,  x + y + z = x + (y + z) :=
+lemma vec_add_assoc : ∀ x y z : aff_vec_coord_tuple K n, x + y + z = x + (y + z) :=
 begin
 intros,
 cases x,
 cases y,
 cases z,
-ext,
-split,
-intro a_1,
-dsimp [has_add.add, vec_add] at a_1 ⊢,
-rw ladd_assoc at a_1,
-exact a_1,
-
-intro a_1,
-dsimp [has_add.add, vec_add] at a_1 ⊢,
-rw ladd_assoc,
-exact a_1
+ext m,
+exact add_assoc (x m) (y m) (z m),
 end
 
 lemma vec_zero_add : ∀ x : aff_vec_coord_tuple K n, 0 + x = x :=
 begin
 intro x,
 cases x,
-rw vec_zero_is,
-ext,
-split,
-intro a_1,
-dsimp [has_add.add, vec_add, vec_zero] at a_1,
-change a ∈ (ladd (zero_vector K n) x_l).nth n_1 at a_1,
-rw zero_ladd' x_l n x_len_fixed at a_1,
-exact a_1,
-
-intro a_1,
-dsimp [has_add.add, vec_add, vec_zero],
-change a ∈ (ladd (zero_vector K n) x_l).nth n_1,
-rw zero_ladd' x_l n x_len_fixed,
-exact a_1,
+ext m,
+exact zero_add (x m),
 end
 
 lemma vec_add_zero : ∀ x : aff_vec_coord_tuple K n, x + 0 = x :=
 begin
 intro x,
 cases x,
-rw vec_zero_is,
-ext,
-split,
-intro a_1,
-dsimp [has_add.add, vec_add, vec_zero] at a_1,
-change a ∈ (ladd x_l (zero_vector K n)).nth n_1 at a_1,
-rw ladd_zero' x_l n x_len_fixed at a_1,
-exact a_1,
-
-intro a_1,
-dsimp [has_add.add, vec_add, vec_zero],
-change a ∈ (ladd x_l (zero_vector K n)).nth n_1,
-rw ladd_zero' x_l n x_len_fixed,
-exact a_1,
+ext m,
+exact add_zero (x m),
 end
 
 lemma vec_add_left_neg : ∀ x : aff_vec_coord_tuple K n, -x + x = 0 :=
 begin
 intro x,
 cases x,
-rw vec_zero_is,
-ext,
-split,
-intro a_1,
-dsimp [vec_zero],
-dsimp [has_neg.neg, vec_neg, has_add.add, vec_add] at a_1,
-cases x_l,
-contradiction,
-rw [ladd_left_neg, x_len_fixed] at a_1,
-exact a_1,
-contradiction,
-
-intro a_1,
-dsimp [vec_zero] at a_1,
-dsimp [has_neg.neg, vec_neg, has_add.add, vec_add],
-cases x_l,
-contradiction,
-rw [ladd_left_neg, x_len_fixed],
-exact a_1,
-contradiction
+ext m,
+exact add_left_neg (x m),
 end
 
 lemma vec_add_comm : ∀ x y : aff_vec_coord_tuple K n, x + y = y + x :=
@@ -278,17 +92,8 @@ begin
 intros x y,
 cases x,
 cases y,
-ext,
-split,
-intro a_1,
-dsimp [has_add.add, vec_add] at a_1 ⊢,
-rw ladd_comm,
-exact a_1,
-
-intro a_1,
-dsimp [has_add.add, vec_add] at a_1 ⊢,
-rw ladd_comm,
-exact a_1,
+ext m,
+exact add_comm (x m) (y m),
 end
 
 /-! ### Type class instance for abelian group -/
@@ -305,57 +110,27 @@ end
 
 
 /-! ### Scalar action -/
-#check semimodule
-#check distrib_mul_action
-lemma scale_head : ∀ a : K, head (scalar_mul a x.1) = 0 :=
-begin
-intros,
-cases x,
-cases x_l,
-rw scalar_nil,
-contradiction,
-have hd0 : x_l_hd = 0 := x_fst_zero,
-rw [scalar_cons, hd0, mul_zero],
-refl,
-end
+
 
 @[ext]
 def vec_scalar : K → aff_vec_coord_tuple K n → aff_vec_coord_tuple K n :=
-    λ a x, ⟨scalar_mul a x.1, trans (scale_len a x.1) x.2, scale_head K n x a⟩
+    λ a x, ⟨λ m : fin n, a * x.1 m⟩
 
 instance : has_scalar K (aff_vec_coord_tuple K n) := ⟨vec_scalar K n⟩
 
 lemma vec_one_smul : (1 : K) • x = x := 
 begin
 cases x,
-ext,
-split,
-intro a_1,
-dsimp only [has_scalar.smul, vec_scalar] at a_1,
-rw one_smul_cons at a_1,
-exact a_1,
-
-intro a_1,
-dsimp only [has_scalar.smul, vec_scalar],
-rw one_smul_cons,
-exact a_1,
+ext m,
+exact one_mul (x m),
 end
 
 lemma vec_mul_smul : ∀ g h : K, ∀ x : aff_vec_coord_tuple K n, (g * h) • x = g • h • x :=
 begin
 intros,
 cases x,
-ext,
-split,
-intro a_1,
-dsimp only [has_scalar.smul, vec_scalar] at a_1 ⊢,
-rw vecl.smul_assoc at a_1,
-exact a_1,
-
-intro a_1,
-dsimp only [has_scalar.smul, vec_scalar] at a_1 ⊢,
-rw vecl.smul_assoc,
-exact a_1
+ext m,
+exact mul_assoc g h (x m),
 end
 
 instance : mul_action K (aff_vec_coord_tuple K n) := ⟨vec_one_smul K n, vec_mul_smul K n⟩
@@ -365,34 +140,15 @@ begin
 intros,
 cases x,
 cases y,
-ext,
-dsimp only [has_scalar.smul, vec_scalar, has_add.add, vec_add],
-split,
-intro a_1,
-rw smul_ladd at a_1,
-exact a_1,
-
-intro a_1,
-rw smul_ladd,
-exact a_1
+ext m,
+exact left_distrib g (x m) (y m),
 end
 
 lemma vec_smul_zero : ∀ g : K, g • (0 : aff_vec_coord_tuple K n) = 0 :=
 begin
 intros,
-rw vec_zero_is,
-dsimp [vec_zero],
-ext,
-split,
-intro a_1,
-dsimp only [has_scalar.smul, vec_scalar] at a_1 ⊢,
-rw smul_zero_cons at a_1,
-exact a_1,
-
-intro a_1,
-dsimp only [has_scalar.smul, vec_scalar] at a_1 ⊢,
-rw smul_zero_cons,
-exact a_1
+dsimp [vec_zero_id, vec_zero, has_scalar.smul, vec_scalar],
+rw mul_zero g,
 end
 
 instance : distrib_mul_action K (aff_vec_coord_tuple K n) := ⟨vec_smul_add K n, vec_smul_zero K n⟩
@@ -400,48 +156,17 @@ instance : distrib_mul_action K (aff_vec_coord_tuple K n) := ⟨vec_smul_add K n
 lemma vec_add_smul : ∀ g h : K, ∀ x : aff_vec_coord_tuple K n, (g + h) • x = g•x + h•x :=
 begin
 intros,
-have h₁ : distrib.add g h = g + h := rfl,
 cases x,
-ext,
-split,
-intro a_1,
-dsimp only [has_scalar.smul, vec_scalar, has_add.add, vec_add] at a_1 ⊢,
-rw [h₁, ladd_smul] at a_1,
-exact a_1,
-
-intro a_1,
-dsimp only [has_scalar.smul, vec_scalar, has_add.add, vec_add] at a_1 ⊢,
-rw [h₁, ladd_smul],
-exact a_1
+ext m,
+exact right_distrib g h (x m),
 end
 
 lemma vec_zero_smul : ∀ x : aff_vec_coord_tuple K n, (0 : K) • x = 0 :=
 begin
 intros,
 cases x,
-ext,
-split,
-intro a_1,
-dsimp [has_scalar.smul, vec_scalar] at a_1,
-rw [zero_smul_cons, x_len_fixed] at a_1,
-rw vec_zero_is,
-exact a_1,
-intro bad,
-have len_zero : x_l.length = 0 := by {rw bad, refl},
-have nat_succ_n_zero : n + 1 ≠ 0 := by contradiction,
-rw eq.symm x_len_fixed at nat_succ_n_zero,
-contradiction,
-
-intro a_1,
-dsimp [has_scalar.smul, vec_scalar],
-rw [zero_smul_cons, x_len_fixed],
-rw vec_zero_is at a_1,
-exact a_1,
-intro bad,
-have len_zero : x_l.length = 0 := by {rw bad, refl},
-have nat_succ_n_zero : n + 1 ≠ 0 := by contradiction,
-rw eq.symm x_len_fixed at nat_succ_n_zero,
-contradiction
+ext m,
+exact zero_mul (x m),
 end
 
 instance aff_semimod : semimodule K (aff_vec_coord_tuple K n) := ⟨vec_add_smul K n, vec_zero_smul K n⟩
@@ -450,50 +175,13 @@ instance aff_module : module K (aff_vec_coord_tuple K n) := aff_semimod K n
 
 /-! ### group action of aff_vec_coord_tuple on aff_pt_coord_tuple -/
 
--- lemmata so the group action function is well-defined
-lemma action_len_fixed : (ladd x.l a.l).length = n + 1 := by simp only [length_sum x.1 a.1, x.2, a.2, min_self]
-
-lemma action_fst_fixed : (ladd x.l a.l).head = 1 :=
-begin
-have h₁ := x.2,
-have h₂ := a.2,
-have h₃ : (ladd x.l a.l).head = x.l.head + a.l.head := 
-    begin
-    cases x.l with x_hd x_tl,
-    contradiction,
-    cases a.l with a_hd a_tl,
-    contradiction,
-    rw add_cons_cons,
-    refl
-    end,
-rw [h₃, x.3, a.3],
-rw zero_add
-end
 
 def aff_group_action : aff_vec_coord_tuple K n → aff_pt_coord_tuple K n → aff_pt_coord_tuple K n :=
-    λ x y, ⟨ladd x.1 y.1, action_len_fixed K n x y, action_fst_fixed K n x y⟩
+    λ x y, ⟨λ m : fin n, x.1 m + y.1 m⟩
 
--- lemmata so the subtraction function is well-defined
-lemma sub_len_fixed : (ladd a.1 (vecl_neg b.1)).length = n + 1 := by rw [length_sum, len_neg, a.2, b.2, min_self]
-
-lemma sub_fst_fixed : (ladd a.1 (vecl_neg b.1)).head = 0 :=
-begin
-have h₁ := a.2,
-have h₂ := b.2,
-have h₃ : (ladd a.1 (vecl_neg b.1)).head = a.1.head + -b.1.head :=
-    begin
-    cases a.1 with a_hd a_tl,
-    contradiction,
-    cases b.1 with b_hd b_tl,
-    contradiction,
-    rw [neg_cons, add_cons_cons],
-    refl
-    end,
-rw [h₃, a.3, b.3, add_comm, add_left_neg]
-end
 
 def aff_group_sub : aff_pt_coord_tuple K n → aff_pt_coord_tuple K n → aff_vec_coord_tuple K n :=
-    λ x y, ⟨ladd x.1 (vecl_neg y.1), sub_len_fixed K n x y, sub_fst_fixed K n x y⟩
+    λ x y, ⟨λ m : fin n, x.1 m - y.1 m⟩
 
 #check add_action
 
@@ -503,22 +191,10 @@ instance : has_vsub (aff_vec_coord_tuple K n) (aff_pt_coord_tuple K n) := ⟨aff
 
 lemma aff_zero_sadd : ∀ x : aff_pt_coord_tuple K n, (0 : aff_vec_coord_tuple K n) +ᵥ x = x :=
 begin
-intros,
-rw vec_zero_is,
+intro x,
 cases x,
-have h₁ : n = length x_l - 1 := by {rw x_len_fixed, refl},
-dsimp [vec_zero],
-ext,
-split,
-intro a_1,
-dsimp [has_vadd.vadd, aff_group_action] at a_1 ⊢,
-rw [h₁, zero_ladd] at a_1,
-exact a_1,
-
-intro a_1,
-dsimp [has_vadd.vadd, aff_group_action] at a_1 ⊢,
-rw [h₁, zero_ladd],
-exact a_1
+ext m,
+exact zero_add (x m),
 end
 
 lemma aff_add_sadd : ∀ x y : aff_vec_coord_tuple K n, ∀ a : aff_pt_coord_tuple K n, x +ᵥ (y +ᵥ a) = x + y +ᵥ a :=
@@ -527,110 +203,35 @@ intros,
 cases x,
 cases y,
 cases a,
-ext,
-dsimp [has_vadd.vadd, aff_group_action, has_add.add, vec_add],
-split,
-intro a_1,
-rw ladd_assoc,
-exact a_1,
-
-intro a_1,
-rw ladd_assoc at a_1,
-exact a_1
-end
-
-instance : add_action (aff_vec_coord_tuple K n) (aff_pt_coord_tuple K n) := ⟨aff_group_action K n, aff_zero_sadd K n, aff_add_sadd K n⟩
-
-lemma aff_add_trans : ∀ a b : aff_pt_coord_tuple K n, ∃ x : aff_vec_coord_tuple K n, x +ᵥ a = b :=
-begin
-intros,
-fapply exists.intro,
-exact b -ᵥ a,
-cases a,
-cases b,
-have h₁ : a_l.length = b_l.length := by {transitivity, exact a_len_fixed, symmetry, exact b_len_fixed},
-have h₂ : a_l ≠ nil :=
-    begin
-    intro bad,
-    rw bad at a_len_fixed,
-    contradiction
-    end,
-ext,
-dsimp [has_vsub.vsub, aff_group_sub, has_vadd.vadd, aff_group_action],
-split,
-intro a_1,
-rw [ladd_assoc, ladd_left_neg, h₁, ladd_zero] at a_1,
-exact a_1,
-exact h₂,
-
-intro a_1,
-rw [ladd_assoc, ladd_left_neg, h₁, ladd_zero],
-exact a_1,
-exact h₂
-end
-
-lemma aff_add_free : ∀ a : aff_pt_coord_tuple K n, ∀ g h : aff_vec_coord_tuple K n, g +ᵥ a = h +ᵥ a → g = h :=
-begin
-intros a g h h₀,
---dsimp [has_vadd.vadd, aff_group_action] at h₀,
-have h₁ : a.1.length = g.1.length := eq.trans a.2 (eq.symm g.2),
-have h₂ : a.1.length = h.1.length := eq.trans a.2 (eq.symm h.2),
-have h₃ : a.1 ≠ nil := by {have a_len_fixed := a.2, intro bad, rw bad at a_len_fixed, contradiction},
-have h₄ : (g +ᵥ a).1 = (h +ᵥ a).1 := by rw h₀,
-have h₅ := ladd_free g.1 h.1 a.1 h₁ h₂ h₃ h₄,
-ext,
-split,
-intro a_1,
-rw h₅ at a_1,
-exact a_1,
-
-intro a_1,
-rw h₅,
-exact a_1,
+ext m,
+exact eq.symm (add_assoc (x m) (y m) (a m)),
 end
 
 lemma aff_vadd_vsub : ∀ (x : aff_vec_coord_tuple K n) (a : aff_pt_coord_tuple K n), x +ᵥ a -ᵥ a = x := 
 begin
 intros,
-cases x,
-cases a,
-have h₁ : ladd a_l (vecl_neg a_l) = ladd (vecl_neg a_l) a_l := by rw ladd_comm,
-have h₂ : a_l.length = x_l.length := eq.trans a_len_fixed (eq.symm x_len_fixed),
-have h₃ : a_l ≠ nil := by {intro bad, rw bad at a_len_fixed, contradiction},
-
-ext,
-dsimp [has_vadd.vadd, aff_group_action, has_vsub.vsub, aff_group_sub],
-split,
-intro a_1,
-rw [ladd_assoc, h₁, ladd_left_neg, h₂, ladd_zero] at a_1,
-exact a_1,
-exact h₃,
-
-intro a_1,
-rw [ladd_assoc, h₁, ladd_left_neg, h₂, ladd_zero],
-exact a_1,
-exact h₃
+ext m,
+exact add_sub_cancel (x.vec m) (a.pt m),
 end
+
+instance : add_action (aff_vec_coord_tuple K n) (aff_pt_coord_tuple K n) := ⟨aff_group_action K n, aff_zero_sadd K n, aff_add_sadd K n⟩
 
 lemma aff_vsub_vadd : ∀ a b : aff_pt_coord_tuple K n, (a -ᵥ b) +ᵥ b = a :=
 begin
 intros,
-cases a,
-cases b,
-have h₁ : b_l.length = a_l.length := eq.trans b_len_fixed (eq.symm a_len_fixed),
-have h₂ : b_l ≠ nil := by {intro bad, rw bad at b_len_fixed, contradiction},
-ext,
-dsimp [has_vsub.vsub, aff_group_sub, has_vadd.vadd, aff_group_action],
-split,
-intro a_1,
-rw [ladd_assoc, ladd_left_neg, h₁, ladd_zero] at a_1,
-exact a_1,
-exact h₂,
+ext m, 
+exact sub_add_cancel (a.pt m) (b.pt m),
+end
 
-intro a_1,
-rw [ladd_assoc, ladd_left_neg, h₁, ladd_zero],
-exact a_1,
-exact h₂
+lemma aff_add_trans : ∀ a b : aff_pt_coord_tuple K n, ∃ x : aff_vec_coord_tuple K n, x +ᵥ a = b :=
+by {intros, apply exists.intro (b -ᵥ a), exact aff_vsub_vadd K n b a}
+
+lemma aff_add_free : ∀ a : aff_pt_coord_tuple K n, ∀ g h : aff_vec_coord_tuple K n, g +ᵥ a = h +ᵥ a → g = h :=
+begin
+intros a g h h₀,
+have h₁ : g +ᵥ a -ᵥ a = h +ᵥ a -ᵥ a := by rw h₀,
+rw [aff_vadd_vsub K n g a, aff_vadd_vsub K n h a] at h₁,
+exact h₁,
 end
 
 instance : nonempty (aff_pt_coord_tuple K n) := ⟨pt_zero K n⟩
@@ -643,10 +244,6 @@ aff_group_sub K n,
 aff_vsub_vadd K n, 
 aff_vadd_vsub K n⟩
 
-/-
-"THEOREM:" these sets of scalar tuples with the operations defined on them
-do have the structure of an affine space.
--/
 
 instance aff_coord_is : 
     affine_space 
@@ -711,7 +308,7 @@ def pt_minus_vec
     (aff_pt_coord_tuple K n) → 
     (aff_vec_coord_tuple K n) → 
     (aff_pt_coord_tuple K n) 
-| p v := aff_group_action K n (vec_neg K n v) p
+| p v := aff_group_action K n (-v) p
 
 notation
  pt -ᵥ v := pt_minus_vec pt v
