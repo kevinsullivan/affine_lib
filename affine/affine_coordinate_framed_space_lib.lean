@@ -115,30 +115,10 @@ Helper method to retrieve the origin of coord space defined in
 terms of a particular frame (which has an origin that we need to retrieve)
 -/
 
-abbreviation zero := vecl.zero_vector K n
-
-def list.to_basis_vec : fin n → list K := λ x, (zero K n).update_nth (x.1 + 1) 1
-
-lemma len_basis_vec_fixed (x : fin n) : (list.to_basis_vec K n x).length = n + 1 :=
-by rw [list.to_basis_vec, list.update_nth_length, len_zero]
-
-lemma head_basis_vec_fixed (x : fin n) : (list.to_basis_vec K n x).head = 0 :=
-begin
-    have h₁ : list.to_basis_vec K n x = (zero K n).update_nth (x.1 + 1) 1 := rfl,
-    have h₂ : ∀ (hd a : K) (tl : list K) (n' : ℕ), ((hd :: tl).update_nth (n' + 1) a).head = (hd :: tl).head := by {intros, rw list.update_nth, refl},
-    rw h₁,
-    induction n with n',
-    have h₃ : zero K 0 = [0] := rfl,
-    rw [h₃, h₂],
-    refl,
-
-    have h₄ : zero K n'.succ = 0 :: zero K n' := rfl,
-    rw [h₄, h₂],
-    refl
-end
+def to_basis_vec : fin n → (fin n → K) := λ x, (λ y, if x=y then 1 else 0)
 
 def std_basis : fin n → aff_vec_coord_tuple K n :=
-λ x, ⟨list.to_basis_vec K n x, len_basis_vec_fixed K n x, head_basis_vec_fixed K n x⟩
+λ x, ⟨to_basis_vec K n x⟩
 
 def affine_coord_frame.standard : affine_coord_frame K n := 
     (affine_coord_frame.tuple ⟨pt_zero K n, std_basis K n, begin
@@ -197,19 +177,11 @@ def affine_coord_frame.standard : affine_coord_frame K n :=
         have h₄ : ∀ (a b : submodule K (aff_vec_coord_tuple K n)), has_coe_t.coe a = has_coe_t.coe b → a = b := sorry,
         
         have h₅ : has_coe_t.coe (finsupp.total (fin n) (aff_vec_coord_tuple K n) K (std_basis K n)).ker = has_coe_t.coe (⊥ : submodule K (fin n →₀ K)) := by rw [h₂, h₃],
-        
-        rw (h₄ ((finsupp.total (fin n) (aff_vec_coord_tuple K n) K (std_basis K n)).ker) (⊥ : submodule K (fin n →₀ K) h₅),
-
         /-dsimp only [linear_map.ker], 
         dsimp only [has_bot.bot], 
         dsimp only [has_zero.zero, add_monoid.zero, add_comm_monoid.zero, add_comm_group.zero],
         dsimp only [finsupp.total],-/
         
-        
-        sorry,
-
-        simp only [set.range, has_top.top, set.univ, submodule.span],
-        simp only [has_Inf.Inf],
         /-
         LEMMA LIST:
         -- The intersection contains every vector
@@ -241,8 +213,8 @@ def affine_coord_frame.standard : affine_coord_frame K n :=
         ⋂ s = ⟨B⟩ ∩ ℝ³ = ⟨B⟩ ≠ ℝ³
         
         
-        -/        
-        sorry
+        -/
+        repeat {sorry},
     end⟩)
 
 def affine_tuple_coord_frame.standard : affine_tuple_coord_frame K n :=
