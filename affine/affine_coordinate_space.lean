@@ -26,6 +26,9 @@ structure aff_pt_coord_tuple :=
 (pt : fin n → K)
 
 
+instance vec_coe : has_coe (aff_vec_coord_tuple K n) (fin n → K) := ⟨λv,v.1⟩
+instance pt_coe : has_coe (aff_pt_coord_tuple K n) (fin n → K) := ⟨λp,p.1⟩
+
 
 variables (x y : aff_vec_coord_tuple K n) (a b : aff_pt_coord_tuple K n)
     

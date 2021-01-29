@@ -345,14 +345,17 @@ def affine_coord_space.mk_tuple_point
     [field K] 
     (val : vector K n)
     : aff_pt_coord_tuple K n
-    := ⟨[1]++val.1,begin
+    := ⟨λi, val.nth i⟩
+        
+        
+        /-⟨[1]++val.1,begin
         have h₁ : ([1] ++ val.1).length = [1].length + val.1.length := by {rw [list.singleton_append, vecl.len_cons, add_comm], refl},
         rw [h₁, val.2, add_comm],
         refl
     end,begin
         rw list.singleton_append,
         refl
-    end⟩
+    end⟩-/
 
 attribute [reducible]
 def affine_coord_space.mk_tuple_vec
@@ -362,14 +365,14 @@ def affine_coord_space.mk_tuple_vec
     [field K] 
     (val : vector K n)
     : aff_vec_coord_tuple K n
-    := ⟨[0]++val.1,begin
+    := ⟨λi, val.nth i⟩/-⟨[0]++val.1,begin
         have h₁ : ([0] ++ val.1).length = [0].length + val.1.length := by {rw [list.singleton_append, vecl.len_cons, add_comm], refl},
         rw [h₁, val.2, add_comm],
         refl
     end,begin
         rw list.singleton_append,
         refl
-    end⟩
+    end⟩-/
 
 attribute [reducible]
 def affine_coord_space.mk_coord_point
@@ -381,14 +384,16 @@ def affine_coord_space.mk_coord_point
     (sp : affine_coord_space K n fr)
     (val : vector K n)
     : aff_coord_pt K n fr
-    := ⟨⟨[1]++val.1,begin
+    := ⟨affine_coord_space.mk_tuple_point val⟩
+    
+    /-⟨⟨[1]++val.1,begin
         have h₁ : ([1] ++ val.1).length = [1].length + val.1.length := by {rw [list.singleton_append, vecl.len_cons, add_comm], refl},
         rw [h₁, val.2, add_comm],
         refl
     end,begin
         rw list.singleton_append,
         refl
-    end⟩⟩
+    end⟩⟩-/
 
 attribute [reducible]
 def affine_coord_space.mk_coord_vec
@@ -400,14 +405,14 @@ def affine_coord_space.mk_coord_vec
     (sp : affine_coord_space K n fr)
     (val : vector K n)
     : aff_coord_vec K n fr
-    := ⟨⟨[0]++val.1,begin
+    := ⟨affine_coord_space.mk_tuple_vec val⟩/-⟨⟨[0]++val.1,begin
         have h₁ : ([0] ++ val.1).length = [0].length + val.1.length := by {rw [list.singleton_append, vecl.len_cons, add_comm], refl},
         rw [h₁, val.2, add_comm],
         refl
     end,begin
         rw list.singleton_append,
         refl
-    end⟩⟩
+    end⟩⟩-/
 
     --:= ⟨⟩
 
@@ -496,6 +501,7 @@ def coord_helper
 | (h::t) := ⟨t,sorry⟩
 | [] := ⟨[],sorry⟩
 -/
+/-
 attribute [reducible]
 def coord_helper
     {K : Type v}
@@ -512,9 +518,80 @@ def coord_helper
         refl
     end⟩
 end
+-/
+/-
+
+-/
+attribute [reducible]
+def indexed.as_list_helper
+    {K : Type u}
+    {n : ℕ}
+    [inhabited K] 
+    [field K] 
+    (coords : fin n → K)
+    : fin n → list K
+| ⟨nat.zero,p⟩ := [(coords ⟨nat.zero,p⟩)]
+| ⟨nat.succ k,p⟩ := 
+    --append current index to result of recursive step and return
+    let kp : k < n := begin
+      have h₁ : k < k.succ := begin
+        rw eq.symm (nat.one_add k),
+        simp only [nat.succ_pos', lt_add_iff_pos_left]
+      end,
+      apply has_lt.lt.trans,
+      exact h₁,
+      exact p
+    end in
+    let upd := [(coords ⟨k, kp⟩)] in
+    have (⟨k, kp⟩ : fin n) < (⟨k.succ,p⟩ : fin n), from begin
+      simp only [subtype.mk_lt_mk],
+      rw eq.symm (nat.one_add k),
+      simp only [nat.succ_pos', lt_add_iff_pos_left]
+    end,
+    --have t : a < (a + b), from sorry,
+    (indexed.as_list_helper ⟨k,kp⟩)++upd --$ λ _, sorry
+using_well_founded {rel_tac := λ _ _, `[exact ⟨_, measure_wf (λi, i.val)⟩]}
 
 attribute [reducible]
-def affine_coord_vec.get_coords 
+def indexed.as_list
+  {K : Type u}
+  {n : ℕ}
+  [inhabited K]
+  [field K]
+  : (fin n → K) → list K
+:= begin
+  intro mat,
+  cases n with n',
+  exact [],
+  have h₁ : n' < n'+1 := 
+    begin
+      by linarith,
+    end,
+  have h₂ : n'.succ = n'+1 :=
+    begin
+      simp 
+    end,
+  have h₃ : n' < n'.succ :=
+    begin
+      simp [h₁, h₂ ]
+    end,
+  exact (indexed.as_list_helper mat (⟨n',h₃⟩ : fin (nat.succ n'))),
+end
+
+
+attribute [reducible]
+def coord_helper
+    {K : Type v}
+    {n : ℕ }
+    [inhabited K]
+    [field K]
+    --(l : fin n → K)
+    : (fin n → K) → vector K n
+| f := ⟨indexed.as_list f, sorry⟩
+
+
+attribute [reducible]
+def affine_coord_vec.get_coords
     {K : Type v}
     {n : ℕ}
     [inhabited K] 
@@ -523,19 +600,19 @@ def affine_coord_vec.get_coords
     (v : aff_coord_vec K n fr)
     : vector K n
     :=
-    coord_helper v.1.1 v.1.2
+    coord_helper ↑v.1
 
 attribute [reducible]
-def affine_coord_pt.get_coords 
+def affine_coord_pt.get_coords
     {K : Type v}
     {n : ℕ}
     [inhabited K] 
     [field K] 
     {fr : affine_coord_frame K n}
-    (v : aff_coord_pt K n fr)
+    (p : aff_coord_pt K n fr)
     : vector K n
     :=
-    coord_helper v.1.1 v.1.2
+    coord_helper ↑p.1
 
 attribute [reducible]
 def affine_tuple_vec.get_coords 
@@ -546,7 +623,7 @@ def affine_tuple_vec.get_coords
     (v : aff_vec_coord_tuple K n )
     : vector K n
     :=
-    coord_helper v.1 v.2
+    coord_helper ↑v
 
 attribute [reducible]
 def affine_tuple_pt.get_coords 
@@ -554,10 +631,10 @@ def affine_tuple_pt.get_coords
     {n : ℕ}
     [inhabited K] 
     [field K] 
-    (v : aff_pt_coord_tuple K n )
+    (p : aff_pt_coord_tuple K n )
     : vector K n
     :=
-    coord_helper v.1 v.2
+    coord_helper ↑p
 
 attribute [reducible]
 def affine_coord_space.std_origin_vector
@@ -589,7 +666,7 @@ def affine_tuple_vec.as_matrix
     (v : aff_vec_coord_tuple K n )
     : matrix (fin n) (fin 1) K
     :=
-    λ i one, (coord_helper  v.1 v.2).nth i
+    λ i one, (coord_helper v.1 ).nth i
 
 attribute [reducible]
 def affine_tuple_pt.as_matrix
@@ -600,7 +677,7 @@ def affine_tuple_pt.as_matrix
     (v : aff_pt_coord_tuple K n )
     : matrix (fin n) (fin 1) K
     :=
-    λ i one, (coord_helper v.1 v.2).nth i
+    λ i one, (coord_helper v.1).nth i
 
 
 attribute [reducible]
@@ -712,7 +789,7 @@ def affine_vec_coord_tuple.as_matrix
     (v : aff_vec_coord_tuple K n)
     : col_matrix K n
     :=
-    λ i one, (@aff_lib.coord_helper K n v.1 v.2).nth i
+    λ i one, (coord_helper v.1).nth i
 
 attribute [reducible]
 def affine_pt_coord_tuple.as_matrix
@@ -723,7 +800,7 @@ def affine_pt_coord_tuple.as_matrix
     (v : aff_pt_coord_tuple K n)
     : col_matrix K n
     :=
-    λ i one, (@aff_lib.coord_helper K n v.1 v.2).nth i
+    λ i one, (coord_helper v.1).nth i
 
 attribute [reducible]
 def affine_coord_vec.to_matrix
@@ -759,7 +836,7 @@ def affine_coord_vec.to_indexed
     (v : aff_coord_vec K n fr)
     : fin n → K
     :=
-    λ i, (@aff_lib.coord_helper K n v.1.1 v.1.2).nth i
+    λ i, (coord_helper v.1.1).nth i
 
 attribute [reducible]
 def affine_coord_pt.to_indexed
@@ -771,7 +848,7 @@ def affine_coord_pt.to_indexed
     (v : aff_coord_pt K n fr)
     : fin n → K 
     :=
-    λ i, (@aff_lib.coord_helper K n v.1.1 v.1.2).nth i
+    λ i, (coord_helper v.1.1).nth i
 
 attribute [reducible]
 def affine_vec_coord_tuple.to_indexed
@@ -782,7 +859,7 @@ def affine_vec_coord_tuple.to_indexed
     (v : aff_vec_coord_tuple K n )
     : fin n → K 
     :=
-    λ i, (@aff_lib.coord_helper K n v.1 v.2).nth i
+    λ i, (coord_helper v.1).nth i
 
 attribute [reducible]
 def affine_pt_coord_tuple.to_indexed
@@ -793,7 +870,7 @@ def affine_pt_coord_tuple.to_indexed
     (v : aff_pt_coord_tuple K n )
     : fin n → K 
     :=
-    λ i, (@aff_lib.coord_helper K n v.1 v.2).nth i
+    λ i, (coord_helper v.1).nth i
 
 attribute [reducible]
 def col_matrix.as_list_helper
@@ -852,72 +929,16 @@ end
 
 
 attribute [reducible]
-def indexed.as_list_helper
-    {K : Type u}
-    {n : ℕ}
-    [inhabited K] 
-    [field K] 
-    (coords : fin n → K)
-    : fin n → list K
-| ⟨nat.zero,p⟩ := [(coords ⟨nat.zero,p⟩)]
-| ⟨nat.succ k,p⟩ := 
-    --append current index to result of recursive step and return
-    let kp : k < n := begin
-      have h₁ : k < k.succ := begin
-        rw eq.symm (nat.one_add k),
-        simp only [nat.succ_pos', lt_add_iff_pos_left]
-      end,
-      apply has_lt.lt.trans,
-      exact h₁,
-      exact p
-    end in
-    let upd := [(coords ⟨k, kp⟩)] in
-    have (⟨k, kp⟩ : fin n) < (⟨k.succ,p⟩ : fin n), from begin
-      simp only [subtype.mk_lt_mk],
-      rw eq.symm (nat.one_add k),
-      simp only [nat.succ_pos', lt_add_iff_pos_left]
-    end,
-    --have t : a < (a + b), from sorry,
-    (indexed.as_list_helper ⟨k,kp⟩)++upd --$ λ _, sorry
-using_well_founded {rel_tac := λ _ _, `[exact ⟨_, measure_wf (λi, i.val)⟩]}
-
-attribute [reducible]
-def indexed.as_list
-  {K : Type u}
-  {n : ℕ}
-  [inhabited K]
-  [field K]
-  : (fin n → K) → list K
-:= begin
-  intro mat,
-  cases n with n',
-  exact [],
-  have h₁ : n' < n'+1 := 
-    begin
-      by linarith,
-    end,
-  have h₂ : n'.succ = n'+1 :=
-    begin
-      simp 
-    end,
-  have h₃ : n' < n'.succ :=
-    begin
-      simp [h₁, h₂ ]
-    end,
-  exact (indexed.as_list_helper mat (⟨n',h₃⟩ : fin (nat.succ n'))),
-end
-
-attribute [reducible]
 def affine_coord_pt.from_matrix
     {K : Type u}
     {n : ℕ}
     [inhabited K] 
     [field K] 
     (fr : affine_coord_frame K n)
-    (coords : col_matrix K n)
-    : aff_coord_pt K n fr
-    := 
-    ⟨⟨[1]++(col_matrix.as_list coords), begin
+    --(coords : col_matrix K n)
+    : col_matrix K n → aff_coord_pt K n fr
+| coords := ⟨⟨λ i, coords i 1⟩⟩
+    /-⟨⟨[1]++(col_matrix.as_list coords), begin
       suffices h₁ : (col_matrix.as_list coords).length = n, from begin
         have h₂ : ([1] ++ col_matrix.as_list coords).length = [1].length + (col_matrix.as_list coords).length := begin
           simp only [list.length, zero_add, list.singleton_append],
@@ -938,7 +959,7 @@ def affine_coord_pt.from_matrix
       have h₃ : ∀ (coords : col_matrix K n''.succ), coords.as_list = coords.as_list_helper ⟨n'',_⟩ := by {intros, refl},
       rw h₁,
       
-    end, rfl⟩⟩
+    end, rfl⟩⟩-/
 
 attribute [reducible]
 def affine_coord_vec.from_matrix
@@ -950,9 +971,10 @@ def affine_coord_vec.from_matrix
     (coords : col_matrix K n)
     : aff_coord_vec K n fr
     := 
-    ⟨⟨[0]++(col_matrix.as_list coords),begin
+    ⟨⟨λi, coords i 1⟩⟩
+    --⟨⟨[0]++(col_matrix.as_list coords),begin
         
-    end,rfl⟩⟩
+    --end,rfl⟩⟩
 
 attribute [reducible]
 def affine_coord_pt.from_indexed
@@ -963,8 +985,9 @@ def affine_coord_pt.from_indexed
     (fr : affine_coord_frame K n)
     (coords : fin n → K)
     : aff_coord_pt K n fr
-    := 
-    ⟨⟨[1]++(indexed.as_list coords),sorry,rfl⟩⟩
+    :=
+    ⟨⟨coords⟩⟩ 
+    --⟨⟨[1]++(indexed.as_list coords),sorry,rfl⟩⟩
 
 attribute [reducible]
 def affine_coord_vec.from_indexed
@@ -975,8 +998,9 @@ def affine_coord_vec.from_indexed
     (fr : affine_coord_frame K n)
     (coords : fin n → K)
     : aff_coord_vec K n fr
-    := 
-    ⟨⟨[0]++(indexed.as_list coords),sorry,rfl⟩⟩
+    :=
+    ⟨⟨coords⟩⟩ 
+    --⟨⟨(indexed.as_list coords)⟩⟩
 
 
 attribute [reducible]
@@ -987,8 +1011,9 @@ def affine_pt_coord_tuple.from_indexed
     [field K] 
     (coords : fin n → K)
     : aff_pt_coord_tuple K n
-    := 
-    ⟨[1]++(indexed.as_list coords),sorry,rfl⟩
+    :=
+    ⟨coords⟩ 
+    --⟨[1]++(indexed.as_list coords),sorry,rfl⟩
 
 attribute [reducible]
 def affine_vec_coord_tuple.from_indexed
@@ -997,8 +1022,9 @@ def affine_vec_coord_tuple.from_indexed
     [inhabited K] 
     [field K] 
     : (fin n → K) → aff_vec_coord_tuple K n
-    := 
-    λ coords : fin n → K, ⟨[0]++(indexed.as_list coords),sorry,rfl⟩
+    | coords := ⟨coords⟩
+     
+    --λ coords : fin n → K, ⟨[0]++(indexed.as_list coords),sorry,rfl⟩
 
 instance : has_coe (fin n → K) (aff_vec_coord_tuple K n) := ⟨affine_vec_coord_tuple.from_indexed⟩
 
