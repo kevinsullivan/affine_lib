@@ -154,75 +154,38 @@ noncomputable def affine_tuple_space.to_base_space
     ⟨
       ⟨
         λ p ,
-          (affine_vec_coord_tuple.from_indexed
-            (
-              (
-                matrix.mul_vec 
+          (matrix.mul_vec 
                 (affine_tuple_coord_frame.get_basis_matrix fr)
-                (affine_vec_coord_tuple.to_indexed 
-                  ((fr.origin -ᵥ pt_zero K n) : aff_vec_coord_tuple K n))
-              ) --: fin n → K
-            )
-          ) +ᵥ
-          (affine_pt_coord_tuple.from_indexed
-            (
-              (
-                matrix.mul_vec 
-                (affine_tuple_coord_frame.get_basis_matrix fr)
-                (affine_pt_coord_tuple.to_indexed p)
-              ) --: fin n → K
-            )
-          ),
+                ↑((fr.origin -ᵥ pt_zero K n) : aff_vec_coord_tuple K n)
+           : aff_vec_coord_tuple K n) 
+          +ᵥ
+          (⟨matrix.mul_vec 
+            (affine_tuple_coord_frame.get_basis_matrix fr)
+            ↑p⟩ : aff_pt_coord_tuple K n),
         λ p,
-          (vec_neg K n (affine_vec_coord_tuple.from_indexed
-            (
-              (
-                matrix.mul_vec 
-                (affine_tuple_coord_frame.get_basis_matrix fr)⁻¹
-                (affine_vec_coord_tuple.to_indexed 
-                  ((fr.origin -ᵥ pt_zero K n) : aff_vec_coord_tuple K n))
-              ) --: fin n → K
-            )
-          )) +ᵥ
-          (affine_pt_coord_tuple.from_indexed
-            (
-              (
-                matrix.mul_vec 
-                (affine_tuple_coord_frame.get_basis_matrix fr)⁻¹
-                (affine_pt_coord_tuple.to_indexed p)
-              ) --: fin n → K
-            )
+          (vec_neg K n (
+            matrix.mul_vec 
+            (affine_tuple_coord_frame.get_basis_matrix fr)⁻¹
+            ↑((fr.origin -ᵥ pt_zero K n) : aff_vec_coord_tuple K n)
+            : aff_vec_coord_tuple K n)) +ᵥ
+          ( (⟨matrix.mul_vec 
+            (affine_tuple_coord_frame.get_basis_matrix fr)⁻¹
+            ↑p⟩) : aff_pt_coord_tuple K n
           ),
           sorry,
           sorry
       ⟩,
       ⟨
         λ v,
-          (affine_vec_coord_tuple.from_indexed
-            (
-              (
-                matrix.mul_vec 
-                (affine_tuple_coord_frame.get_basis_matrix fr)
-                (affine_vec_coord_tuple.to_indexed v)
-              ) --: fin n → K
-            )
-          )
-            ,
-        begin
-
-          --λs : (fin n → K)
-        end,
+          (matrix.mul_vec 
+          (affine_tuple_coord_frame.get_basis_matrix fr)
+          (↑v) : aff_vec_coord_tuple K n),
+        sorry,
         sorry,
         λ v,
-          (affine_vec_coord_tuple.from_indexed
-            (
-              (
-                matrix.mul_vec 
-                (affine_tuple_coord_frame.get_basis_matrix fr)⁻¹
-                (affine_vec_coord_tuple.to_indexed v)
-              ) --: fin n → K
-            )
-          ),
+          (matrix.mul_vec 
+          (affine_tuple_coord_frame.get_basis_matrix fr)⁻¹
+          (↑v) : aff_vec_coord_tuple K n),
         sorry,
         sorry⟩ ,
       sorry

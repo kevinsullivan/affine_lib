@@ -129,62 +129,35 @@ noncomputable def affine_tuple_space.to_base_euclidean_space
       ⟨
         λ p ,
           ((fr.origin -ᵥ pt_zero ℝ n) : aff_vec_coord_tuple ℝ n) +ᵥ
-          (affine_pt_coord_tuple.from_indexed
-            (
-              (
-                matrix.mul_vec 
-                (affine_tuple_coord_frame.get_basis_matrix fr)
-                (affine_pt_coord_tuple.to_indexed p)
-              ) --: fin n → K
-            )
-          ),
+          (⟨matrix.mul_vec 
+            (affine_tuple_coord_frame.get_basis_matrix fr)
+            (affine_pt_coord_tuple.to_indexed p)⟩
+          : aff_pt_coord_tuple ℝ n),
         λ p,
-          (vec_neg ℝ n (affine_vec_coord_tuple.from_indexed
-            (
-              (
+          (vec_neg ℝ n (
                 matrix.mul_vec 
                 (affine_tuple_coord_frame.get_basis_matrix fr)⁻¹
                 (affine_vec_coord_tuple.to_indexed 
                   ((fr.origin -ᵥ pt_zero ℝ n) : aff_vec_coord_tuple ℝ n))
-              ) --: fin n → K
-            )
           )) +ᵥ
-          (affine_pt_coord_tuple.from_indexed
-            (
-              (
-                matrix.mul_vec 
+          (⟨matrix.mul_vec 
                 (affine_tuple_coord_frame.get_basis_matrix fr)⁻¹
-                (affine_pt_coord_tuple.to_indexed p)
-              ) --: fin n → K
-            )
+                (↑p)⟩ : aff_pt_coord_tuple ℝ n
           ),
           sorry,
           sorry
       ⟩,
       ⟨
         λ v,
-          (affine_vec_coord_tuple.from_indexed
-            (
-              (
-                matrix.mul_vec 
-                (affine_tuple_coord_frame.get_basis_matrix fr)
-                (affine_vec_coord_tuple.to_indexed v)
-              ) --: fin n → K
-            )
-          )
-            ,
+          matrix.mul_vec 
+          (affine_tuple_coord_frame.get_basis_matrix fr)
+          (affine_vec_coord_tuple.to_indexed v),
         sorry,
         sorry,
         λ v,
-          (affine_vec_coord_tuple.from_indexed
-            (
-              (
-                matrix.mul_vec 
-                (affine_tuple_coord_frame.get_basis_matrix fr)⁻¹
-                (affine_vec_coord_tuple.to_indexed v)
-              ) --: fin n → K
-            )
-          ),
+          matrix.mul_vec 
+          (affine_tuple_coord_frame.get_basis_matrix fr)⁻¹
+          (affine_vec_coord_tuple.to_indexed v),
         sorry,
         sorry⟩ ,
       sorry
@@ -323,52 +296,28 @@ noncomputable def affine_euclidean_rotation.as_transform
     ⟨
       ⟨
         λ p ,
-          (affine_coord_pt.from_indexed _
-            (
-              (
-                matrix.mul_vec 
-                (affine_tuple_basis.get_basis_matrix rot.r)
-                (affine_pt_coord_tuple.to_indexed p.1)
-              )
-            )
-          ),
+          ⟨⟨matrix.mul_vec 
+          (affine_tuple_basis.get_basis_matrix rot.r)
+          (↑p.1)⟩⟩,
         λ p ,
-          (affine_coord_pt.from_indexed _
-            (
-              (
-                matrix.mul_vec 
-                (affine_tuple_basis.get_basis_matrix rot.r)⁻¹
-                (affine_pt_coord_tuple.to_indexed p.1)
-              )
-            )
-          ),
+          ⟨⟨matrix.mul_vec 
+          (affine_tuple_basis.get_basis_matrix rot.r)⁻¹
+          (affine_pt_coord_tuple.to_indexed p.1)⟩⟩,
           sorry,
           sorry
       ⟩,
       ⟨
         λ v,
-          (affine_coord_vec.from_indexed _
-            (
-              (
-                matrix.mul_vec 
-                (affine_tuple_basis.get_basis_matrix rot.r)
-                (affine_vec_coord_tuple.to_indexed v.1)
-              )
-            )
-          )
+          ⟨⟨matrix.mul_vec 
+          (affine_tuple_basis.get_basis_matrix rot.r)
+          (affine_vec_coord_tuple.to_indexed v.1)⟩⟩
             ,
         sorry,
         sorry,
         λ v,
-          (affine_coord_vec.from_indexed _
-            (
-              (
-                matrix.mul_vec 
-                (affine_tuple_basis.get_basis_matrix rot.r)⁻¹
-                (affine_vec_coord_tuple.to_indexed v.1)
-              )
-            )
-          ),
+          ⟨⟨matrix.mul_vec 
+          (affine_tuple_basis.get_basis_matrix rot.r)⁻¹
+          (affine_vec_coord_tuple.to_indexed v.1)⟩⟩,
         sorry,
         sorry⟩ ,
       sorry
@@ -387,5 +336,5 @@ variables
 #check (rot : affine_euclidean_space_transform n fr1 fr1 sp1 sp1).linear cv1
 #check (rot : affine_euclidean_space_transform n fr1 fr1 sp1 sp1) cp1
 #check rot⬝cp1 --should this work?
-
+--#check rot cp1
 end eucl_lib
