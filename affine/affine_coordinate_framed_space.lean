@@ -130,8 +130,19 @@ lemma vec_add_left_neg_coord : ∀ x : aff_coord_vec K n fr, -x + x = 0 :=
 begin
 intro x,
 ext m,
--- exact add_left_neg (x.1.1 m), -- not sure why this fails
-sorry,
+have h₀ : -x.to_aff_vec_coord_tuple.vec m + x.to_aff_vec_coord_tuple.vec m = 0 := add_left_neg (x.1.1 m),
+have h₁ : (0 : aff_coord_vec K n fr).to_aff_vec_coord_tuple.vec m = (0 : K) := rfl,
+have h₂ : (-x + x).to_aff_vec_coord_tuple.vec m = -x.to_aff_vec_coord_tuple.vec m + x.to_aff_vec_coord_tuple.vec m := begin
+    have h₃ : (-x + x).1.1 m = (-x).1.1 m + x.1.1 m := rfl,
+    have h₄ : -x = vec_neg_coord K n fr ⟨x.1⟩ := begin
+        have h : x = ⟨x.1⟩ := by {ext, refl},
+        rw h,
+        refl
+    end,
+    have h₅ : vec_neg_coord K n fr ⟨x.1⟩ = ⟨⟨λ m : fin n, -(x.1.1 m)⟩⟩ := rfl,
+    rw [h₃, h₄, h₅]
+end,
+exact eq.trans h₂ (eq.trans h₀ (eq.symm h₁)),
 end
 
 
