@@ -6,6 +6,7 @@ import
     linear_algebra.matrix
 --    linear_algebra.
 
+
 open_locale affine
 
 namespace aff_trans
@@ -306,7 +307,6 @@ with affine_coord_space.fold_tuple_to_to_standard_transforms :
 
 attribute [reducible]
 noncomputable def affine_coord_space.build_transform
-    [inhabited (affine_coord_frame K n)]
     (sp1 : affine_coord_space K n fr1)
     (sp2 : affine_coord_space K n fr2)
     : affine_coord_space_transform K n fr1 fr2 sp1 sp2
