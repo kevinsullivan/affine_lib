@@ -130,8 +130,19 @@ lemma vec_add_left_neg_coord : ∀ x : aff_coord_vec K n fr, -x + x = 0 :=
 begin
 intro x,
 ext m,
---exact add_left_neg (x.1.1 m) not sure why this fails
-sorry,
+have h₀ : -x.to_aff_vec_coord_tuple.vec m + x.to_aff_vec_coord_tuple.vec m = 0 := add_left_neg (x.1.1 m),
+have h₁ : (0 : aff_coord_vec K n fr).to_aff_vec_coord_tuple.vec m = (0 : K) := rfl,
+have h₂ : (-x + x).to_aff_vec_coord_tuple.vec m = -x.to_aff_vec_coord_tuple.vec m + x.to_aff_vec_coord_tuple.vec m := begin
+    have h₃ : (-x + x).1.1 m = (-x).1.1 m + x.1.1 m := rfl,
+    have h₄ : -x = vec_neg_coord K n fr ⟨x.1⟩ := begin
+        have h : x = ⟨x.1⟩ := by {ext, refl},
+        rw h,
+        refl
+    end,
+    have h₅ : vec_neg_coord K n fr ⟨x.1⟩ = ⟨⟨λ m : fin n, -(x.1.1 m)⟩⟩ := rfl,
+    rw [h₃, h₄, h₅]
+end,
+exact eq.trans h₂ (eq.trans h₀ (eq.symm h₁)),
 end
 
 
@@ -271,8 +282,23 @@ begin
 intros a g h h₀,
 have h₁ := aff_add_free K n a.1 g.1 h.1,
 dsimp only [has_vadd.vadd, aff_group_action_coord] at h₀ h₁,
--- need to recover g.1 +ᵥ a.1 = h.1 +ᵥ a.1 from h₀
-sorry,
+have h₂ : ∀ (x y : aff_coord_pt K n fr), x = y → x.to_aff_pt_coord_tuple = y.to_aff_pt_coord_tuple := begin
+    intros x y hy,
+    rw hy
+end,
+have h₃ : aff_coord_pt.mk (aff_group_action K n g.to_aff_vec_coord_tuple a.to_aff_pt_coord_tuple) = 
+    aff_coord_pt.mk (aff_group_action K n h.to_aff_vec_coord_tuple a.to_aff_pt_coord_tuple) →
+    (aff_coord_pt.mk (aff_group_action K n g.to_aff_vec_coord_tuple a.to_aff_pt_coord_tuple)).to_aff_pt_coord_tuple =
+    (aff_coord_pt.mk (aff_group_action K n h.to_aff_vec_coord_tuple a.to_aff_pt_coord_tuple)).to_aff_pt_coord_tuple := by apply h₂,
+have h₄ := h₃ h₀,
+have h₅ : (aff_coord_pt.mk (aff_group_action K n g.to_aff_vec_coord_tuple a.to_aff_pt_coord_tuple)).to_aff_pt_coord_tuple =
+    aff_group_action K n g.to_aff_vec_coord_tuple a.to_aff_pt_coord_tuple := rfl,
+have h₆ : (aff_coord_pt.mk (aff_group_action K n h.to_aff_vec_coord_tuple a.to_aff_pt_coord_tuple)).to_aff_pt_coord_tuple =
+    aff_group_action K n h.to_aff_vec_coord_tuple a.to_aff_pt_coord_tuple := rfl,
+rw [h₅, h₆] at h₄,
+have h₇ := h₁ h₄,
+ext,
+rw h₇
 end
 
 lemma aff_vadd_vsub_coord : ∀ (x : aff_coord_vec K n fr) (a : aff_coord_pt K n fr), x +ᵥ a -ᵥ a = x := 
