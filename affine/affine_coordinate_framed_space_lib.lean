@@ -1,6 +1,5 @@
 import .affine_coordinate_framed_space
 import .affine_space_type
-import .list_as_k_tuple
 import linear_algebra.matrix
 import tactic.ext
 universes u v w

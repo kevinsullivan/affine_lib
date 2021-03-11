@@ -1,4 +1,4 @@
-import .list_as_k_tuple linear_algebra.affine_space.basic
+import linear_algebra.affine_space.basic
 import linear_algebra.basis
 import .affine_coordinate_space
 import data.real.basic
