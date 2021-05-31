@@ -2,13 +2,19 @@ import linear_algebra.affine_space.affine_equiv
 import algebra.direct_sum
 import linear_algebra.direct_sum_module
 
+/-
+This file is not an official part of our repository.
+It's for some experimenting around with direct sums.
+-/
+
+
 universes u 
 variables 
 (K : Type u) 
 [field K]
 [inhabited K]
 
-#check smul_eq_zero
+#check @smul_eq_zero
 #check smul_eq_zero.mp
 #check sub_smul
 
