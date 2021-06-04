@@ -1,25 +1,32 @@
+/-
+© 2021 by the Rector and Visitors of the University of Virginia
+-/
+
 import .lin2kcoord
 
-abbreviation K := ℚ 
+/-
+We illustrate the use of, and test, lin2kcoord.lean. 
+-/
 
--- two-D vectors over a field, K
-def v1 := ((1, 1) : K × K)
-def v2 := ((-1,1) : K × K)
+-- 2D coordinate vectors over a field, K = ℚ 
+def v1 := ((1, 1) : ℚ × ℚ)
+def v2 := ((-1,1) : ℚ × ℚ)
 
--- translation (add)
+-- element addition, abstract now
 def v3 := v1 + v2
+
+example : v3 = (0,2) := 
+begin
+unfold v1 v2 v3,
+simp,
+trivial,
+end
 
 -- scaling (smul)
 def v4 := 5 • v3
-
--- test
-#eval v4          -- expect (0,10)
-
--- accessors
-#check v3.1 
-#reduce v3.1      -- {num := int.of_nat 0, denom := 1, pos := _, cop := _}
-#check v3.2 
-#reduce v3.2      -- deterministic timeout
-
--- transformations
--- ?
+example : v4 = (0,10) := 
+begin
+  unfold v4 v3 v2 v1,
+  simp,
+  trivial,
+end
