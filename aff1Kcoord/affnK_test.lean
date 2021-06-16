@@ -21,16 +21,10 @@ noncomputable def p4c : ℝ := pt_coord ℝ p4
 /-
 -/
 
-
-
 /-
 Build an n-D affine space from n 1-D spaces
 -/
 abbreviation affnK (n : nat) := fin n → (affine_space (vec K) (pt K)) 
-
-
-
-
 
 /-
 -/
