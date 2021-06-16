@@ -1,5 +1,5 @@
 import data.real.basic
-import .aff1nK
+import .affnK
 
 
 -- Operations on vectors using vec type
