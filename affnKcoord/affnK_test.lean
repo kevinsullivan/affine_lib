@@ -1,24 +1,29 @@
 import data.real.basic
 import .affnK
 
+abbreviation K := ℚ 
+def dim := 3
 
--- Operations on vectors using vec type
-noncomputable def v1 : vec ℝ := mk_vec ℝ 0
-noncomputable def v2 : vec ℝ := mk_vec ℝ 3
-noncomputable def v3 := v1 + v2
-noncomputable def v4 := (2 : ℝ) • v3
+def v1 : vec_n K dim := mk_vec_n _ _ ⟨[4,5,6], rfl⟩
+#eval v1.coords
+def v2 : vec_n K dim := v1 + v1
+def v3 := 5•v1 - v2
 
--- Operations involving points using pt type 
-noncomputable def p1 : pt ℝ := mk_pt ℝ 0
-noncomputable def p2 : pt ℝ := mk_pt ℝ 3
-noncomputable def p3 := p1 -ᵥ p2
-noncomputable def p4 := v4 +ᵥ p2
+def p1 : pt_n K dim := mk_pt_n _ _  ⟨[1,2,3], rfl⟩
 
--- get coordinate of pt
-noncomputable def p4c : ℝ := pt_coord ℝ p4
+#eval p1.coords
+
+def p2 : pt_n K dim := v2 +ᵥ p1
+
+#eval p2.coords
+
+def p3 := p1 -ᵥ p2
+
+#eval p3.coords
 
 
 /-
+Code from 6/14 meeting:
 -/
 
 /-
