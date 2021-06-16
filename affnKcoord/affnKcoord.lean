@@ -13,11 +13,9 @@ section explicitK
 
 variables 
 (K : Type u) [field K] [inhabited K]
-(space_id : ℕ) (dim : ℕ) 
+(dim : ℕ) 
 
-def id_vec : fin dim → ℕ := λi, space_id
-
-inductive fm (K : Type u) [inhabited K] [field K] : Πdim : ℕ, Πid_vec:fin dim → ℕ, Type u
+inductive fm : Πdim : ℕ, Πid_vec:fin dim → ℕ, Type (u)
 | base : Πdim : ℕ, Πid_vec:fin dim → ℕ, fm dim id_vec
 | deriv 
     {dim : ℕ}
@@ -26,111 +24,68 @@ inductive fm (K : Type u) [inhabited K] [field K] : Πdim : ℕ, Πid_vec:fin di
     (basis : fin dim → vec_n K dim)
     (parent : fm dim id_vec)
     : fm dim id_vec
-| prod
-    (dim1 dim2 : ℕ)
-    (id1 : fin dim1 → ℕ)
-    (id2 : fin dim2 → ℕ)
-    (f1 : fm dim1 id1)
-    (f2 : fm dim2 id2)
-    (prod_origin : pt_n K (dim1 + dim2))
-    (prod_basis : fin (dim1+dim2) → vec_n K (dim1 + dim2))
-    : fm (dim1+dim2) (add_maps id1 id2)
-
-attribute [reducible]
-def fm.parent2
-{K : Type u} [field K] [inhabited K]
-{dim : ℕ} {id_vec : fin dim → ℕ} :
-fm K dim id_vec → fm K dim id_vec
-| (fm.base dim id_vec) := (fm.base dim id_vec)
-| (fm.deriv origin basis parent) := parent
-| (fm.prod d1 d2 i1 i2 f1 f2 o1 b1 : fm K dim id_vec) := (fm.prod f1 f2)
 
 
 def fm.parent 
 {K : Type u} [field K] [inhabited K]
 {dim : ℕ} {id_vec : fin dim → ℕ}
-(f: fm K dim id_vec) : fm K dim id_vec:=
-begin
-    cases f,
-    exact (fm.base dim id_vec),
-    exact f_parent,
-    exact fm.prod f_f1 f_f2 f_prod_origin f_prod_basis
-end
-/-| (fm.base dim id_vec) := (fm.base dim id_vec)
+: fm K dim id_vec → fm K dim id_vec
+| (fm.base dim id_vec) := (fm.base dim id_vec)
 | (fm.deriv origin basis parent) := parent
-| (fm.prod f1 f2) := (fm.prod f1 f2)
--/
 
-def fm.origin2 
+def fm.origin
 {K : Type u} [field K] [inhabited K]
 {dim : ℕ} {id_vec : fin dim → ℕ}  :
 fm K dim id_vec → pt_n K dim
 | (fm.base dim id_vec) := (λi, mk_pt K 0)
 | (fm.deriv origin basis parent) := origin
-| (fm.prod f1 f2) := (λi, mk_pt K 0)
-
-def fm.origin 
-{K : Type u} [field K] [inhabited K]
-{dim : ℕ} {id_vec : fin dim → ℕ} 
-(f : fm K dim id_vec) : pt_n K dim :=
-begin 
-    cases f,
-    exact (λi, mk_pt K 0),
-    exact f_origin,
-    exact f_prod_origin
-end
 
 def fm.basis 
 {K : Type u} [field K] [inhabited K]
-{dim : ℕ} {id_vec : fin dim → ℕ} 
-(f : fm K dim id_vec) : fin dim → vec_n K dim
-:=
-begin
-    cases f,
-    exact (λ i j, if j = i then mk_vec K 1 else mk_vec K 0),
-    exact f_basis,
-    exact f_prod_basis
+{dim : ℕ} {id_vec : fin dim → ℕ} :
+fm K dim id_vec → (fin dim → vec_n K dim)
+| (fm.base dim id_vec) := (λ i j, if j = i then mk_vec K 1 else mk_vec K 0)
+| (fm.deriv origin basis parent) := basis
 
-end
-/-
-inductive fm : nat → Type u
-| base : ∀ (n : nat), fm n
-| deriv : ∀ (n : nat), (prod (pt K) (vec K)) → fm n → fm n
--/
 
 #check fm K 
 
 def mk_fm  {dim : ℕ} {id_vec : fin dim → ℕ}  (p : pt_n K dim) (v : fin dim → vec_n K dim) (f : fm K dim id_vec)
     : fm K dim id_vec:= fm.deriv p v f
 
-def mk_prod_fm
+def merge_prod_fm 
     {K : Type u} [inhabited K] [field K] 
-    {dim1 : ℕ} {id_vec1 : fin dim1 → ℕ} (f1 : fm K dim1 id_vec1)
-    {dim2 : ℕ} {id_vec2 : fin dim2 → ℕ} (f2 : fm K dim2 id_vec2)
-    : fm K (dim1+dim2) (add_maps id_vec1 id_vec2)
-    := fm.prod f1 f2 
-        (add_maps f1.origin f2.origin) 
+    {dim1 : ℕ} {id_vec1 : fin dim1 → ℕ} --(f1 : fm K dim1 id_vec1)
+    {dim2 : ℕ} {id_vec2 : fin dim2 → ℕ} --(f2 : fm K dim2 id_vec2)
+    :  fm K dim1 id_vec1 → fm K dim2 id_vec2 → fm K (dim1+dim2) (add_maps id_vec1 id_vec2)
+| (fm.deriv o1 b1 p1) (fm.deriv o2 b2 p2) := fm.deriv (add_maps o1 o2) 
         (λi, 
-            if i.1 < dim1 then (add_maps (f1.basis ⟨i.1,sorry⟩) (mk_vec_n K dim2 ⟨list.repeat dim2 0, sorry⟩))
-            else (add_maps (mk_vec_n K dim1 ⟨list.repeat dim1 0, sorry⟩) (f2.basis ⟨i.1,sorry⟩)))
-
---structure spc {K : Type u} [inhabited K] [field K] {space_id : nat} {dim : ℕ} (f : fm K dim id_vec) : Type u       -- interesting specimen, here, btw
+            if i.1 < dim1 then (add_maps (b1 ⟨i.1,sorry⟩) (mk_vec_n K dim2 ⟨list.repeat dim2 0, sorry⟩))
+            else (add_maps (mk_vec_n K dim1 ⟨list.repeat dim1 0, sorry⟩) (b2 ⟨i.1,sorry⟩)))
+        (merge_prod_fm p1 p2)
+| (fm.deriv o1 b1 p1) (fm.base dim2 id_vec2) := fm.deriv (add_maps o1 (fm.base dim2 id_vec2).origin) 
+        (λi, 
+            if i.1 < dim1 then (add_maps (b1 ⟨i.1,sorry⟩) (mk_vec_n K dim2 ⟨list.repeat dim2 0, sorry⟩))
+            else (add_maps (mk_vec_n K dim1 ⟨list.repeat dim1 0, sorry⟩) ((fm.base dim2 id_vec2).basis ⟨i.1,sorry⟩)))
+        (merge_prod_fm p1 (fm.base dim2 id_vec2))
+| (fm.base dim1 id_vec1) (fm.deriv o2 b2 p2) := fm.deriv (add_maps (fm.base dim1 id_vec1).origin o2) 
+        (λi, 
+            if i.1 < dim1 then (add_maps (mk_vec_n K dim1 ⟨list.repeat dim1 0, sorry⟩) (b2 ⟨i.1,sorry⟩))
+            else (add_maps ((fm.base dim1 id_vec1).basis ⟨i.1,sorry⟩) (mk_vec_n K dim2 ⟨list.repeat dim2 0, sorry⟩)))
+        (merge_prod_fm (fm.base dim1 id_vec1) p2)      
+| (fm.base dim1 id_vec1) (fm.base dim2 id_vec2) := fm.base (dim1+dim2) (add_maps id_vec1 id_vec2)
 
 inductive spc : Π{dim : ℕ}, Π{id_vec : fin dim → ℕ},Π(f: fm K dim id_vec), Type u
 | single {dim : ℕ} {id_vec : fin dim → ℕ} (f: fm K dim id_vec) : spc f
 | prod 
     {dim1 : ℕ} {id_vec1 : fin dim1 → ℕ} (f1: fm K dim1 id_vec1) --(s1 : spc dim1 id_vec1 f1)
     {dim2 : ℕ} {id_vec2 : fin dim2 → ℕ} (f2: fm K dim2 id_vec2) --(s2 : spc dim2 id_vec2 f2)
-    : spc (mk_prod_fm f1 f2)
+    : spc (merge_prod_fm f1 f2)--(mk_prod_fm f1 f2)
 
 
 def spc.fm {K : Type u} [inhabited K] [field K] {dim : ℕ} {id_vec : fin dim → ℕ} {f: fm K dim id_vec} (sp : spc K f)
     := f
 
-
---| prod ()
-
---notation s1`×`s2 := spc.prod s1 s2
 
 def mk_space  {K : Type u} [inhabited K] [field K] 
 {dim : ℕ} {id_vec : fin dim → ℕ} 
@@ -141,18 +96,7 @@ def mk_prod_spc
     {K : Type u} [inhabited K] [field K] 
     {dim1 : ℕ} {id_vec1 : fin dim1 → ℕ} {f1 : fm K dim1 id_vec1} (s1 : spc K f1)
     {dim2 : ℕ} {id_vec2 : fin dim2 → ℕ} {f2 : fm K dim2 id_vec2} (s2 : spc K f2)
-    : spc K (mk_prod_fm f1 f2) := spc.prod f1 f2
-
-
-
-/-
-inductive prod_spc (K : Type u) [inhabited K] [field K] : Type u
-| single  {space_id : nat} {dim : ℕ} {f : fm K dim id_vec} : prod_spc
-| double {space_id1 : nat} {dim1 : ℕ} {f1 : fm K space_id1 dim1} {space_id2 : nat} {dim2 : ℕ} {f2 : fm K space_id2 dim2} 
-    (s1 : prod_spc) (s2 : prod_spc)
-     : prod_spc
-
-def prod_spc.to_spc : prod_spc K → spc -/
+    : spc K (merge_prod_fm f1 f2) := spc.prod f1 f2
 
 
 
@@ -165,11 +109,6 @@ variables
 {dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} (s : spc K f)
 {dim2 : nat } {id_vec2 : fin dim2 → nat} {f2 : fm K dim2 id_vec2} (s2 : spc K f2)
 
-/-
-Augment pt and vec types with spaces and frames and
-then make operations apply only for objects in same
-space (and thus frame).
--/
 @[ext]
 structure point {f : fm K dim id_vec} (s : spc K f) :=
 (coords : pt_n K dim)
@@ -218,12 +157,6 @@ def mk_frame {f : fm K dim id_vec} {s : spc K f}  (p : point s) (v : fin dim →
 fm.deriv p.coords (λi, (v i).coords) f   -- TODO: make sure v ≠ 0 (erasing tyoe info)
                                       -- TODO: snd arg is really a basis for the vs
 
-
-/-
-    *************************************
-    Instantiate module K (vector K)
-    *************************************
--/
 
 variables v1 v2 : vectr s
 
@@ -315,23 +248,10 @@ instance sub_neg_monoid_vectr : sub_neg_monoid (vectr s) :=
     ..(show add_monoid (vectr s), by apply_instance)
 }
 
-/- ⟨ 
-    add_vectr_vectr s, add_assoc_vectr s, vectr_zero s, zero_add_vectr s, add_zero_vectr s, -- add_monoid
-    neg_vectr s,                                                                  -- has_neg
-    sub_vectr_vectr s,                                                              -- has_sub
-    sub_eq_add_neg_vectr s,                                                       -- new
-⟩ -/
-
 lemma add_left_neg_vectr : ∀ a : vectr s, -a + a = 0 := 
 begin
     intros,
-    ext,/-
-    repeat {
-    have h0 : (-a + a).coords = -a.coords + a.coords := rfl,
-    simp [h0],
-    have : (0:vec K) = (0:vectr s).coords := rfl,
-    simp *,
-    } -/
+    ext,
     admit,
     admit
 end
@@ -344,17 +264,6 @@ instance : add_group (vectr s) := {
 ..(show sub_neg_monoid (vectr s), by apply_instance),
 
 }
-
-
-/-⟨
-    -- sub_neg_monoid
-    add_vectr_vectr s, add_assoc_vectr s, vectr_zero s, zero_add_vectr s, add_zero_vectr s, -- add_monoid
-    neg_vectr s,                                                                  -- has_neg
-    sub_vectr_vectr s,                                                              -- has_sub
-    sub_eq_add_neg_vectr s, 
-    -- new
-    add_left_neg_vectr s,
-⟩ -/
 
 lemma add_comm_vectr : ∀ a b : vectr s, a + b = b + a := 
 begin
@@ -428,6 +337,7 @@ end
 lemma smul_zero_vectr : ∀(r : K), r • (0 : vectr s) = 0 := begin
     admit--intros, ext, exact mul_zero _, exact mul_zero _
 end
+
 instance distrib_mul_action_K_vectrK : distrib_mul_action K (vectr s) := ⟨
 smul_add_vectr s,
 smul_zero_vectr s,
@@ -457,29 +367,9 @@ instance add_comm_group_vectr : add_comm_group (vectr s) :=
     add_comm := begin
         exact add_comm_vectr s
         
-        /-intros,
-        ext,
-        let h0 : (a + b).coords = a.coords + b.coords := rfl,
-        let h1 : (b + a).coords = b.coords + a.coords := rfl,
-        rw [h0,h1],
-        exact add_comm _ _,
-        exact add_comm _ _,-/
     end,
---to_add_group := (show add_group (vec K), by apply_instance),
---to_add_comm_monoid := (show add_comm_monoid (vec K), by apply_instance),
 ..(show add_group (vectr s), by apply_instance)
 }
-/-⟨
--- add_group
-    add_vectr_vectr s, add_assoc_vectr s, vectr_zero s, zero_add_vectr s, add_zero_vectr s, -- add_monoid
-    neg_vectr s,                                                                  -- has_neg
-    sub_vectr_vectr s,                                                              -- has_sub
-    sub_eq_add_neg_vectr s, 
-    add_left_neg_vectr s,
--- commutativity
-    add_comm_vectr s,
-⟩-/
-
 instance : module K (vectr s) := module_K_vectrK s
 
 /-
@@ -568,16 +458,6 @@ begin
 end
 
 
-/-instance aff_point_torsor : add_torsor (vectr s) (point s) := 
-⟨ 
-    aff_vectr_group_action s,
-    zero_vectr_vadd'_a1 s,    -- from add_action
-    vectr_add_assoc'_a1 s,    -- from add_action
-    aff_point_group_sub s,    -- from has_vsub
-    point_vsub_vadd_a1 s,     -- from add_torsor
-    point_vadd_vsub_a1 s,     -- from add_torsor
-⟩-/
-
 instance : affine_space (vectr s) (point s) := ⟨
     point_vsub_vadd_a1 s,
     point_vadd_vsub_a1 s,
@@ -585,15 +465,8 @@ instance : affine_space (vectr s) (point s) := ⟨
 
 
 
-/-
-And now for transforms
--/
 
---variables {f1 :  fm K dim id_vec} {f2 :  fm K dim id_vec} (s1 : spc K f1) (s2 : spc K f2)
-#check (point s) ≃ᵃ[K] (point s)
---not usable?
 abbreviation raw_tr := (pt_n K dim) ≃ᵃ[K] (pt_n K dim)
---abbreviation fm_tr := (point s1) ≃ᵃ[K] (point s2)
 
 structure fm_tr 
     {f1 :  fm K dim id_vec} {f2 :  fm K dim id_vec} 
@@ -619,7 +492,7 @@ def fm.to_homogeneous_matrix (f_ : fm K dim id_vec) : matrix (fin (dim + 1)) (fi
     if i=0 ∧ j=0 then 1 
     else if i=0 then 0
     else if j = 0 then (f_.origin ⟨i.1-1, sorry⟩).coord
-    else (f_.basis ⟨j.1-1,sorry⟩ ⟨i.1-1, sorry⟩).coord
+    else (f_.basis ⟨i.1-1,sorry⟩ ⟨j.1-1, sorry⟩).coord
 
 def point.to_homogeneous_coords (p : point s) : fin (dim+1) → K
     := 
@@ -661,289 +534,82 @@ def mk_vec_n_from_homogeneous_coords (coords_:fin (dim+1) → K) : vec_n K dim
     :=
     λi, mk_vec K (coords_ ⟨i.1+1,sorry⟩)
 
+def matrix.cramer_inverse 
+    {dim : ℕ} {K : Type u} [inhabited K] [field K] : matrix (fin dim) (fin dim) K →
+    matrix (fin dim) (fin dim) K := 
+    λm,
+    λ i j,
+    let detm := m.cramer (λi, m i ⟨0, sorry⟩) ⟨0, sorry⟩ in
+    let colj : fin dim → K := λi, if i = j then 1 else 0 in
+    (m.cramer colj i)/detm
+
 
 #check f.to_homogeneous_matrix
-/-
-TODO: This material needs inspection, verification
--/
-/-
-equation compiler failed to generate bytecode for 'to_base_helper'._main'
-nested exception message:
-code generation failed, VM does not have code for 'classical.choice'
--/
-/-
-stuck at noncomputable for now
--/
-/-
-noncomputable def to_base_helper' :  fm K dim id_vec → @raw_tr K _ _ dim
-| (fm.base dim id_vec) := ⟨
-            ⟨   /-base case -/
-                (λ p, p),
-                (λ p, p),
-                begin
-                    unfold function.left_inverse,
-                    intros,
-                    simp *
-                end,
-                begin
-                    unfold function.right_inverse function.left_inverse,
-                    intros,
-                    simp *
-                end
-            ⟩,
-            ⟨
-                (λ v, v),
-                begin
-                    intros, simp*
-                end,
-               -- (λ v, ⟨v.coords⟩),
-                begin
-                    intros, simp *
-                end,
-                (λ v, v),
-                begin
-                    unfold function.left_inverse,
-                    intros, simp *
-                end,
-                begin
-                    unfold function.left_inverse function.right_inverse,
-                    intros, simp *
-                end,
-            ⟩,
-            begin
-                simp *,
-                --admit   -- TODO: What's this?
-            end
-        ⟩
-| (fm.deriv origin basis parent) := (⟨
-            ⟨/-transform from current->parent-/
-                (λ (p : pt_n K dim),
-                mk_pt_n_from_homogeneous_coords 
-                (((fm.deriv origin basis parent).to_homogeneous_matrix.mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
-                : pt_n K dim → pt_n K dim),
-                (λ (p : pt_n K dim),
-                mk_pt_n_from_homogeneous_coords 
-                ((((fm.deriv origin basis parent).to_homogeneous_matrix.nonsing_inv).mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
-                : pt_n K dim → pt_n K dim),
-                sorry,
-                sorry,
-            ⟩,
-            ⟨
-                λv, v,
-                sorry,
-                sorry,
-                sorry,
-                sorry,
-                sorry
-            ⟩,
-            sorry /-invert to parent->current and append to current->base-/
-⟩ : @raw_tr K _ _ dim).trans (to_base_helper' parent)
-| (fm.prod f1 f2 prod_origin prod_basis) := ⟨
-            ⟨/-transform from current->parent-/
-                (λ (p : pt_n K dim),
-                mk_pt_n_from_homogeneous_coords 
-                (((fm.prod f1 f2 prod_origin prod_basis).to_homogeneous_matrix.mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
-                : pt_n K dim → pt_n K dim),
-                (λ (p : pt_n K dim),
-                mk_pt_n_from_homogeneous_coords 
-                ((((fm.prod f1 f2 prod_origin prod_basis).to_homogeneous_matrix.nonsing_inv).mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
-                : pt_n K dim → pt_n K dim),
-                sorry,
-                sorry,
-            ⟩,
-            ⟨
-                λv, v,
-                sorry,
-                sorry,
-                sorry,
-                sorry,
-                sorry
-            ⟩,
-            sorry /-invert to parent->current and append to current->base-/
-⟩
--/
-noncomputable def to_base_helper' :  fm K dim id_vec → @raw_tr K _ _ dim :=
-begin
-    intros f,
-    cases f,
-    { exact ⟨
-            ⟨   /-base case -/
-                (λ p, p),
-                (λ p, p),
-                begin
-                    unfold function.left_inverse,
-                    intros,
-                    simp *
-                end,
-                begin
-                    unfold function.right_inverse function.left_inverse,
-                    intros,
-                    simp *
-                end
-            ⟩,
-            ⟨
-                (λ v, v),
-                begin
-                    intros, simp*
-                end,
-               -- (λ v, ⟨v.coords⟩),
-                begin
-                    intros, simp *
-                end,
-                (λ v, v),
-                begin
-                    unfold function.left_inverse,
-                    intros, simp *
-                end,
-                begin
-                    unfold function.left_inverse function.right_inverse,
-                    intros, simp *
-                end,
-            ⟩,
-            begin
-                simp *,
-                --admit   -- TODO: What's this?
-            end
-        ⟩},
-    { exact (⟨
-            ⟨/-transform from current->parent-/
-                (λ (p : pt_n K dim),
-                mk_pt_n_from_homogeneous_coords 
-                (((fm.deriv f_origin f_basis f_parent).to_homogeneous_matrix.mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
-                : pt_n K dim → pt_n K dim),
-                (λ (p : pt_n K dim),
-                mk_pt_n_from_homogeneous_coords 
-                ((((fm.deriv f_origin f_basis f_parent).to_homogeneous_matrix.nonsing_inv).mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
-                : pt_n K dim → pt_n K dim),
-                sorry,
-                sorry,
-            ⟩,
-            ⟨
-                λv, v,
-                sorry,
-                sorry,
-                sorry,
-                sorry,
-                sorry
-            ⟩,
-            sorry /-invert to parent->current and append to current->base-/
-⟩ : @raw_tr K _ _ dim).trans (to_base_helper' f_parent)
-    },
-    {
-        exact ⟨
-            ⟨/-transform from current->parent-/
-                (λ (p : pt_n K dim),
-                mk_pt_n_from_homogeneous_coords 
-                (((fm.prod f1 f2 prod_origin prod_basis).to_homogeneous_matrix.mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
-                : pt_n K dim → pt_n K dim),
-                (λ (p : pt_n K dim),
-                mk_pt_n_from_homogeneous_coords 
-                ((((fm.prod f1 f2 prod_origin prod_basis).to_homogeneous_matrix.nonsing_inv).mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
-                : pt_n K dim → pt_n K dim),
-                sorry,
-                sorry,
-            ⟩,
-            ⟨
-                λv, v,
-                sorry,
-                sorry,
-                sorry,
-                sorry,
-                sorry
-            ⟩,
-            sorry /-invert to parent->current and append to current->base-/
-⟩
-    }
-end
-/-
-| (fm.base dim id_vec) := ⟨
-            ⟨   /-base case -/
-                (λ p, p),
-                (λ p, p),
-                begin
-                    unfold function.left_inverse,
-                    intros,
-                    simp *
-                end,
-                begin
-                    unfold function.right_inverse function.left_inverse,
-                    intros,
-                    simp *
-                end
-            ⟩,
-            ⟨
-                (λ v, v),
-                begin
-                    intros, simp*
-                end,
-               -- (λ v, ⟨v.coords⟩),
-                begin
-                    intros, simp *
-                end,
-                (λ v, v),
-                begin
-                    unfold function.left_inverse,
-                    intros, simp *
-                end,
-                begin
-                    unfold function.left_inverse function.right_inverse,
-                    intros, simp *
-                end,
-            ⟩,
-            begin
-                simp *,
-                --admit   -- TODO: What's this?
-            end
-        ⟩
-| (fm.deriv origin basis parent) := (⟨
-            ⟨/-transform from current->parent-/
-                (λ (p : pt_n K dim),
-                mk_pt_n_from_homogeneous_coords 
-                (((fm.deriv origin basis parent).to_homogeneous_matrix.mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
-                : pt_n K dim → pt_n K dim),
-                (λ (p : pt_n K dim),
-                mk_pt_n_from_homogeneous_coords 
-                ((((fm.deriv origin basis parent).to_homogeneous_matrix.nonsing_inv).mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
-                : pt_n K dim → pt_n K dim),
-                sorry,
-                sorry,
-            ⟩,
-            ⟨
-                λv, v,
-                sorry,
-                sorry,
-                sorry,
-                sorry,
-                sorry
-            ⟩,
-            sorry /-invert to parent->current and append to current->base-/
-⟩ : @raw_tr K _ _ dim).trans (to_base_helper' parent)
-| (fm.prod f1 f2 prod_origin prod_basis) := ⟨
-            ⟨/-transform from current->parent-/
-                (λ (p : pt_n K dim),
-                mk_pt_n_from_homogeneous_coords 
-                (((fm.prod f1 f2 prod_origin prod_basis).to_homogeneous_matrix.mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
-                : pt_n K dim → pt_n K dim),
-                (λ (p : pt_n K dim),
-                mk_pt_n_from_homogeneous_coords 
-                ((((fm.prod f1 f2 prod_origin prod_basis).to_homogeneous_matrix.nonsing_inv).mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
-                : pt_n K dim → pt_n K dim),
-                sorry,
-                sorry,
-            ⟩,
-            ⟨
-                λv, v,
-                sorry,
-                sorry,
-                sorry,
-                sorry,
-                sorry
-            ⟩,
-            sorry /-invert to parent->current and append to current->base-/
-⟩
--/
 
-#check linear_equiv.mk
+def to_base_helper' :  fm K dim id_vec → @raw_tr K _ _ dim
+| (fm.base dim id_vec) := ⟨
+            ⟨   /-base case -/
+                (λ p, p),
+                (λ p, p),
+                begin
+                    unfold function.left_inverse,
+                    intros,
+                    simp *
+                end,
+                begin
+                    unfold function.right_inverse function.left_inverse,
+                    intros,
+                    simp *
+                end
+            ⟩,
+            ⟨
+                (λ v, v),
+                begin
+                    intros, simp*
+                end,
+               -- (λ v, ⟨v.coords⟩),
+                begin
+                    intros, simp *
+                end,
+                (λ v, v),
+                begin
+                    unfold function.left_inverse,
+                    intros, simp *
+                end,
+                begin
+                    unfold function.left_inverse function.right_inverse,
+                    intros, simp *
+                end,
+            ⟩,
+            begin
+                simp *,
+                --admit   -- TODO: What's this?
+            end
+        ⟩
+| (fm.deriv origin basis parent) := (⟨
+            ⟨/-transform from current->parent-/
+                (λ (p : pt_n K dim),
+                mk_pt_n_from_homogeneous_coords 
+                (((fm.deriv origin basis parent).to_homogeneous_matrix.mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
+                : pt_n K dim → pt_n K dim),
+                (λ (p : pt_n K dim),
+                mk_pt_n_from_homogeneous_coords 
+                ((((fm.deriv origin basis parent).to_homogeneous_matrix.cramer_inverse).mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
+                : pt_n K dim → pt_n K dim),
+                sorry,
+                sorry,
+            ⟩,
+            ⟨
+                λv, v,
+                sorry,
+                sorry,
+                sorry,
+                sorry,
+                sorry
+            ⟩,
+            sorry /-invert to parent->current and append to current->base-/
+⟩ : @raw_tr K _ _ dim).trans (to_base_helper' parent)
+
 #reduce pt_n K dim ≃ pt_n K dim
  
 noncomputable def spc.to_base {f1 :  fm K dim id_vec} (s1 : spc K f1) : @raw_tr K _ _ dim := to_base_helper' f1
@@ -987,23 +653,9 @@ def fm_tr.transform_vectr
     {s1 : spc K f1} {s2 : spc K f2} (tr:fm_tr s1 s2 ) 
     : vectr s1 → vectr s2 :=
     λv,
-    let as_pt : point s1 := (⟨⟨(1,v.coords.to_prod.2),rfl⟩⟩) in
+    let as_pt : point s1 := ⟨λi, mk_pt K (v.coords i).coord⟩ in
     let tr_pt := (tr.to_equiv as_pt) in
-    ⟨⟨(0, tr_pt.coords.to_prod.2),rfl⟩⟩
-
-
-/-
-DEMO: transform generation between arbitrary affine coordinate spaces on physical dimension
--/
-variables {f1 :  fm K dim id_vec} {f2 :  fm K dim id_vec} (s1 : spc K f1) (s2 : spc K f2)
-
-def s1_to_s2 : _ := s1.fm_tr s2     -- Yay!
-
-#check s1_to_s2 s1 s2
-
-variables (my_vec : vectr s1)
-
-#check ((s1_to_s2 s1 s2).transform_vectr) (((s1_to_s2 s1 s2).transform_vectr) my_vec)
+    ⟨λi, mk_vec K (tr_pt.coords i).coord⟩
 
 end implicitK
 
