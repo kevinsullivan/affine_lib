@@ -61,6 +61,12 @@ def der_to_p3 := prod3_der_sp.fm_tr prod3_spc
 #check der_to_p3.transform_point der_pt
 #eval der_to_p3.transform_point der_pt
 
+--error, noncomputable!
+def der_pt_in_p3 : point prod3_spc := der_to_p3.transform_point der_pt
+--OK
+noncomputable def nc_der_pt_in_p3 : point prod3_spc := der_to_p3.transform_point der_pt
+
+
 #check der_pt -ᵥ my_pt
 
 --still works
