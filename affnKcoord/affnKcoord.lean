@@ -1,6 +1,8 @@
 import .affnK
 import linear_algebra.affine_space.affine_equiv
 import linear_algebra.matrix
+import linear_algebra.basis
+import linear_algebra.std_basis
 
 /-
 Framed points, vectors, frames
@@ -21,58 +23,64 @@ inductive fm : Πdim : ℕ, Πid_vec:fin dim → ℕ, Type (u)
     {dim : ℕ}
     {id_vec : fin dim → ℕ}
     (origin : pt_n K dim) 
-    (basis : fin dim → vec_n K dim)
+    --(basis : fin dim → vec_n K dim)
+    (basis : (fin dim) → (vec_n K dim))
+    (basis_independent : linear_independent K basis)
+    (basis_spans : submodule.span K (set.range basis))
     (parent : fm dim id_vec)
     : fm dim id_vec
 
-
+@[simp]
 def fm.parent 
 {K : Type u} [field K] [inhabited K]
 {dim : ℕ} {id_vec : fin dim → ℕ}
 : fm K dim id_vec → fm K dim id_vec
 | (fm.base dim id_vec) := (fm.base dim id_vec)
-| (fm.deriv origin basis parent) := parent
+| (fm.deriv origin basis _ _ parent) := parent
 
+@[simp]
 def fm.origin
 {K : Type u} [field K] [inhabited K]
 {dim : ℕ} {id_vec : fin dim → ℕ}  :
 fm K dim id_vec → pt_n K dim
 | (fm.base dim id_vec) := (λi, mk_pt K 0)
-| (fm.deriv origin basis parent) := origin
+| (fm.deriv origin basis _ _ parent) := origin
 
+@[simp]
 def fm.basis 
 {K : Type u} [field K] [inhabited K]
 {dim : ℕ} {id_vec : fin dim → ℕ} :
 fm K dim id_vec → (fin dim → vec_n K dim)
 | (fm.base dim id_vec) := (λ i j, if j = i then mk_vec K 1 else mk_vec K 0)
-| (fm.deriv origin basis parent) := basis
+| (fm.deriv origin basis _ _ parent) := (basis:fin dim → vec_n K dim)
 
 
 #check fm K 
 
 def mk_fm  {dim : ℕ} {id_vec : fin dim → ℕ}  (p : pt_n K dim) (v : fin dim → vec_n K dim) (f : fm K dim id_vec)
-    : fm K dim id_vec:= fm.deriv p v f
+    : fm K dim id_vec:= fm.deriv p v sorry sorry f
 
+@[simp]
 def merge_prod_fm 
     {K : Type u} [inhabited K] [field K] 
     {dim1 : ℕ} {id_vec1 : fin dim1 → ℕ} --(f1 : fm K dim1 id_vec1)
     {dim2 : ℕ} {id_vec2 : fin dim2 → ℕ} --(f2 : fm K dim2 id_vec2)
     :  fm K dim1 id_vec1 → fm K dim2 id_vec2 → fm K (dim1+dim2) (add_maps id_vec1 id_vec2)
-| (fm.deriv o1 b1 p1) (fm.deriv o2 b2 p2) := fm.deriv (add_maps o1 o2) 
+| (fm.deriv o1 b1 _ _ p1) (fm.deriv o2 b2 _ _ p2) := fm.deriv (add_maps o1 o2) 
         (λi, 
-            if i.1 < dim1 then (add_maps (b1 ⟨i.1,sorry⟩) (mk_vec_n K dim2 ⟨list.repeat dim2 0, sorry⟩))
+            if lt:i.1<dim1 then (add_maps (b1 ⟨i.1,sorry⟩) (mk_vec_n K dim2 ⟨list.repeat dim2 0, sorry⟩))
             else (add_maps (mk_vec_n K dim1 ⟨list.repeat dim1 0, sorry⟩) (b2 ⟨i.1,sorry⟩)))
-        (merge_prod_fm p1 p2)
-| (fm.deriv o1 b1 p1) (fm.base dim2 id_vec2) := fm.deriv (add_maps o1 (fm.base dim2 id_vec2).origin) 
+         sorry sorry (merge_prod_fm p1 p2)
+| (fm.deriv o1 b1 _ _ p1) (fm.base dim2 id_vec2) := fm.deriv (add_maps o1 (fm.base dim2 id_vec2).origin) 
         (λi, 
-            if i.1 < dim1 then (add_maps (b1 ⟨i.1,sorry⟩) (mk_vec_n K dim2 ⟨list.repeat dim2 0, sorry⟩))
+            if lt:i.1 < dim1 then (add_maps (b1 ⟨i.1,sorry⟩) (mk_vec_n K dim2 ⟨list.repeat dim2 0, sorry⟩))
             else (add_maps (mk_vec_n K dim1 ⟨list.repeat dim1 0, sorry⟩) ((fm.base dim2 id_vec2).basis ⟨i.1,sorry⟩)))
-        (merge_prod_fm p1 (fm.base dim2 id_vec2))
-| (fm.base dim1 id_vec1) (fm.deriv o2 b2 p2) := fm.deriv (add_maps (fm.base dim1 id_vec1).origin o2) 
+         sorry sorry (merge_prod_fm p1 (fm.base dim2 id_vec2))
+| (fm.base dim1 id_vec1) (fm.deriv o2 b2 _ _ p2) := fm.deriv (add_maps (fm.base dim1 id_vec1).origin o2) 
         (λi, 
             if i.1 < dim1 then (add_maps (mk_vec_n K dim1 ⟨list.repeat dim1 0, sorry⟩) (b2 ⟨i.1,sorry⟩))
             else (add_maps ((fm.base dim1 id_vec1).basis ⟨i.1,sorry⟩) (mk_vec_n K dim2 ⟨list.repeat dim2 0, sorry⟩)))
-        (merge_prod_fm (fm.base dim1 id_vec1) p2)      
+         sorry sorry (merge_prod_fm (fm.base dim1 id_vec1) p2)      
 | (fm.base dim1 id_vec1) (fm.base dim2 id_vec2) := fm.base (dim1+dim2) (add_maps id_vec1 id_vec2)
 
 inductive spc : Π{dim : ℕ}, Π{id_vec : fin dim → ℕ},Π(f: fm K dim id_vec), Type u
@@ -86,12 +94,13 @@ inductive spc : Π{dim : ℕ}, Π{id_vec : fin dim → ℕ},Π(f: fm K dim id_ve
 def spc.fm {K : Type u} [inhabited K] [field K] {dim : ℕ} {id_vec : fin dim → ℕ} {f: fm K dim id_vec} (sp : spc K f)
     := f
 
-
+@[simp]
 def mk_space  {K : Type u} [inhabited K] [field K] 
 {dim : ℕ} {id_vec : fin dim → ℕ} 
     (f : fm K dim id_vec) : spc K f  :=
   spc.single f
 
+@[simp]
 def mk_prod_spc
     {K : Type u} [inhabited K] [field K] 
     {dim1 : ℕ} {id_vec1 : fin dim1 → ℕ} {f1 : fm K dim1 id_vec1} (s1 : spc K f1)
@@ -154,7 +163,7 @@ def vectr.space {dim : ℕ} {id_vec : fin dim → ℕ} {f: fm K dim id_vec} {s :
 
 -- note that we don't extend fm
 def mk_frame {f : fm K dim id_vec} {s : spc K f}  (p : point s) (v : fin dim → vectr s) :=
-fm.deriv p.coords (λi, (v i).coords) f   -- TODO: make sure v ≠ 0 (erasing tyoe info)
+fm.deriv p.coords (λi, (v i).coords) sorry sorry f   -- TODO: make sure v ≠ 0 (erasing tyoe info)
                                       -- TODO: snd arg is really a basis for the vs
 
 
@@ -177,34 +186,43 @@ begin
     intros,
     ext,
     --cases a,
-    repeat {
     have p1 : (a + b + c).coords = a.coords + b.coords + c.coords := rfl,
     have p2 : (a + (b + c)).coords = a.coords + (b.coords + c.coords) := rfl,
     rw [p1,p2],
-    cc
-    },
-    admit,
-    admit
+    --cc
+    repeat {admit}
 end
 
 
 instance add_semigroup_vectr : add_semigroup (vectr s) := ⟨ add_vectr_vectr s, add_assoc_vectr s⟩ 
 
-@[simp]
-def vectr_zero := mk_vectr s ⟨list.repeat 0 dim, sorry⟩--@mk_vectr K _ _ n f s (0:K)
-instance has_zero_vectr : has_zero (vectr s) := ⟨vectr_zero s⟩
+#check list.eq_repeat
 
-#check mul_zero_class.zero
+@[simp]
+def vectr_zero := mk_vectr s ⟨list.repeat 0 dim, begin
+        simp  *
+    end⟩--@mk_vectr K _ _ n f s (0:K)
+instance has_zero_vectr : has_zero (vectr s) := ⟨vectr_zero s⟩
 
 lemma zero_add_vectr : ∀ a : vectr s, 0 + a = a := 
 begin
-    admit/-intros,--ext,
-    ext,
-    let h0 : (0 + a).coords = (0 : vectr s).coords + a.coords := rfl,
-    simp [h0],
+    intros, ext,
     exact zero_add _,
-    exact zero_add _,
-    -/
+    let : ((0:vectr s) + a).coords = (0:vectr s).coords + a.coords := rfl,
+    simp *,
+    let : ((0:vectr s).coords x + a.coords x).to_prod = ((0:vectr s).coords x).to_prod + (a.coords x).to_prod := rfl,
+    simp *,
+    simp [has_zero.zero, mul_zero_class.zero, mul_zero_one_class.zero,
+        monoid_with_zero.zero, semiring.zero, ring.zero, division_ring.zero, field.zero, mk_vec_n],
+    unfold vector.nth,
+    let l := (list.repeat (field.zero : K) dim),
+    let leq : l = (list.repeat (field.zero : K) dim) := rfl,
+    let h0 := list.eq_repeat.elim_left leq,
+    let h1 := h0.elim_right,
+    admit
+    --unfold vector.nth,
+    --let : ((0 : vectr s).coords x) = vec_zero K := rfl,
+
 end
 
 lemma add_zero_vectr : ∀ a : vectr s, a + 0 = a := 
@@ -586,15 +604,15 @@ def to_base_helper' :  fm K dim id_vec → @raw_tr K _ _ dim
                 --admit   -- TODO: What's this?
             end
         ⟩
-| (fm.deriv origin basis parent) := (⟨
+| (fm.deriv origin basis ind spans parent) := (⟨
             ⟨/-transform from current->parent-/
                 (λ (p : pt_n K dim),
                 mk_pt_n_from_homogeneous_coords 
-                (((fm.deriv origin basis parent).to_homogeneous_matrix.mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
+                (((fm.deriv origin basis ind spans parent).to_homogeneous_matrix.mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
                 : pt_n K dim → pt_n K dim),
                 (λ (p : pt_n K dim),
                 mk_pt_n_from_homogeneous_coords 
-                ((((fm.deriv origin basis parent).to_homogeneous_matrix.cramer_inverse).mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
+                ((((fm.deriv origin basis ind spans parent).to_homogeneous_matrix.cramer_inverse).mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
                 : pt_n K dim → pt_n K dim),
                 sorry,
                 sorry,

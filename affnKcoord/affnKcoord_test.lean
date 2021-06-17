@@ -44,9 +44,13 @@ def der_fm1 : fm K dim first_id := fm.deriv
 
 def my_pt : point std_sp := mk_point std_sp ⟨[1,1,1],rfl⟩
 
-def u4 : vectr std_sp := mk_vectr std_sp ⟨[3,0,0],rfl⟩
-def u5 : vectr std_sp := mk_vectr std_sp ⟨[0,3,0],rfl⟩
-def u6 : vectr std_sp := mk_vectr std_sp ⟨[0,0,3],rfl⟩
+--def u4 : vectr std_sp := mk_vectr std_sp ⟨[1,2,-1],rfl⟩
+--def u5 : vectr std_sp := mk_vectr std_sp ⟨[-2,0,1],rfl⟩
+--def u6 : vectr std_sp := mk_vectr std_sp ⟨[1,-1,0],rfl⟩
+
+def u4 : vectr std_sp := mk_vectr std_sp ⟨[6,0,0],rfl⟩
+def u5 : vectr std_sp := mk_vectr std_sp ⟨[0,6,0],rfl⟩
+def u6 : vectr std_sp := mk_vectr std_sp ⟨[0,0,6],rfl⟩
 
 def myder : fm K dim first_id
     := fm.deriv my_pt.coords (λi, match i.1 with
@@ -54,6 +58,15 @@ def myder : fm K dim first_id
     | 1 := u5.coords
     | _ := u6.coords
     end) std_sp.fm 
+
+
+def mydersp := mk_space myder
+
+def pt2 := mk_point mydersp ⟨[1,1,1],rfl⟩
+
+def tfd : point std_sp := (mydersp.fm_tr std_sp).transform_point pt2
+
+#eval tfd.coords ⟨2, sorry⟩
 
 
 def homder := myder.to_homogeneous_matrix
