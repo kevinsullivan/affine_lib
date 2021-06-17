@@ -3,7 +3,7 @@ import .affnKcoord_transforms
 abbreviation K := ℚ 
 def dim := 1
 def first_id := 1
-def std_fm : fm K dim first_id := fm.base dim first_id
+def std_fm : fm K dim (λi,first_id) := fm.base dim first_id
 def std_sp := mk_space std_fm
 #check std_fm
 
@@ -13,8 +13,32 @@ def p1 : point std_sp :=
 def prod2_point : point (mk_prod_spc std_sp std_sp) :=
   mk_point_prod p1 p1
 
-#check prod2_point.space
+example : (add_maps (λ (i : fin dim), first_id) (λ (i : fin dim), first_id))= (λ i : fin 2 , first_id)
+  := begin
+    intros,
+    simp * ,
+    refl,
+  end
 
+  #check eq.rec_on
+
+@[reducible, simp]
+def fmtest : fm K (2) (λi, first_id) :=--(add_maps (λ (i : fin dim), first_id) (λ (i : fin dim), first_id)) :=--(λ i, first_id) := 
+  let pf:(add_maps (λ (i : fin dim), first_id) (λ (i : fin dim), first_id))=(λi, first_id)
+    := begin
+    intros,
+    simp * ,
+    end in
+    (eq.rec_on pf prod2_point.space.fm)
+  /-begin
+    let h : fm K (2) (λi, first_id) :=
+      eq.rec_on
+  end-/
+  /-
+  (eq.rec_on begin 
+    
+  end prod2_point.space.fm : fm K (2) (λi, first_id))
+-/
 def prod3_point : point _ :=
   mk_point_prod prod2_point p1
 
@@ -48,7 +72,7 @@ def prod3_der_fm : fm K (3) (add_maps (add_maps ↑first_id ↑first_id) ↑firs
     | 0 := u1.coords
     | 1 := u2.coords
     | _ := u3.coords
-    end) prod3_spc.fm 
+    end) sorry sorry prod3_spc.fm 
 
 def prod3_der_sp : spc K prod3_der_fm := mk_space prod3_der_fm
 

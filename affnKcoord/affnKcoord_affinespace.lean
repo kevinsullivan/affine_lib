@@ -33,7 +33,9 @@ def add_vectr_point (v : vectr s) (p : point s) : point s :=
     mk_point' s (v.coords +ᵥ p.coords)
 
 instance : has_vadd (vectr s) (point s) := ⟨add_vectr_point s⟩
-
+/-
+The 0 vectr plus any particular point is the particular point unchanged
+-/
 lemma zero_vectr_vadd'_a1 : ∀ p : point s, (0 : vectr s) +ᵥ p = p := begin
     intros,
     ext,--exact zero_add _,
@@ -41,7 +43,9 @@ lemma zero_vectr_vadd'_a1 : ∀ p : point s, (0 : vectr s) +ᵥ p = p := begin
     --exact add_zero _
     admit
 end
-
+/-
+vectr addition is associative with the action of vectrs on points
+-/
 lemma vectr_add_assoc'_a1 : ∀ (g1 g2 : vectr s) (p : point s), g1 +ᵥ (g2 +ᵥ p) = g1 + g2 +ᵥ p := begin
     intros, ext,
     repeat {
@@ -54,7 +58,11 @@ lemma vectr_add_assoc'_a1 : ∀ (g1 g2 : vectr s) (p : point s), g1 +ᵥ (g2 +�
     cc,
     }
 end
-
+/-
+@[protect_proj] class add_action (G : Type*) (P : Type*) [add_monoid G] extends has_vadd G P :=
+(zero_vadd : ∀ p : P, (0 : G) +ᵥ p = p)
+(add_vadd : ∀ (g₁ g₂ : G) (p : P), (g₁ + g₂) +ᵥ p = g₁ +ᵥ (g₂ +ᵥ p))
+-/
 instance vectr_add_action: add_action (vectr s) (point s) := 
 ⟨ 
 begin
@@ -67,12 +75,21 @@ begin
 end
 ⟩
 
+/-
+point differencing operation
+-/
 @[simp]
 def aff_point_group_sub : point s → point s → vectr s := sub_point_point s
 instance point_has_vsub : has_vsub (vectr s) (point s) := ⟨ aff_point_group_sub s ⟩ 
 
+/-
+point is a nonempty set
+-/
 instance : nonempty (point s) := ⟨mk_point s ⟨list.repeat 0 dim,sorry⟩⟩
 
+/-
+Requirement for affine spaces
+-/
 lemma point_vsub_vadd_a1 : ∀ (p1 p2 : (point s)), (p1 -ᵥ p2) +ᵥ p2 = p1 := begin
     intros, ext,
     --repeat {
@@ -80,6 +97,9 @@ lemma point_vsub_vadd_a1 : ∀ (p1 p2 : (point s)), (p1 -ᵥ p2) +ᵥ p2 = p1 :=
 end
 
 
+/-
+Requirement for affine spaces
+-/
 lemma point_vadd_vsub_a1 : ∀ (g : vectr s) (p : point s), g +ᵥ p -ᵥ p = g := 
 begin
     intros, ext,
@@ -90,7 +110,7 @@ begin
     }
 end
 
-
+--final instance showing vectrs and points form an affine space
 instance : affine_space (vectr s) (point s) := ⟨
     point_vsub_vadd_a1 s,
     point_vadd_vsub_a1 s,

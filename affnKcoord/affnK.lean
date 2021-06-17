@@ -32,15 +32,22 @@ def vec_n.coords {K : Type u}
 {n : ℕ} (vecn : vec_n K n) : fin n → K :=
   λi, (vecn i).coord
 
-
+#check nat.sub_le_left_iff_le_add
 def mk_pt_prod {n1 : ℕ} (p1 : pt_n K n1) {n2 : ℕ} (p2 : pt_n K n2) : pt_n K (n1+n2) := 
-  λi, if i.1<n1 then p1 ⟨i.1,sorry⟩ else p2 ⟨i.1-n1,sorry⟩
+  λi, if lt:i.1<n1 then p1 ⟨i.1,begin cc end⟩ else p2 ⟨i.1-n1,begin 
+    exact (nat.sub_lt_left_iff_lt_add (by linarith)).elim_right i.2,
+  end⟩
 
 def mk_vec_prod {n1 : ℕ} (p1 : pt_n K n1) {n2 : ℕ} (p2 : pt_n K n2) : pt_n K (n1+n2) := 
-  λi, if i.1<n1 then p1 ⟨i.1,sorry⟩ else p2 ⟨i.1-n1,sorry⟩
+  λi, if lt:i.1<n1 then p1 ⟨i.1,begin cc end⟩ else p2 ⟨i.1-n1,begin 
+    exact (nat.sub_lt_left_iff_lt_add (by linarith)).elim_right i.2,
+  end⟩
 
+@[reducible,elab_as_eliminator, simp]
 def add_maps {n1 n2 : ℕ} {T : Type u} (m1 : fin n1 → T) (m2 : fin n2 → T) : (fin (n1 + n2) → T) := 
-  λi, if i.1 < n1 then m1 ⟨i.1,sorry⟩ else m2 ⟨i.1-n1,sorry⟩
+  λi, if lt:i.1 < n1 then m1 ⟨i.1,begin cc end⟩ else m2 ⟨i.1-n1,begin 
+    exact (nat.sub_lt_left_iff_lt_add (by linarith)).elim_right i.2,
+  end⟩
 
 
 --done
