@@ -125,6 +125,13 @@ Helper function to retrieve frame from space (space is simply a wrapper around f
 -/
 def spc.fm {K : Type u} [inhabited K] [field K] {dim : ℕ} {id_vec : fin dim → ℕ} {f: fm K dim id_vec} (sp : spc K f)
     := f
+def spc.frame {K : Type u} [inhabited K] [field K] {dim : ℕ} {id_vec : fin dim → ℕ} {f: fm K dim id_vec} (sp : spc K f)
+    := f
+@[reducible]
+def spc.frame_type {K : Type u} [inhabited K] [field K] {dim : ℕ} {id_vec : fin dim → ℕ} {f: fm K dim id_vec} (sp : spc K f)
+    := fm K dim id_vec
+
+
 
 /-
 Alias for the default constructor of spc

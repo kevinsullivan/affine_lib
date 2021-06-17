@@ -43,7 +43,7 @@ def mk_vec_prod {n1 : ℕ} (p1 : pt_n K n1) {n2 : ℕ} (p2 : pt_n K n2) : pt_n K
     exact (nat.sub_lt_left_iff_lt_add (by linarith)).elim_right i.2,
   end⟩
 
-@[reducible,elab_as_eliminator, simp]
+@[reducible,elab_with_expected_type, simp]
 def add_maps {n1 n2 : ℕ} {T : Type u} (m1 : fin n1 → T) (m2 : fin n2 → T) : (fin (n1 + n2) → T) := 
   λi, if lt:i.1 < n1 then m1 ⟨i.1,begin cc end⟩ else m2 ⟨i.1-n1,begin 
     exact (nat.sub_lt_left_iff_lt_add (by linarith)).elim_right i.2,
