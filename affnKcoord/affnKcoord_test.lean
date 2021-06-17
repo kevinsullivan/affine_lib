@@ -1,4 +1,4 @@
-import .affnKcoord
+import .affnKcoord_transforms
 
 abbreviation K := ℚ 
 def dim := 3
@@ -40,7 +40,7 @@ def der_fm1 : fm K dim first_id := fm.deriv
     | 1 := v2.coords
     | _ := v3.coords
     end)
-  std_fm
+  sorry sorry std_fm
 
 def my_pt : point std_sp := mk_point std_sp ⟨[1,1,1],rfl⟩
 
@@ -57,7 +57,7 @@ def myder : fm K dim first_id
     | 0 := u4.coords
     | 1 := u5.coords
     | _ := u6.coords
-    end) std_sp.fm 
+    end) sorry sorry std_sp.fm 
 
 
 def mydersp := mk_space myder
@@ -71,24 +71,20 @@ def tfd : point std_sp := (mydersp.fm_tr std_sp).transform_point pt2
 
 def homder := myder.to_homogeneous_matrix
 
+/-
+WARNING : ALL MATRIX EVALUATION BROKEN AS OF 6/17 DUE TO INTRODUCTION OF 
+LINEAR INDEPENDENCE AND SPANNING PROOFS IN FM.DERIV DEFINITION
+
+THIS MUST BE SOLVED OR REMOVED IN ORDER TO EVALUATE TRANSFORM RESULTS OR COORDINATES OF MATRICES.
+-/
+
+
 #check v1.coords
 #eval p2.coords ⟨3,sorry⟩
 #eval v1.coords ⟨2,sorry⟩
 #eval v2.coords ⟨2,sorry⟩
 #eval v3.coords ⟨0,sorry⟩
 #eval homder 2 3
-/-
-1   0   0     0
-7   2   5     8
-17  6   15    24
-27  .5  15/4  7
--/
-/-
-0     0   0
--20   15  
-40    -30
--20   15
--/
 
 #eval homder ⟨0,sorry⟩ ⟨0,sorry⟩
 #eval homder 1 0
@@ -162,7 +158,7 @@ def der_fm2 : fm K dim first_id := fm.deriv
     | 1 := v3.coords
     | _ := v1.coords
     end)
-  std_fm
+  sorry sorry std_fm
 
 def der_sp2 : spc K der_fm2 := mk_space der_fm2
 
@@ -177,5 +173,7 @@ def der1_to_2 := der_sp1.fm_tr der_sp2
 def trans_der_vec1 : vectr der_sp2 := der1_to_2.transform_vectr der_vec1
 
 def okay_sp_add : _ := (der1_to_2.transform_vectr der_vec1) +ᵥ der_vec2
+
+#check (der_vec1.expressed_in der_sp2)
 
 

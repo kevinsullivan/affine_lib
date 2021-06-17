@@ -1,4 +1,4 @@
-import .affnKcoord
+import .affnKcoord_transforms
 
 universes u 
 variables 
@@ -17,7 +17,7 @@ def std_fm : fm K space_id dim   := fm.base space_id dim
 /-
 Build std_spc on this farme
 -/
-def std_spc : spc (std_fm K space_id dim) := mk_space (std_fm K space_id dim) 
+def std_spc : spc K (std_fm K dim space_id) := mk_space (std_fm K dim space_id) 
 
 /-
 Now we can build point and vectr objects in terms
@@ -28,10 +28,10 @@ frame (fm) objects.
 /-
 Basic values for points and vectrs 
 -/
-def point_zero := mk_point (std_spc K space_id dim) ⟨list.repeat 0 dim, sorry⟩
-def vectr_one  := mk_vectr (std_spc K space_id dim) ⟨list.repeat 1 dim, sorry⟩ 
-def std_frame  := mk_frame (point_zero K space_id dim) (λi, vectr_one K space_id dim) 
-def std_space  := mk_space (std_frame K space_id dim) 
+def point_zero := mk_point (std_spc K dim space_id) ⟨list.repeat 0 dim, sorry⟩
+def vectr_one  := mk_vectr (std_spc K dim space_id) ⟨list.repeat 1 dim, sorry⟩ 
+def std_frame  := mk_frame (point_zero K dim space_id) (λi, vectr_one K dim space_id) 
+def std_space  := mk_space (std_frame K dim space_id) 
 
 -- Exports: 
 
