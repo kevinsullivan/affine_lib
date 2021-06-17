@@ -26,16 +26,10 @@ def p3 := p1 -ᵥ p2
 Code from 6/14 meeting:
 -/
 
-
-
 /-
 Build an n-D affine space from n 1-D spaces
 -/
 abbreviation affnK (n : nat) := fin n → (affine_space (vec K) (pt K)) 
-
-
-
-
 
 /-
 -/
