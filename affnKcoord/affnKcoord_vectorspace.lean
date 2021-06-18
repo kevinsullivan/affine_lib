@@ -1,7 +1,7 @@
 import .affnK
-import linear_algebra.affine_space.affine_equiv
-import linear_algebra.matrix
-import linear_algebra.basis
+--import linear_algebra.affine_space.affine_equiv
+--import linear_algebra.matrix
+--import linear_algebra.basis
 import linear_algebra.std_basis
 import .affnKcoord_definitions
 
