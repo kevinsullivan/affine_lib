@@ -10,21 +10,32 @@ variables
 {dim2 : nat } {id_vec2 : fin dim2 → nat} {f2 : fm K dim2 id_vec2} (s2 : spc K f2)
 
 /-
-Affine transform using unframed points and vectors
--/
+Let raw_tr be the *type* of an affine equivalence
+between abstract affine spaces comprising unframed
+(abstract, without coordinates) points and vectors.
 
+An affine equivalence is an equivalence, ≃ᵃ[K], 
+between affine spaces such that both forward and
+inverse maps are affine.
+
+Lean defines it using an equiv for the map and a 
+linear_equiv for the linear part in order to allow
+affine equivalences with good definitional equalities.
+-/
 abbreviation raw_tr := (pt_n K dim) ≃ᵃ[K] (pt_n K dim)
 
 /-
-Structure simply encapsulating an affine transform from points between
-two different affine coordinate spaces
+Structure simply encapsulating an affine transform from 
+points between two affine coordinate spaces, s1 and s2.
 -/
 structure fm_tr 
     {f1 :  fm K dim id_vec} {f2 :  fm K dim id_vec} 
-    (s1 : spc K f1) (s2 : spc K f2)  extends (point s1) ≃ᵃ[K] (point s2)
+    (s1 : spc K f1) (s2 : spc K f2) extends (point s1) ≃ᵃ[K] (point s2)
 
 /-
 Inverse
+
+KEVIN: Explain, or remove, the .1 notation here. Use identifiers when possible.
 -/
 def fm_tr.symm  {f1 :  fm K dim id_vec} {f2 :  fm K dim id_vec} 
     {s1 : spc K f1} {s2 : spc K f2} (ftr : fm_tr s1 s2) : fm_tr s2 s1 :=
@@ -216,14 +227,16 @@ def to_base_helper' :  fm K dim id_vec → @raw_tr K _ _ dim
 
 /-
 Extension method to get a transform from a space to the base (standard) frame 
-(essentially a transform from a frame to the standard frame, since spc is mostly a wrapper around a frame)
+(essentially a transform from a frame to the standard frame, since spc is mostly 
+a wrapper around a frame)
 -/
 def spc.to_base {f1 :  fm K dim id_vec} (s1 : spc K f1) : @raw_tr K _ _ dim := to_base_helper' f1
 
 /-
 Our general function which computes a transform from one space to another.
-First computes the transform from the SOURCE space down to the standard space, TrA, and then computes the transform 
-of the TARGET space down to the standard space TrB, and composes TrA with the INVERSE of TrB. This gives you a transform
+First computes the transform from the SOURCE space down to the standard space, 
+TrA, and then computes the transform of the TARGET space down to the standard
+space TrB, and composes TrA with the INVERSE of TrB. This yields a transform
 from A to B.
 -/
 def spc.fm_tr {f1 :  fm K dim id_vec} {f2 :  fm K dim id_vec} (s1 : spc K f1) : Π (s2 : spc K f2),
@@ -253,7 +266,8 @@ def spc.fm_tr {f1 :  fm K dim id_vec} {f2 :  fm K dim id_vec} (s1 : spc K f1) : 
     ⟩
 
 /-
-Extension method for a computed transform which allows you to transform a point between two coordinate spaces.
+Extension method for a computed transform which allows you to transform a point 
+between two coordinate spaces.
 -/
 
 def fm_tr.transform_point  
@@ -264,8 +278,9 @@ def fm_tr.transform_point
     tr.to_equiv p
 
 /-
-Extension method for a computed transform which allows you to transform a vectr between two coordinate spaces.
-Note there is some magic here because lean "affine transforms" only allow you to transform between points.
+Extension method for a computed transform which allows you to transform a vectr 
+between two coordinate spaces. Note there is some magic here because lean "affine 
+transforms" only allow you to transform between points.
 -/
 
 def fm_tr.transform_vectr  
@@ -279,7 +294,8 @@ def fm_tr.transform_vectr
 
 /-
 Requested Dr Sullivan on 6/16.
-Simple sugared helper methods to express a point/vector in a different coordinate space
+Simple sugared helper methods to express a point/vector in a different 
+coordinate space
 -/
 def point.expressed_in 
     {dim : ℕ} {id_vec : fin dim → ℕ} {f: fm K dim id_vec} {s : spc K f}  
