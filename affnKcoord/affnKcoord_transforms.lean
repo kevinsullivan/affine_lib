@@ -10,10 +10,6 @@ variables
 {dim2 : nat } {id_vec2 : fin dim2 → nat} {f2 : fm K dim2 id_vec2} (s2 : spc K f2)
 
 /-
-Let raw_tr be the *type* of an affine equivalence
-between abstract affine spaces comprising unframed
-(abstract, without coordinates) points and vectors.
-
 An affine equivalence is an equivalence, ≃ᵃ[K], 
 between affine spaces such that both forward and
 inverse maps are affine.
@@ -21,6 +17,12 @@ inverse maps are affine.
 Lean defines it using an equiv for the map and a 
 linear_equiv for the linear part in order to allow
 affine equivalences with good definitional equalities.
+-/
+
+/-
+Let raw_tr be the *type* of an affine equivalence
+between abstract affine spaces comprising unframed
+(abstract, without coordinates) points and vectors.
 -/
 abbreviation raw_tr := (pt_n K dim) ≃ᵃ[K] (pt_n K dim)
 
