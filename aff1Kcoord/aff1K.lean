@@ -1,13 +1,9 @@
 --import linear_algebra.affine_space.basic
 import ..lin2Kcoord.lin2kcoord
-import linear_algebra.affine_space.affine_equiv
-import tactic.linarith
-import algebra.direct_sum
+--import linear_algebra.affine_space.affine_equiv
+--import tactic.linarith
+--import algebra.direct_sum
 import linear_algebra.direct_sum_module
-import tactic.linarith
-
-open_locale direct_sum
-
 
 universes u 
 variables 
@@ -577,7 +573,15 @@ instance vecK_ptK_affine_space : affine_space (vec K) (pt K) := ⟨
 ⟩
 
 variables (n : ℕ )
-#check  ⨁(i : fin (n)), (λi, vec K) i
 
+/-
+direct sum
+-/
+open_locale direct_sum
 
+#check  ⨁(i : fin n), (λi, vec K) i
+
+/-
+Affine equivalence of two affine spaces
+-/
 #check (pt K) ≃ᵃ[K] (pt K) --works!
