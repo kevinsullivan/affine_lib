@@ -7,10 +7,9 @@ variables
 [field K]
 [inhabited K]
 
-variables (n : ℕ )
-
 -- direct sum example
-open_locale direct_sum
+variable (n : ℕ )
+open_locale direct_sum  -- notation
 #check  ⨁(i : fin n), (λi, vec K) i
 
 -- affine equivalence of affine spaces
@@ -30,6 +29,6 @@ noncomputable def p3 := p1 -ᵥ p2
 noncomputable def p4 := v4 +ᵥ p2
 
 -- get coordinate of pt
-noncomputable def p4c : ℝ := pt_coord ℝ p4
+noncomputable def p4c : ℝ := pt.coord p4
 
 
