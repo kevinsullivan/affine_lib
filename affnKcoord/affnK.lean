@@ -1,5 +1,4 @@
 import ..aff1Kcoord.aff1K
-import linear_algebra.affine_space.affine_equiv
 import tactic.linarith
 
 universes u 
