@@ -39,6 +39,9 @@ lemma zero_vectr_vadd'_a1 : ∀ p : point s, (0 : vectr s) +ᵥ p = p := begin
     --exact add_zero _
     admit
 end
+
+-- SULLIVAN: The following proof is slow to build. I simplified the
+-- second simp somewhat but it's still very slow. Analyze & improve.
 /-
 vectr addition is associative with the action of vectrs on points
 -/
