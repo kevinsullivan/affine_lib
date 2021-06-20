@@ -1,8 +1,4 @@
---import linear_algebra.affine_space.basic
 import ..lin2Kcoord.lin2kcoord
---import linear_algebra.affine_space.affine_equiv
---import tactic.linarith
---import algebra.direct_sum
 import linear_algebra.direct_sum_module
 
 universes u 
@@ -12,16 +8,30 @@ variables
 [inhabited K]
 
 /-
-Export affine_space (vec K) (pt K) := aff_pt_torsor K,
-with vector_space K (vec K) = semimodule K (vec K).
+We represent primitive points and vectors constituting a 1-D affine 
+space with a field K by as elements of a 2-D linear space over K. We
+represent the 1-D affine point, p, with coordinate x : K, as a pair, 
+(1 : K, x), and a 1-D (affine space) vector, v, with coordinate, x : K,
+as a pair (0 : K, x). 
+
+We prove the following properties
+
+- vector-vector addition
+- scalar-vector multiplication
+- vector negation
+- vector subtraction
+- zero vector
+
+- piont-point subtraction
+- point-vector addition
+
+- vectors act on points by point-vector addition
+- subtraction of points yields vectors in a specific way
+- etc. need to explain proof in structured English to make it comprehensible 
+- ...
 -/
 
 
-/-
-Objects
--/
-
--- 1-D *affine* K pt and vec objects rep'd by 2-D linear K tuples
 @[ext]
 structure pt extends K × K := (inv : fst = 1)
 @[simp]
@@ -29,12 +39,10 @@ def mk_pt' (p : K × K) (i : p.1 = 1): pt K := @pt.mk K _ _ p i    -- private
 @[simp]
 def mk_pt (k : K) : pt K  := @pt.mk K _ _ (1, k) rfl              -- exported
 
-def pt.coord {K : Type u} 
-[field K]
-[inhabited K] (p : pt K) : K := p.to_prod.2
-
-#check K × K
-#check prod
+def pt.coord 
+    {K : Type u} [field K] [inhabited K] 
+    (p : pt K) : K := 
+    p.to_prod.2
 
 @[ext]
 structure vec extends K × K := (inv : fst = 0)
@@ -87,13 +95,10 @@ has_zero vec
 def vec_zero  := mk_vec K 0
 instance has_zero_vec : has_zero (vec K) := ⟨vec_zero K⟩
 
-/-
-class add_monoid (M : Type u) extends add_semigroup M, has_zero M :=
-(zero_add : ∀ a : M, 0 + a = a) (add_zero : ∀ a : M, a + 0 = a)
--/
 
 
 
+-- SULIVAN: Delete obsolete commented code 
 
 
 
@@ -175,7 +180,10 @@ def add_vec_pt (v : vec K) (p : pt K) : pt K := mk_pt' K (p.to_prod + v.to_prod)
 end
 -- add affine combination operation here 
 
-
+/-
+That ends our set of affine space objects and operators.
+Now we prove that we've really got an affine space.
+-/
 
 /-
 has_vadd (vector point addition)
@@ -571,17 +579,3 @@ instance vecK_ptK_affine_space : affine_space (vec K) (pt K) := ⟨
         cc
     end,
 ⟩
-
-variables (n : ℕ )
-
-/-
-direct sum
--/
-open_locale direct_sum
-
-#check  ⨁(i : fin n), (λi, vec K) i
-
-/-
-Affine equivalence of two affine spaces
--/
-#check (pt K) ≃ᵃ[K] (pt K) --works!

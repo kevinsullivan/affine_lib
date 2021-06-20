@@ -1,6 +1,21 @@
 import data.real.basic
 import .aff1K
 
+universes u 
+variables 
+(K : Type u) 
+[field K]
+[inhabited K]
+
+variables (n : ℕ )
+
+-- direct sum example
+open_locale direct_sum
+#check  ⨁(i : fin n), (λi, vec K) i
+
+-- affine equivalence of affine spaces
+#check (pt K) ≃ᵃ[K] (pt K) --works!
+
 
 -- Operations on vectors using vec type
 noncomputable def v1 : vec ℝ := mk_vec ℝ 0
