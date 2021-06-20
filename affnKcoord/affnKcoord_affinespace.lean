@@ -1,8 +1,4 @@
 import .affnK
-import linear_algebra.affine_space.affine_equiv
-import linear_algebra.matrix
-import linear_algebra.basis
-import linear_algebra.std_basis
 import .affnKcoord_vectorspace
 
 /-
@@ -53,11 +49,12 @@ lemma vectr_add_assoc'_a1 : ∀ (g1 g2 : vectr s) (p : point s), g1 +ᵥ (g2 +�
     have h1 : (g1 + g2 +ᵥ p).coords = (g1.coords +ᵥ g2.coords +ᵥ p.coords) := rfl,
     rw [h0,h1],
     simp *,
-    simp [has_vadd.vadd, has_add.add, add_semigroup.add, add_zero_class.add,  add_monoid.add, sub_neg_monoid.add, 
-        add_group.add, distrib.add, ring.add, division_ring.add],
+    simp [has_vadd.vadd, has_add.add, add_semigroup.add, add_zero_class.add,
+        add_monoid.add, add_group.add, distrib.add],
     cc,
     }
 end
+
 /-
 @[protect_proj] class add_action (G : Type*) (P : Type*) [add_monoid G] extends has_vadd G P :=
 (zero_vadd : ∀ p : P, (0 : G) +ᵥ p = p)
