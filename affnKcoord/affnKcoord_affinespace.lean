@@ -42,18 +42,22 @@ end
 /-
 vectr addition is associative with the action of vectrs on points
 -/
-lemma vectr_add_assoc'_a1 : ∀ (g1 g2 : vectr s) (p : point s), g1 +ᵥ (g2 +ᵥ p) = g1 + g2 +ᵥ p := begin
-    intros, ext,
-    repeat {
-    have h0 : (g1 +ᵥ (g2 +ᵥ p)).coords = (g1.coords +ᵥ (g2.coords +ᵥ p.coords)) := rfl,
-    have h1 : (g1 + g2 +ᵥ p).coords = (g1.coords +ᵥ g2.coords +ᵥ p.coords) := rfl,
-    rw [h0,h1],
-    simp *,
-    simp [has_vadd.vadd, has_add.add, add_semigroup.add, add_zero_class.add,
-        add_monoid.add, add_group.add, distrib.add],
-    cc,
-    }
-end
+lemma vectr_add_assoc'_a1 : ∀ 
+    (g1 g2 : vectr s) 
+    (p : point s), 
+    g1 +ᵥ (g2 +ᵥ p) = g1 + g2 +ᵥ p := 
+    begin
+        intros, ext,
+        repeat {
+        have h0 : (g1 +ᵥ (g2 +ᵥ p)).coords = (g1.coords +ᵥ (g2.coords +ᵥ p.coords)) := rfl,
+        have h1 : (g1 + g2 +ᵥ p).coords = (g1.coords +ᵥ g2.coords +ᵥ p.coords) := rfl,
+        rw [h0,h1],
+        simp *,
+        simp [has_vadd.vadd, has_add.add, add_semigroup.add, add_zero_class.add,
+            add_monoid.add, add_group.add, distrib.add],
+        cc,
+        }
+    end
 
 /-
 @[protect_proj] class add_action (G : Type*) (P : Type*) [add_monoid G] extends has_vadd G P :=
