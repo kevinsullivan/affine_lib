@@ -29,9 +29,17 @@ We prove the following properties
 - subtraction of points yields vectors in a specific way
 - etc. need to explain proof in structured English to make it comprehensible 
 - ...
+
+SULLIVAN: Can we now do away with the lin2K stuff and just
+use Lean's type system to distinguish single-coordinate pts
+from single-coordinate vecs?
 -/
 
-
+/-
+Objects: 
+- pt, point in a 1-D affine space over field K
+- vec, vector in a 1-D affine space over field K
+-/
 @[ext]
 structure pt extends K × K := (inv : fst = 1)
 @[simp]
