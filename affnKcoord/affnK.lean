@@ -10,9 +10,8 @@ variables
 
 open_locale affine
 
-
-abbreviation pt_n := fin n → pt K
-abbreviation vec_n := fin n → vec K
+abbreviation pt_n := fin (n) → pt K
+abbreviation vec_n := fin (n) → vec K
 
 def mk_pt_n (vals : vector K n) : pt_n K n := 
   λi, mk_pt K (vals.nth i)
