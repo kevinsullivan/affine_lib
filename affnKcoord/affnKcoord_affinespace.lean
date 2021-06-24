@@ -34,10 +34,16 @@ The 0 vectr plus any particular point is the particular point unchanged
 -/
 lemma zero_vectr_vadd'_a1 : ∀ p : point s, (0 : vectr s) +ᵥ p = p := begin
     intros,
-    ext,--exact zero_add _,
-    exact add_zero _,
-    --exact add_zero _
-    admit
+    ext,
+    dsimp only [has_vadd.vadd],
+    dsimp only [add_vectr_point, mk_point'],
+    dsimp only [has_vadd.vadd],
+    dsimp only [aff_vec_group_action, add_vec_pt],
+    simp only [add_right_eq_self],
+    dsimp only [has_zero.zero],
+    dsimp only [vectr_zero, mk_vectr, mk_vec_n, mk_vec, vector.nth],
+    simp only [list.nth_le_repeat],
+    refl,
 end
 
 -- SULLIVAN: The following proof is slow to build. I simplified the
@@ -89,15 +95,18 @@ instance point_has_vsub : has_vsub (vectr s) (point s) := ⟨ aff_point_group_su
 /-
 point is a nonempty set
 -/
-instance : nonempty (point s) := ⟨mk_point s ⟨list.repeat 0 dim,sorry⟩⟩
+instance : nonempty (point s) := ⟨mk_point s ⟨list.repeat 0 dim, by simp only [list.length_repeat]⟩⟩
 
 /-
 Requirement for affine spaces
 -/
 lemma point_vsub_vadd_a1 : ∀ (p1 p2 : (point s)), (p1 -ᵥ p2) +ᵥ p2 = p1 := begin
     intros, ext,
-    --repeat {
-    admit,admit
+    dsimp only [has_vsub.vsub, has_vadd.vadd],
+    dsimp only [add_vectr_point, aff_point_group_sub, mk_point', sub_point_point, mk_vectr'],
+    dsimp only [has_vsub.vsub, has_vadd.vadd],
+    dsimp only [aff_vec_group_action, aff_pt_group_sub, add_vec_pt, sub_pt_pt],
+    simp only [add_sub_cancel'_right]
 end
 
 
