@@ -146,10 +146,11 @@ def matrix.cramer_inverse
     matrix (fin dim) (fin dim) K := 
     λm,
     λ i j,
+    if dgz:dim>0 then 
     let detm := m.cramer (λi, m i ⟨0, sorry⟩) ⟨0, sorry⟩ in
     let colj : fin dim → K := λi, if i = j then 1 else 0 in
     (m.cramer colj i)/detm
-
+    else 0
 
 /-
 Helper function for general transforms.
