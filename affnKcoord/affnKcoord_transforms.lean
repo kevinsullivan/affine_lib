@@ -65,11 +65,14 @@ The other columns are a 0 + the vectr coordinates
 -/
 def fm.to_homogeneous_matrix (f_ : fm K dim id_vec) : matrix (fin (dim + 1)) (fin (dim + 1)) K
     := 
+    if gtz:dim > 0 then
     λ i j, 
     if i=0 ∧ j=0 then 1 
     else if i=0 then 0
     else if j = 0 then (f_.origin ⟨i.1-1, sorry⟩).coord
     else (f_.basis ⟨i.1-1,sorry⟩ ⟨j.1-1, sorry⟩).coord
+    else
+    λ i j, 1
 
 /-
 Convert a point into a "lean vector", with 1 at the top followed by the point's coordinates
@@ -77,7 +80,7 @@ Convert a point into a "lean vector", with 1 at the top followed by the point's 
 def point.to_homogeneous_coords (p : point s) : fin (dim+1) → K
     := 
     λi,
-    if i=0 then 1
+    if eqz:i=0 then 1
     else (p.coords ⟨i.1-1, sorry⟩).coord
 
 
@@ -87,33 +90,15 @@ Convert a vector into a "lean vector", with 0 at the top followed by the vector'
 def vectr.to_homogeneous_coords (v : vectr s) : fin (dim+1) → K
     := 
     λi,
-    if i=0 then 0
+    if eqz:i=0 then 0
     else (v.coords ⟨i.1-1, sorry⟩).coord
-
-/-
-Convert a "lean vector" with homogeneous coordinates back into our representation
-of a point in a particular space
--/
-def mk_point_from_homogeneous_coords (coords_:fin (dim+1) → K) : point s
-    := 
-    let findim : fin dim → pt K := λi, mk_pt K (coords_ ⟨i.1+1,sorry⟩) in
-    mk_point' s findim
-
-/-
-Convert a "lean vector" with homogeneous coordinates back into our representation
-of a vectr in a particular space
--/
-def mk_vectr_from_homogeneous_coords (coords_:fin (dim+1) → K) : vectr s
-    := 
-    let findim : fin dim → vec K := λi, mk_vec K (coords_ ⟨i.1+1,sorry⟩) in
-    mk_vectr' s findim
 
 /-
 Convert an unframed point into a homogeneous lean vector (1 at the top)
 -/
 def pt_n.to_homogeneous_coords (p : pt_n K dim) : fin (dim+1) → K
     := 
-    λi, if i=0 then 0 
+    λi, if eqz:i=0 then 0 
     else (p ⟨i.1-1,sorry⟩).coord
 
 /-
@@ -121,22 +106,26 @@ Convert an unframed vector into a homogeneous lean vector (0 at the top)
 -/
 def vec_n.to_homogeneous_coords (v : vec_n K dim) : fin (dim+1) → K
     :=
-    λi, if i=0 then 0 
+    λi, if eqz:i=0 then 0 
     else (v ⟨i.1-1,sorry⟩).coord
 /-
 Convert from a lean vector (with 1 at the top) back into an unframed point in our representation 
 -/
 def mk_pt_n_from_homogeneous_coords (coords_:fin (dim+1) → K) : pt_n K dim
     := 
+    if gtz:dim>0 then
     λi, mk_pt K (coords_ ⟨i.1+1,sorry⟩)
-
+    else 
+    λi, mk_pt K 0
 /-
 Convert from a lean vector (with 0 at the top) back into an unframed vector in our representation 
 -/
 def mk_vec_n_from_homogeneous_coords (coords_:fin (dim+1) → K) : vec_n K dim
     :=
+    if gtz:dim>0 then
     λi, mk_vec K (coords_ ⟨i.1+1,sorry⟩)
-
+    else 
+    λi, mk_vec K 0
 /-
 Exploit's cramer's rule to form a computable inverse for a given matrix.
 Used in computing transforms
