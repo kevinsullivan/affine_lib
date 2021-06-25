@@ -1,4 +1,6 @@
 import .affnKcoord_affinespace
+import linear_algebra.matrix
+import linear_algebra.affine_space.basic
 
 universes u
 
