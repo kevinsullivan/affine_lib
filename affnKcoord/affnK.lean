@@ -48,6 +48,8 @@ def add_maps {n1 n2 : ℕ} {T : Type u} (m1 : fin n1 → T) (m2 : fin n2 → T) 
   end⟩
 
 
+instance exists_ : affine_space (fin n → K) (fin n → K) := by apply_instance
+
 --done
 instance : add_comm_group (vec_n K n) := by apply_instance
 instance : affine_space (vec_n K n) (pt_n K n) := by apply_instance
