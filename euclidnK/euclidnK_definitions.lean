@@ -160,7 +160,7 @@ def orientation :=
 
 def rotation :=
   {
-      tr : fm_tr s s2 // 
+      tr : fm_tr s s // 
       ∀ v : vectr s, ∥(tr.transform_vectr v)∥ = 1 ∧ 
       ∀ i j : fin dim, 
         i≠j →
