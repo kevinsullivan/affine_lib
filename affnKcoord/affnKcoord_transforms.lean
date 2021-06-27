@@ -172,6 +172,7 @@ Convert a point into a "lean vector", with 1 at the top followed by the point's 
 def point.to_homogeneous_coords {K : Type u} [field K] [inhabited K] 
 {dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f}(p : point s) : fin (dim+1) → K
     := 
+    if dim = 0 then λi, 1 else
     λi,
     if eqz:i=0 then 1
     else (p.coords ⟨i.1-1, sorry⟩).coord
@@ -183,6 +184,7 @@ Convert a vector into a "lean vector", with 0 at the top followed by the vector'
 def vectr.to_homogeneous_coords {K : Type u} [field K] [inhabited K] 
 {dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f}(v : vectr s) : fin (dim+1) → K
     := 
+    if dim = 0 then λi, 0 else
     λi,
     if eqz:i=0 then 0
     else (v.coords ⟨i.1-1, sorry⟩).coord
@@ -192,7 +194,8 @@ Convert an unframed point into a homogeneous lean vector (1 at the top)
 -/
 def pt_n.to_homogeneous_coords {K : Type u} [field K] [inhabited K]  {dim : ℕ} (p : pt_n K dim) : fin (dim+1) → K
     := 
-    λi, if eqz:i=0 then 0 
+    if dim = 0 then λi, 1 else
+    λi, if eqz:i=0 then 1 
     else (p ⟨i.1-1,sorry⟩).coord
 
 /-
@@ -200,6 +203,7 @@ Convert an unframed vector into a homogeneous lean vector (0 at the top)
 -/
 def vec_n.to_homogeneous_coords {K : Type u} [field K] [inhabited K]  {dim : ℕ} (v : vec_n K dim) : fin (dim+1) → K
     :=
+    if dim = 0 then λi, 0 else
     λi, if eqz:i=0 then 0 
     else (v ⟨i.1-1,sorry⟩).coord
 
