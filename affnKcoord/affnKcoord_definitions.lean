@@ -91,17 +91,20 @@ def merge_prod_fm
 | (fm.deriv o1 b1 p1) (fm.deriv o2 b2 p2) := fm.deriv (add_maps o1 o2) 
         ⟨(λi, 
             if lt:i.1<dim1 then (add_maps (b1.basis_vecs ⟨i.1, lt⟩) (mk_vec_n K dim2 ⟨list.repeat 0 dim2, by simp only [list.length_repeat]⟩))
-            else (add_maps (mk_vec_n K dim1 ⟨list.repeat 0 dim1, by simp only [list.length_repeat]⟩) (b2.basis_vecs ⟨i.1 - dim1,sorry⟩)))
+            else if lt:i.1-dim1<dim2 then (add_maps (mk_vec_n K dim1 ⟨list.repeat 0 dim1, by simp only [list.length_repeat]⟩) (b2.basis_vecs ⟨i.1 - dim1,lt⟩))
+            else 0)
          ,sorry, sorry⟩ (merge_prod_fm p1 p2)
 | (fm.deriv o1 b1 p1) (fm.base dim2 id_vec2) := fm.deriv (add_maps o1 (fm.base dim2 id_vec2).origin) 
         ⟨(λi, 
             if lt:i.1 < dim1 then (add_maps (b1.basis_vecs ⟨i.1, lt⟩) (mk_vec_n K dim2 ⟨list.repeat 0 dim2, by simp only [list.length_repeat]⟩))
-            else (add_maps (mk_vec_n K dim1 ⟨list.repeat 0 dim1, by simp only [list.length_repeat]⟩) ((fm.base dim2 id_vec2).basis.basis_vecs ⟨i.1 - dim1,sorry⟩)))
+            else if lt:i.1-dim1<dim2 then (add_maps (mk_vec_n K dim1 ⟨list.repeat 0 dim1, by simp only [list.length_repeat]⟩) ((fm.base dim2 id_vec2).basis.basis_vecs ⟨i.1 - dim1,lt⟩))
+            else 0)
          ,sorry, sorry⟩ (merge_prod_fm p1 (fm.base dim2 id_vec2))
 | (fm.base dim1 id_vec1) (fm.deriv o2 b2 p2) := fm.deriv (add_maps (fm.base dim1 id_vec1).origin o2) 
         ⟨(λi, 
-            if lt:i.1<dim1 then (add_maps (mk_vec_n K dim1 ⟨list.repeat 0 dim1, by simp only [list.length_repeat]⟩) (b2.basis_vecs ⟨i.1-dim1,sorry⟩))
-            else (add_maps ((fm.base dim1 id_vec1).basis.basis_vecs ⟨i.1,sorry⟩) (mk_vec_n K dim2 ⟨list.repeat 0 dim2, by simp only [list.length_repeat]⟩)))
+            if lt:i.1<dim1 then (add_maps ((fm.base dim1 id_vec1).basis.basis_vecs ⟨i.1,lt⟩) (mk_vec_n K dim2 ⟨list.repeat 0 dim2, by simp only [list.length_repeat]⟩))
+            else if lt:i.1-dim1<dim2 then (add_maps (mk_vec_n K dim1 ⟨list.repeat 0 dim1, by simp only [list.length_repeat]⟩) (b2.basis_vecs ⟨i.1-dim1,lt⟩))
+            else 0)
          ,sorry, sorry⟩ (merge_prod_fm (fm.base dim1 id_vec1) p2)      
 | (fm.base dim1 id_vec1) (fm.base dim2 id_vec2) := fm.base (dim1+dim2) (add_maps id_vec1 id_vec2)
 
