@@ -12,6 +12,32 @@ variables
 {dim2 : nat } {id_vec2 : fin dim2 → nat} {f2 : fm K dim2 id_vec2} (s2 : spc K f2)
 
 /-
+Andrew 6/27
+Had to move this in here - need to wait until the proof that vectr s is an add_comm_group to define this
+
+Also Andrew 6/27 - This should get split into two files, a function library and what is most relevant to the transform
+-/
+
+structure vectr_basis := 
+    (basis_vectrs : fin dim → vectr s)
+    (basis_independent : linear_independent K basis_vectrs)
+    (basis_spans : submodule.span K (set.range basis_vectrs))
+        
+
+instance : has_lift_t (point s) (pt_n K dim) := ⟨λp, p.coords⟩
+instance : has_lift_t (vectr s) (vec_n K dim) := ⟨λv, v.coords⟩
+instance : has_lift_t (vectr_basis s) (vec_n_basis K dim) := ⟨λvb, ⟨λi, (vb.basis_vectrs i).coords, sorry, sorry⟩⟩
+/-
+Used to make a frame using framed points and vectors. Simply use their coordinates,
+but their underlying frame is noted as the parent of the derived frame
+-/
+def mk_frame {f : fm K dim id_vec} {s : spc K f}  (p : point s) (v : vectr_basis s) :=
+fm.deriv ↑p ↑v f   -- TODO: make sure v ≠ 0 (erasing tyoe info)
+                                      -- TODO: snd arg is really a basis for the vs
+
+
+
+/-
 An affine equivalence is an equivalence, ≃ᵃ[K], 
 between affine spaces such that both forward and
 inverse maps are affine.
@@ -55,29 +81,33 @@ def fm_tr.trans  {f1 :  fm K dim id_vec} {f2 :  fm K dim id_vec} {f3 :  fm K dim
 /-
 Convert a (our) basis (fin dim → pt_n K dim) to a Lean matrix
 -/
-def basis_to_matrix (ftok : fin dim → pt_n K dim) : matrix (fin dim) (fin dim) K :=
+def vec_n_basis.to_matrix {K : Type u} [field K] [inhabited K]  {dim : ℕ} (ftok : vec_n_basis K dim) : matrix (fin dim) (fin dim) K :=
     λ i j,
-    ((ftok j) i).coord
+    ((ftok.basis_vecs j) i).coord
 
+def vectr_basis.to_matrix {dim : ℕ} {id_vec : fin dim → ℕ} {f: fm K dim id_vec} {s : spc K f}  (ftok : vectr_basis s) : matrix (fin dim) (fin dim) K :=
+    (↑ftok : vec_n_basis K dim).to_matrix
 /-
 Convert a frame to a homogeneous matrix. The first column is a 1 + the point coordinates,
 The other columns are a 0 + the vectr coordinates
 -/
-def fm.to_homogeneous_matrix (f_ : fm K dim id_vec) : matrix (fin (dim + 1)) (fin (dim + 1)) K
+def fm.to_homogeneous_matrix {K : Type u} [field K] [inhabited K] 
+{dim : nat} {id_vec : fin dim → nat }(f_ : fm K dim id_vec) : matrix (fin (dim + 1)) (fin (dim + 1)) K
     := 
     if gtz:dim > 0 then
     λ i j, 
     if i=0 ∧ j=0 then 1 
     else if i=0 then 0
     else if j = 0 then (f_.origin ⟨i.1-1, sorry⟩).coord
-    else (f_.basis ⟨i.1-1,sorry⟩ ⟨j.1-1, sorry⟩).coord
+    else (f_.basis.basis_vecs ⟨i.1-1,sorry⟩ ⟨j.1-1, sorry⟩).coord
     else
     λ i j, 1
 
 /-
 Convert a point into a "lean vector", with 1 at the top followed by the point's coordinates
 -/
-def point.to_homogeneous_coords (p : point s) : fin (dim+1) → K
+def point.to_homogeneous_coords {K : Type u} [field K] [inhabited K] 
+{dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f}(p : point s) : fin (dim+1) → K
     := 
     λi,
     if eqz:i=0 then 1
@@ -87,7 +117,8 @@ def point.to_homogeneous_coords (p : point s) : fin (dim+1) → K
 /-
 Convert a vector into a "lean vector", with 0 at the top followed by the vector's coordinates
 -/
-def vectr.to_homogeneous_coords (v : vectr s) : fin (dim+1) → K
+def vectr.to_homogeneous_coords {K : Type u} [field K] [inhabited K] 
+{dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f}(v : vectr s) : fin (dim+1) → K
     := 
     λi,
     if eqz:i=0 then 0
@@ -96,7 +127,7 @@ def vectr.to_homogeneous_coords (v : vectr s) : fin (dim+1) → K
 /-
 Convert an unframed point into a homogeneous lean vector (1 at the top)
 -/
-def pt_n.to_homogeneous_coords (p : pt_n K dim) : fin (dim+1) → K
+def pt_n.to_homogeneous_coords {K : Type u} [field K] [inhabited K]  {dim : ℕ} (p : pt_n K dim) : fin (dim+1) → K
     := 
     λi, if eqz:i=0 then 0 
     else (p ⟨i.1-1,sorry⟩).coord
@@ -104,14 +135,47 @@ def pt_n.to_homogeneous_coords (p : pt_n K dim) : fin (dim+1) → K
 /-
 Convert an unframed vector into a homogeneous lean vector (0 at the top)
 -/
-def vec_n.to_homogeneous_coords (v : vec_n K dim) : fin (dim+1) → K
+def vec_n.to_homogeneous_coords {K : Type u} [field K] [inhabited K]  {dim : ℕ} (v : vec_n K dim) : fin (dim+1) → K
     :=
     λi, if eqz:i=0 then 0 
     else (v ⟨i.1-1,sorry⟩).coord
+
+/-
+Convert a point into a "lean vector", with 1 at the top followed by the point's coordinates
+-/
+def point.to_coords {K : Type u} [field K] [inhabited K] 
+{dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f}(p : point s) : fin (dim) → K
+    := 
+    λi,
+    (p.coords ⟨i.1, sorry⟩).coord
+
+
+/-
+Convert a vector into a "lean vector", with 0 at the top followed by the vector's coordinates
+-/
+def vectr.to_coords {K : Type u} [field K] [inhabited K] 
+{dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f}(v : vectr s) : fin (dim) → K
+    := 
+    λi,
+    (v.coords ⟨i.1, sorry⟩).coord
+
+/-
+Convert an unframed point into a homogeneous lean vector (1 at the top)
+-/
+def pt_n.to_coords {K : Type u} [field K] [inhabited K]  {dim : ℕ} (p : pt_n K dim) : fin (dim) → K
+    := 
+    λi, (p ⟨i.1,sorry⟩).coord
+
+/-
+Convert an unframed vector into a homogeneous lean vector (0 at the top)
+-/
+def vec_n.to_coords {K : Type u} [field K] [inhabited K]  {dim : ℕ} (v : vec_n K dim) : fin (dim) → K
+    :=
+    λi, (v ⟨i.1,sorry⟩).coord
 /-
 Convert from a lean vector (with 1 at the top) back into an unframed point in our representation 
 -/
-def mk_pt_n_from_homogeneous_coords (coords_:fin (dim+1) → K) : pt_n K dim
+def mk_pt_n_from_homogeneous_coords {K : Type u} [field K] [inhabited K]  {dim : ℕ} (coords_:fin (dim+1) → K) : pt_n K dim
     := 
     if gtz:dim>0 then
     λi, mk_pt K (coords_ ⟨i.1+1,sorry⟩)
@@ -120,12 +184,56 @@ def mk_pt_n_from_homogeneous_coords (coords_:fin (dim+1) → K) : pt_n K dim
 /-
 Convert from a lean vector (with 0 at the top) back into an unframed vector in our representation 
 -/
-def mk_vec_n_from_homogeneous_coords (coords_:fin (dim+1) → K) : vec_n K dim
+def mk_vec_n_from_homogeneous_coords  {K : Type u} [field K] [inhabited K]  {dim : ℕ} (coords_:fin (dim+1) → K) : vec_n K dim
     :=
     if gtz:dim>0 then
     λi, mk_vec K (coords_ ⟨i.1+1,sorry⟩)
     else 
     λi, mk_vec K 0
+
+
+def mk_point_from_homogeneous_coords {K : Type u} [field K] [inhabited K] 
+{dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f} (coords_:fin (dim+1) → K) : point s
+    := 
+    if gtz:dim>0 then
+    ⟨λi, mk_pt K (coords_ ⟨i.1+1,sorry⟩)⟩
+    else 
+    ⟨λi, mk_pt K 0⟩
+/-
+Convert from a lean vector (with 0 at the top) back into an unframed vector in our representation 
+-/
+def mk_vectr_from_homogeneous_coords {K : Type u} [field K] [inhabited K] 
+{dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f} (coords_:fin (dim+1) → K) : vectr s
+    :=
+    if gtz:dim>0 then
+    ⟨λi, mk_vec K (coords_ ⟨i.1+1,sorry⟩)⟩
+    else 
+    ⟨λi, mk_vec K 0⟩
+/-
+Convert from a lean vector back into an unframed point in our representation 
+-/
+def mk_pt_n_from_coords {K : Type u} [field K] [inhabited K] {dim : ℕ} (coords_:fin (dim) → K) : pt_n K dim
+    := 
+    λi, mk_pt K (coords_ ⟨i.1,sorry⟩)
+/-
+Convert from a lean vector (with 0 at the top) back into an unframed vector in our representation 
+-/
+def mk_vec_n_from_coords {K : Type u} [field K] [inhabited K] {dim : ℕ} (coords_:fin (dim) → K) : vec_n K dim
+    :=
+    λi, mk_vec K (coords_ ⟨i.1,sorry⟩)
+
+
+def mk_point_from_coords {K : Type u} [field K] [inhabited K] 
+{dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f} (coords_:fin (dim) → K) : point s
+    := 
+    ⟨λi, mk_pt K (coords_ ⟨i.1,sorry⟩)⟩
+/-
+Convert from a lean vector (with 0 at the top) back into an unframed vector in our representation 
+-/
+def mk_vectr_from_coords {K : Type u} [field K] [inhabited K] 
+{dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f} (coords_:fin (dim) → K) : vectr s
+    :=
+    ⟨λi, mk_vec K (coords_ ⟨i.1,sorry⟩)⟩
 /-
 Exploit's cramer's rule to form a computable inverse for a given matrix.
 Used in computing transforms
@@ -195,15 +303,15 @@ def to_base_helper' :  fm K dim id_vec → @raw_tr K _ _ dim
                 --admit   -- TODO: What's this?
             end
         ⟩
-| (fm.deriv origin basis ind spans parent) := (⟨
+| (fm.deriv origin basis parent) := (⟨
             ⟨/-transform from current->parent-/
                 (λ (p : pt_n K dim),
                 mk_pt_n_from_homogeneous_coords 
-                (((fm.deriv origin basis ind spans parent).to_homogeneous_matrix.mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
+                (((fm.deriv origin basis parent).to_homogeneous_matrix.mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
                 : pt_n K dim → pt_n K dim),
                 (λ (p : pt_n K dim),
                 mk_pt_n_from_homogeneous_coords 
-                ((((fm.deriv origin basis ind spans parent).to_homogeneous_matrix.cramer_inverse).mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
+                ((((fm.deriv origin basis parent).to_homogeneous_matrix.cramer_inverse).mul_vec p.to_homogeneous_coords) : fin (dim + 1) → K)
                 : pt_n K dim → pt_n K dim),
                 sorry,
                 sorry,

@@ -1,5 +1,6 @@
 import ..aff1Kcoord.aff1K
 import tactic.linarith
+import linear_algebra.std_basis
 
 universes u 
 variables 
@@ -24,6 +25,7 @@ def pt_n.coords {K : Type u}
 [inhabited K]
 {n : ℕ} (ptn : pt_n K n) : fin n → K :=
   λi, (ptn i).coord
+
 def vec_n.coords {K : Type u}
 [field K]
 [inhabited K]
@@ -47,8 +49,12 @@ def add_maps {n1 n2 : ℕ} {T : Type u} (m1 : fin n1 → T) (m2 : fin n2 → T) 
     exact (nat.sub_lt_left_iff_lt_add (by linarith)).elim_right i.2,
   end⟩
 
+structure vec_n_basis :=
+  (basis_vecs:fin n → vec_n K n)
+  (basis_independent : linear_independent K basis_vecs)
+  (basis_spans : submodule.span K (set.range basis_vecs))
 
-instance exists_ : affine_space (fin n → K) (fin n → K) := by apply_instance
+instance : has_lift_t (vec_n_basis K n) (fin n → vec_n K n) := ⟨λvb, vb.basis_vecs⟩
 
 --done
 instance : add_comm_group (vec_n K n) := by apply_instance

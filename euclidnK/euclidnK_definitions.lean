@@ -145,26 +145,67 @@ structure affine_euclidean_space.angle
 
 
 noncomputable
-def real_affine_coord_vec.compute_angle
+def vectr.compute_angle
     (v1 : vectr s)
-    (v2 : vectr s)
-    : affine_euclidean_space.angle
+    : vectr s → affine_euclidean_space.angle
     := 
+      λ v2,
       ⟨real.arccos ⟪v1,v2⟫/∥v1∥*∥v2∥⟩
 
 
-def orientation := 
-  {b : fin dim → vectr s // 
-  ∀ i : fin dim, ∥b i∥ = 1 ∧ 
-  ∀ i j : fin dim, i≠j → ⟪b i,b j⟫ = (0:ℝ)}
-
+structure orientation extends vectr_basis s := 
+    (col_norm_one : ∀ i : fin dim, ∥basis_vectrs i∥ = 1)
+    (col_orthogonal : ∀ i j : fin dim, i≠j → ⟪basis_vectrs i,basis_vectrs j⟫ = (0:ℝ))
+/--/
+structure rotation :=
+  (tr : fm_tr s s ) --not extended because we want to use "transform_vectr" and "transform_point" extension methods
+  (rotation_no_displacement : ∀ v : vectr s, ∥(tr.transform_vectr 0)∥ = 0)
+  (rotation_no_scaling : ∀ v : vectr s, ∥(tr.transform_vectr v)∥ = 1) 
+  (rotation_col_orthogonal : ∀ i j : fin dim, 
+        i≠j →
+        ⟪ tr.transform_vectr (⟨(fm.base dim id_vec).basis.basis_vecs i⟩:vectr s),
+          tr.transform_vectr ((⟨(fm.base dim id_vec).basis.basis_vecs j⟩):vectr s)⟫ 
+          = (0:ℝ))
+-/
 def rotation :=
   {
-      tr : fm_tr s s // 
-      ∀ v : vectr s, ∥(tr.transform_vectr v)∥ = 1 ∧ 
-      ∀ i j : fin dim, 
-        i≠j →
-        ⟪ tr.transform_vectr (⟨(fm.base dim id_vec).basis i⟩:vectr s),
-          tr.transform_vectr ((⟨(fm.base dim id_vec).basis j⟩):vectr s)⟫ 
-          = (0:ℝ)
+    tr : fm_tr s s //
+    (∀ v : vectr s, ∥(tr.transform_vectr 0)∥ = 0) ∧
+    (∀ v : vectr s, ∥(tr.transform_vectr v)∥ = 1) ∧
+    (∀ i j : fin dim, 
+          i≠j →
+          ⟪ tr.transform_vectr (⟨(fm.base dim id_vec).basis.basis_vecs i⟩:vectr s),
+            tr.transform_vectr ((⟨(fm.base dim id_vec).basis.basis_vecs j⟩):vectr s)⟫ 
+            = (0:ℝ))
   }
+
+variables (bb : vectr_basis s) (pp : point s)
+
+
+def rotation.mk {K : Type u} [field K] [inhabited K] [normed_field K] [has_lift_t K ℝ]
+{dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f} (b : vectr_basis s) : rotation s :=
+⟨ 
+  begin
+    
+    eapply fm_tr.mk,
+    split,
+    sorry,
+    split,
+    sorry,
+    sorry,
+    exact (λ p, mk_point_from_coords (b.to_matrix.mul_vec p.to_coords)),
+    exact (λ p, mk_point_from_coords (b.to_matrix.cramer_inverse.mul_vec p.to_coords)),
+
+         --(λ p, mk_point_from_coords (b.to_matrix.mul_vec p.to_coords)),
+          --(λ p, mk_point_from_coords ((b.to_matrix.cramer_inverse.mul_vec p.to_coords)),
+    split,
+    sorry,
+    sorry,
+    sorry,
+    sorry,
+    exact (λ v, mk_vectr_from_coords (b.to_matrix.mul_vec v.to_coords)),
+    exact (λ p, mk_vectr_from_coords (b.to_matrix.cramer_inverse.mul_vec p.to_coords)),
+  end
+,sorry, sorry, sorry⟩
+
+instance : has_lift_t (orientation s) (rotation s) := ⟨λo, rotation.mk o.1/-subtype notation-/⟩
