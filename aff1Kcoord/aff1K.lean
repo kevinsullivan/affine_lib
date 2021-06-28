@@ -53,9 +53,9 @@ def mk_pt (k : K) : pt K  := ⟨k⟩             -- exported
 def mk_vec (k : K) : vec K := ⟨k⟩            -- exported
 
 /-
-    ********************
-    *** Vector space ***
-    ********************
+    *******************************
+    *** Vector space operations ***
+    *******************************
 -/
 
 
@@ -67,22 +67,23 @@ def smul_vec (k : K) (v : vec K) : vec K := ⟨k*v.coord⟩
 
 @[simp]
 def neg_vec (v : vec K) : vec K := ⟨-v.coord⟩
+
 @[simp]
 def sub_vec_vec (v2 v1 : vec K) : vec K := add_vec_vec K v2 (neg_vec K v1)  -- v2-v1
 
 @[simp]
 def vec_zero  := mk_vec K 0
-instance has_zero_vec : has_zero (vec K) := ⟨vec_zero K⟩
+
+instance : has_zero (vec K) := ⟨vec_zero K⟩
+instance : has_neg (vec K) := ⟨neg_vec K⟩
+
 
 /-
-    ********************
-    *** Affine space ***
-    ********************
+    *******************************
+    *** Affine space operations ***
+    *******************************
 -/
 
-/-
-1-D Affine space operations
--/
 @[simp]
 def sub_pt_pt (p1 p2 : pt K) : vec K := ⟨p1.coord - p2.coord⟩
 
@@ -94,16 +95,15 @@ def add_vec_pt (v : vec K) (p : pt K) : pt K := ⟨p.coord + v.coord⟩
 -- add affine combination operation here 
 
 @[simp]
-def aff_vec_group_action : vec K → pt K → pt K := add_vec_pt K
-instance : has_vadd (vec K) (pt K) := ⟨aff_vec_group_action K⟩
+def aff_vec_group_action := add_vec_pt K
 
 @[simp]
-def aff_pt_group_sub : pt K → pt K → vec K := sub_pt_pt K
-instance pt_has_vsub : has_vsub (vec K) (pt K) := ⟨ aff_pt_group_sub K ⟩ 
+def aff_pt_group_sub := sub_pt_pt K
+
+instance : has_vadd (vec K) (pt K) := ⟨aff_vec_group_action K⟩
+instance : has_vsub (vec K) (pt K) := ⟨ aff_pt_group_sub K ⟩ 
 
 open_locale affine
-
-instance : has_neg (vec K) := ⟨neg_vec K⟩
 
 @[simp]
 def nsmul_vec : ℕ → (vec K) → (vec K) 
@@ -146,8 +146,6 @@ instance : add_comm_monoid (vec K) :=
         dsimp [0, vec_zero K],
         ext,
         cc,
-        
-
     end,
     begin
         simp [auto_param],
