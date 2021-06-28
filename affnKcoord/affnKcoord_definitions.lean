@@ -25,9 +25,7 @@ inductive fm : Π (dim : ℕ) (id_vec : fin dim → ℕ), Type (u)
     {dim : ℕ}
     {id_vec : fin dim → ℕ}
     (origin : pt_n K dim) 
-    (basis : (fin dim) → (vec_n K dim))
-    (basis_independent : linear_independent K basis)
-    (basis_spans : submodule.span K (set.range basis))
+    (basis : vec_n_basis K dim)
     (parent : fm dim id_vec)
     : fm dim id_vec
 
@@ -43,7 +41,7 @@ def fm.parent
 {dim : ℕ} {id_vec : fin dim → ℕ}
 : fm K dim id_vec → fm K dim id_vec
 | (fm.base dim id_vec) := (fm.base dim id_vec)
-| (fm.deriv origin basis _ _ parent) := parent
+| (fm.deriv origin basis parent) := parent
 
 /-
 Origin of a frame. For a standard frame, it is the 0 pt, 
@@ -55,7 +53,7 @@ def fm.origin
 {dim : ℕ} {id_vec : fin dim → ℕ}  :
 fm K dim id_vec → pt_n K dim
 | (fm.base dim id_vec) := (λi, mk_pt K 0)
-| (fm.deriv origin basis _ _ parent) := origin
+| (fm.deriv origin basis parent) := origin
 
 /-
 Basis of a frame. For a standard frame, it is the standard basis, 
@@ -65,9 +63,9 @@ for a derived frame, the basis was provided at instantiation.
 def fm.basis 
 {K : Type u} [field K] [inhabited K]
 {dim : ℕ} {id_vec : fin dim → ℕ} :
-fm K dim id_vec → (fin dim → vec_n K dim)
-| (fm.base dim id_vec) := (λ i j, if j = i then mk_vec K 1 else mk_vec K 0)
-| (fm.deriv origin basis _ _ parent) := (basis:fin dim → vec_n K dim)
+fm K dim id_vec → (vec_n_basis K dim)
+| (fm.base dim id_vec) := ⟨(λ i j, if j = i then mk_vec K 1 else mk_vec K 0), sorry, sorry⟩
+| (fm.deriv origin basis parent) := (basis)
 
 
 /-
@@ -75,8 +73,8 @@ Make a derived frame from an existing frame.
 Arguments are (unframed) origin, (unframed) basis,
 and parent frame.
 -/
-def mk_fm  {dim : ℕ} {id_vec : fin dim → ℕ}  (p : pt_n K dim) (v : fin dim → vec_n K dim) (f : fm K dim id_vec)
-    : fm K dim id_vec:= fm.deriv p v sorry sorry f
+def mk_fm  {dim : ℕ} {id_vec : fin dim → ℕ}  (p : pt_n K dim) (b : vec_n_basis K dim) (f : fm K dim id_vec)
+    : fm K dim id_vec:= fm.deriv p b f
 
 /-
 Helper function used to merge two frames when creating a product 
@@ -90,21 +88,24 @@ def merge_prod_fm
     {dim1 : ℕ} {id_vec1 : fin dim1 → ℕ} --(f1 : fm K dim1 id_vec1)
     {dim2 : ℕ} {id_vec2 : fin dim2 → ℕ} --(f2 : fm K dim2 id_vec2)
     :  fm K dim1 id_vec1 → fm K dim2 id_vec2 → fm K (dim1+dim2) (add_maps id_vec1 id_vec2)
-| (fm.deriv o1 b1 _ _ p1) (fm.deriv o2 b2 _ _ p2) := fm.deriv (add_maps o1 o2) 
-        (λi, 
-            if lt:i.1<dim1 then (add_maps (b1 ⟨i.1,sorry⟩) (mk_vec_n K dim2 ⟨list.repeat dim2 0, sorry⟩))
-            else (add_maps (mk_vec_n K dim1 ⟨list.repeat dim1 0, sorry⟩) (b2 ⟨i.1,sorry⟩)))
-         sorry sorry (merge_prod_fm p1 p2)
-| (fm.deriv o1 b1 _ _ p1) (fm.base dim2 id_vec2) := fm.deriv (add_maps o1 (fm.base dim2 id_vec2).origin) 
-        (λi, 
-            if lt:i.1 < dim1 then (add_maps (b1 ⟨i.1,sorry⟩) (mk_vec_n K dim2 ⟨list.repeat dim2 0, sorry⟩))
-            else (add_maps (mk_vec_n K dim1 ⟨list.repeat dim1 0, sorry⟩) ((fm.base dim2 id_vec2).basis ⟨i.1,sorry⟩)))
-         sorry sorry (merge_prod_fm p1 (fm.base dim2 id_vec2))
-| (fm.base dim1 id_vec1) (fm.deriv o2 b2 _ _ p2) := fm.deriv (add_maps (fm.base dim1 id_vec1).origin o2) 
-        (λi, 
-            if i.1 < dim1 then (add_maps (mk_vec_n K dim1 ⟨list.repeat dim1 0, sorry⟩) (b2 ⟨i.1,sorry⟩))
-            else (add_maps ((fm.base dim1 id_vec1).basis ⟨i.1,sorry⟩) (mk_vec_n K dim2 ⟨list.repeat dim2 0, sorry⟩)))
-         sorry sorry (merge_prod_fm (fm.base dim1 id_vec1) p2)      
+| (fm.deriv o1 b1 p1) (fm.deriv o2 b2 p2) := fm.deriv (add_maps o1 o2) 
+        ⟨(λi, 
+            if lt:i.1<dim1 then (add_maps (b1.basis_vecs ⟨i.1, lt⟩) (mk_vec_n K dim2 ⟨list.repeat 0 dim2, by simp only [list.length_repeat]⟩))
+            else if lt:i.1-dim1<dim2 then (add_maps (mk_vec_n K dim1 ⟨list.repeat 0 dim1, by simp only [list.length_repeat]⟩) (b2.basis_vecs ⟨i.1 - dim1,lt⟩))
+            else 0)
+         ,sorry, sorry⟩ (merge_prod_fm p1 p2)
+| (fm.deriv o1 b1 p1) (fm.base dim2 id_vec2) := fm.deriv (add_maps o1 (fm.base dim2 id_vec2).origin) 
+        ⟨(λi, 
+            if lt:i.1 < dim1 then (add_maps (b1.basis_vecs ⟨i.1, lt⟩) (mk_vec_n K dim2 ⟨list.repeat 0 dim2, by simp only [list.length_repeat]⟩))
+            else if lt:i.1-dim1<dim2 then (add_maps (mk_vec_n K dim1 ⟨list.repeat 0 dim1, by simp only [list.length_repeat]⟩) ((fm.base dim2 id_vec2).basis.basis_vecs ⟨i.1 - dim1,lt⟩))
+            else 0)
+         ,sorry, sorry⟩ (merge_prod_fm p1 (fm.base dim2 id_vec2))
+| (fm.base dim1 id_vec1) (fm.deriv o2 b2 p2) := fm.deriv (add_maps (fm.base dim1 id_vec1).origin o2) 
+        ⟨(λi, 
+            if lt:i.1<dim1 then (add_maps ((fm.base dim1 id_vec1).basis.basis_vecs ⟨i.1,lt⟩) (mk_vec_n K dim2 ⟨list.repeat 0 dim2, by simp only [list.length_repeat]⟩))
+            else if lt:i.1-dim1<dim2 then (add_maps (mk_vec_n K dim1 ⟨list.repeat 0 dim1, by simp only [list.length_repeat]⟩) (b2.basis_vecs ⟨i.1-dim1,lt⟩))
+            else 0)
+         ,sorry, sorry⟩ (merge_prod_fm (fm.base dim1 id_vec1) p2)      
 | (fm.base dim1 id_vec1) (fm.base dim2 id_vec2) := fm.base (dim1+dim2) (add_maps id_vec1 id_vec2)
 
 /-
@@ -222,12 +223,6 @@ def mk_vectr_prod
 def vectr.space {dim : ℕ} {id_vec : fin dim → ℕ} {f: fm K dim id_vec} {s : spc K f} 
     (v : vectr s) : spc K _ := s
 
-/-
-Used to make a frame using framed points and vectors. Simply use their coordinates,
-but their underlying frame is noted as the parent of the derived frame
--/
-def mk_frame {f : fm K dim id_vec} {s : spc K f}  (p : point s) (v : fin dim → vectr s) :=
-fm.deriv p.coords (λi, (v i).coords) sorry sorry f   -- TODO: make sure v ≠ 0 (erasing tyoe info)
-                                      -- TODO: snd arg is really a basis for the vs
+
 end implicitK
 

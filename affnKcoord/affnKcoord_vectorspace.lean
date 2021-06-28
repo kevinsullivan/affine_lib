@@ -41,12 +41,12 @@ lemma add_assoc_vectr : ∀ a b c : vectr s, a + b + c = a + (b + c) :=
 begin
     intros,
     ext,
-    --cases a,
     have p1 : (a + b + c).coords = a.coords + b.coords + c.coords := rfl,
     have p2 : (a + (b + c)).coords = a.coords + (b.coords + c.coords) := rfl,
     rw [p1,p2],
-    --cc
-    repeat {admit}
+    dsimp only [has_add.add],
+    dsimp only [add_vec_vec],
+    simp only [add_assoc]
 end
 
 --vectrs form an additive semigroup
@@ -65,8 +65,14 @@ instance has_zero_vectr : has_zero (vectr s) := ⟨vectr_zero s⟩
 lemma zero_add_vectr : ∀ a : vectr s, 0 + a = a := 
 begin
     intros, ext,
-    exact zero_add _,
-    admit
+    dsimp only [has_add.add],
+    dsimp only [add_vectr_vectr],
+    simp only [mk_vectr'],
+    dsimp only [has_add.add],
+    dsimp only [add_vec_vec],
+    dsimp only [has_zero.zero],
+    dsimp only [vectr_zero],
+    simp only [mk_vectr, mk_vec_n, vector.nth, mk_vec, list.nth_le_repeat, zero_add],
 end
 
 /-
@@ -74,9 +80,15 @@ any vectr plus the 0 vectr is the original vectr
 -/
 lemma add_zero_vectr : ∀ a : vectr s, a + 0 = a := 
 begin
-    admit/-intros,ext,
-    exact add_zero _,
-    exact add_zero _,-/
+    intros, ext,
+    dsimp only [has_add.add],
+    dsimp only [add_vectr_vectr],
+    simp only [mk_vectr'],
+    dsimp only [has_add.add],
+    dsimp only [add_vec_vec],
+    dsimp only [has_zero.zero],
+    dsimp only [vectr_zero],
+    simp only [mk_vectr, mk_vec_n, vector.nth, mk_vec, list.nth_le_repeat, add_zero],
 end
 
 /-
@@ -115,8 +127,7 @@ subtracting a vectr is equivalent to adding the inverse
 lemma sub_eq_add_neg_vectr : ∀ a b : vectr s, a - b = a + -b := 
 begin
     intros,ext,
-    refl,refl
-
+    refl
 end 
 
 /-
@@ -145,8 +156,18 @@ lemma add_left_neg_vectr : ∀ a : vectr s, -a + a = 0 :=
 begin
     intros,
     ext,
-    admit,
-    admit
+    dsimp only [has_add.add],
+    dsimp only [add_vectr_vectr],
+    simp only [mk_vectr'],
+    dsimp only [has_add.add],
+    dsimp only [add_vec_vec],
+    dsimp only [has_zero.zero],
+    dsimp only [vectr_zero],
+    simp only [mk_vectr, mk_vec_n, vector.nth, mk_vec, list.nth_le_repeat],
+    dsimp only [has_neg.neg],
+    dsimp only [neg_vectr],
+    dsimp only [has_scalar.smul],
+    simp only [neg_mul_eq_neg_mul_symm, one_mul, mk_vectr', add_left_neg, smul_vec],
 end
 
 /-
@@ -173,8 +194,12 @@ begin
     rw [p1,p2],
     cc
     } ,
-    admit,
-    admit   
+    dsimp only [has_add.add],
+    dsimp only [add_vectr_vectr],
+    dsimp only [mk_vectr'],
+    dsimp only [has_add.add],
+    dsimp only [add_vec_vec],
+    simp only [add_comm]
 end
 
 /-
@@ -225,7 +250,6 @@ begin
     cases b,
     ext,
     exact mul_assoc x y _,
-    exact mul_assoc x y _
 end
 
 /-
@@ -257,7 +281,15 @@ end
 any scalar times the 0 vectr is the 0 vectr
 -/
 lemma smul_zero_vectr : ∀(r : K), r • (0 : vectr s) = 0 := begin
-    admit
+    intros,
+    ext,
+    dsimp only [has_scalar.smul],
+    dsimp only [smul_vectr],
+    dsimp only [has_scalar.smul],
+    dsimp only [mk_vectr'],
+    dsimp only [smul_vec],
+    dsimp only [has_zero.zero],
+    simp only [vectr_zero, mk_vectr, mk_vec_n, mk_vec, vector.nth, list.nth_le_repeat, mul_zero],
 end
 
 /-
@@ -277,14 +309,24 @@ begin
   intros,
   ext,
   exact right_distrib _ _ _,
-  exact right_distrib _ _ _
 end
 
 --0 scalar times any vectr is 0 vectr
 lemma zero_smul_vectr : ∀ (x : vectr s), (0 : K) • x = 0 := begin
     intros,
     ext,
-    admit,admit--exact zero_mul _, exact zero_mul _
+    dsimp only [has_scalar.smul],
+    dsimp only [smul_vectr],
+    dsimp only [has_scalar.smul],
+    dsimp only [mk_vectr'],
+    dsimp only [smul_vec],
+    have h₁ : ((0 : vectr s).coords x_1).coord = 0 := begin
+        dsimp only [has_zero.zero],
+        simp only [vectr_zero, mk_vectr, mk_vec_n, mk_vec, vector.nth, list.nth_le_repeat, mul_zero],
+        refl
+    end,
+    rw h₁,
+    simp only [zero_mul]
 end
 
 --vectors form an additive commutative group
