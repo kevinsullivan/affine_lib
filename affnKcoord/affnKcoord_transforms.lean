@@ -175,7 +175,43 @@ def point.to_homogeneous_coords {K : Type u} [field K] [inhabited K]
     if dim = 0 then λi, 1 else
     λi,
     if eqz:i=0 then 1
-    else (p.coords ⟨i.1-1, sorry⟩).coord
+    else (p.coords ⟨i.1-1, begin
+        have h₀ := i.2,
+        cases dim with dim',
+        {
+            simp only [zero_add] at h₀,
+            cases i.val with i',
+            {
+                have h₁ : i = 0 := by simp only [eq_iff_true_of_subsingleton],
+                contradiction,
+            },
+            {
+                have h₁ : i'.succ + 1 ≤ 1 := begin
+                    dsimp only [has_lt.lt, nat.lt] at h₀,
+                    dsimp only [has_le.le],
+                    exact h₀,
+                end,
+                have h₂ := (add_le_add_iff_right 1).1 h₁,
+                have h₃ := nat.not_succ_le_zero i',
+                contradiction,
+            }
+        },
+        cases i.1 with i',
+        simp only [nat.succ_pos'],
+        have h₁ : i'.succ.succ ≤ dim'.succ + 1 := begin
+            simp only [has_lt.lt, nat.lt] at h₀,
+            simp only [has_le.le],
+            exact h₀
+        end,
+        have h₂ : dim'.succ + 1 = dim'.succ.succ := by simp only [eq_self_iff_true],
+        rw h₂ at h₁,
+        have h₃ : i'.succ ≤ dim'.succ := nat.le_of_succ_le_succ h₁,
+        have h₄ : (i'.succ - 1).succ = i'.succ := by simp only [nat.succ_sub_succ_eq_sub, nat.sub_zero],
+        simp only [has_le.le] at h₃,
+        simp only [has_lt.lt, nat.lt],
+        rw h₄,
+        exact h₃,
+    end⟩).coord
 
 
 /-
@@ -187,7 +223,43 @@ def vectr.to_homogeneous_coords {K : Type u} [field K] [inhabited K]
     if dim = 0 then λi, 0 else
     λi,
     if eqz:i=0 then 0
-    else (v.coords ⟨i.1-1, sorry⟩).coord
+    else (v.coords ⟨i.1-1, begin
+        have h₀ := i.2,
+        cases dim with dim',
+        {
+            simp only [zero_add] at h₀,
+            cases i.val with i',
+            {
+                have h₁ : i = 0 := by simp only [eq_iff_true_of_subsingleton],
+                contradiction,
+            },
+            {
+                have h₁ : i'.succ + 1 ≤ 1 := begin
+                    dsimp only [has_lt.lt, nat.lt] at h₀,
+                    dsimp only [has_le.le],
+                    exact h₀,
+                end,
+                have h₂ := (add_le_add_iff_right 1).1 h₁,
+                have h₃ := nat.not_succ_le_zero i',
+                contradiction,
+            }
+        },
+        cases i.1 with i',
+        simp only [nat.succ_pos'],
+        have h₁ : i'.succ.succ ≤ dim'.succ + 1 := begin
+            simp only [has_lt.lt, nat.lt] at h₀,
+            simp only [has_le.le],
+            exact h₀
+        end,
+        have h₂ : dim'.succ + 1 = dim'.succ.succ := by simp only [eq_self_iff_true],
+        rw h₂ at h₁,
+        have h₃ : i'.succ ≤ dim'.succ := nat.le_of_succ_le_succ h₁,
+        have h₄ : (i'.succ - 1).succ = i'.succ := by simp only [nat.succ_sub_succ_eq_sub, nat.sub_zero],
+        simp only [has_le.le] at h₃,
+        simp only [has_lt.lt, nat.lt],
+        rw h₄,
+        exact h₃,
+    end⟩).coord
 
 /-
 Convert an unframed point into a homogeneous lean vector (1 at the top)
@@ -196,7 +268,43 @@ def pt_n.to_homogeneous_coords {K : Type u} [field K] [inhabited K]  {dim : ℕ}
     := 
     if dim = 0 then λi, 1 else
     λi, if eqz:i=0 then 1 
-    else (p ⟨i.1-1,sorry⟩).coord
+    else (p ⟨i.1-1, begin
+        have h₀ := i.2,
+        cases dim with dim',
+        {
+            simp only [zero_add] at h₀,
+            cases i.val with i',
+            {
+                have h₁ : i = 0 := by simp only [eq_iff_true_of_subsingleton],
+                contradiction,
+            },
+            {
+                have h₁ : i'.succ + 1 ≤ 1 := begin
+                    dsimp only [has_lt.lt, nat.lt] at h₀,
+                    dsimp only [has_le.le],
+                    exact h₀,
+                end,
+                have h₂ := (add_le_add_iff_right 1).1 h₁,
+                have h₃ := nat.not_succ_le_zero i',
+                contradiction,
+            }
+        },
+        cases i.1 with i',
+        simp only [nat.succ_pos'],
+        have h₁ : i'.succ.succ ≤ dim'.succ + 1 := begin
+            simp only [has_lt.lt, nat.lt] at h₀,
+            simp only [has_le.le],
+            exact h₀
+        end,
+        have h₂ : dim'.succ + 1 = dim'.succ.succ := by simp only [eq_self_iff_true],
+        rw h₂ at h₁,
+        have h₃ : i'.succ ≤ dim'.succ := nat.le_of_succ_le_succ h₁,
+        have h₄ : (i'.succ - 1).succ = i'.succ := by simp only [nat.succ_sub_succ_eq_sub, nat.sub_zero],
+        simp only [has_le.le] at h₃,
+        simp only [has_lt.lt, nat.lt],
+        rw h₄,
+        exact h₃,
+    end⟩).coord
 
 /-
 Convert an unframed vector into a homogeneous lean vector (0 at the top)
@@ -205,7 +313,43 @@ def vec_n.to_homogeneous_coords {K : Type u} [field K] [inhabited K]  {dim : ℕ
     :=
     if dim = 0 then λi, 0 else
     λi, if eqz:i=0 then 0 
-    else (v ⟨i.1-1,sorry⟩).coord
+    else (v ⟨i.1-1, begin
+        have h₀ := i.2,
+        cases dim with dim',
+        {
+            simp only [zero_add] at h₀,
+            cases i.val with i',
+            {
+                have h₁ : i = 0 := by simp only [eq_iff_true_of_subsingleton],
+                contradiction,
+            },
+            {
+                have h₁ : i'.succ + 1 ≤ 1 := begin
+                    dsimp only [has_lt.lt, nat.lt] at h₀,
+                    dsimp only [has_le.le],
+                    exact h₀,
+                end,
+                have h₂ := (add_le_add_iff_right 1).1 h₁,
+                have h₃ := nat.not_succ_le_zero i',
+                contradiction,
+            }
+        },
+        cases i.1 with i',
+        simp only [nat.succ_pos'],
+        have h₁ : i'.succ.succ ≤ dim'.succ + 1 := begin
+            simp only [has_lt.lt, nat.lt] at h₀,
+            simp only [has_le.le],
+            exact h₀
+        end,
+        have h₂ : dim'.succ + 1 = dim'.succ.succ := by simp only [eq_self_iff_true],
+        rw h₂ at h₁,
+        have h₃ : i'.succ ≤ dim'.succ := nat.le_of_succ_le_succ h₁,
+        have h₄ : (i'.succ - 1).succ = i'.succ := by simp only [nat.succ_sub_succ_eq_sub, nat.sub_zero],
+        simp only [has_le.le] at h₃,
+        simp only [has_lt.lt, nat.lt],
+        rw h₄,
+        exact h₃,
+    end⟩).coord
 
 /-
 Convert a point into a "lean vector", with 1 at the top followed by the point's coordinates
@@ -214,7 +358,7 @@ def point.to_coords {K : Type u} [field K] [inhabited K]
 {dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f}(p : point s) : fin (dim) → K
     := 
     λi,
-    (p.coords ⟨i.1, sorry⟩).coord
+    (p.coords ⟨i.1, i.2⟩).coord
 
 
 /-
@@ -224,21 +368,21 @@ def vectr.to_coords {K : Type u} [field K] [inhabited K]
 {dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f}(v : vectr s) : fin (dim) → K
     := 
     λi,
-    (v.coords ⟨i.1, sorry⟩).coord
+    (v.coords ⟨i.1, i.2⟩).coord
 
 /-
 Convert an unframed point into a homogeneous lean vector (1 at the top)
 -/
 def pt_n.to_coords {K : Type u} [field K] [inhabited K]  {dim : ℕ} (p : pt_n K dim) : fin (dim) → K
     := 
-    λi, (p ⟨i.1,sorry⟩).coord
+    λi, (p ⟨i.1, i.2⟩).coord
 
 /-
 Convert an unframed vector into a homogeneous lean vector (0 at the top)
 -/
 def vec_n.to_coords {K : Type u} [field K] [inhabited K]  {dim : ℕ} (v : vec_n K dim) : fin (dim) → K
     :=
-    λi, (v ⟨i.1,sorry⟩).coord
+    λi, (v ⟨i.1, i.2⟩).coord
 /-
 Convert from a lean vector (with 1 at the top) back into an unframed point in our representation 
 -/
@@ -271,7 +415,11 @@ def mk_point_from_homogeneous_coords {K : Type u} [field K] [inhabited K]
 {dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f} (coords_:fin (dim+1) → K) : point s
     := 
     if gtz:dim>0 then
-    ⟨λi, mk_pt K (coords_ ⟨i.1+1,sorry⟩)⟩
+    ⟨λi, mk_pt K (coords_ ⟨i.1+1,begin
+        have h₀ : i.val < dim := i.2,
+        simp only [has_lt.lt, nat.lt] at h₀ ⊢,
+        exact nat.succ_le_succ h₀,
+    end⟩)⟩
     else 
     ⟨λi, mk_pt K 0⟩
 /-
@@ -281,7 +429,11 @@ def mk_vectr_from_homogeneous_coords {K : Type u} [field K] [inhabited K]
 {dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f} (coords_:fin (dim+1) → K) : vectr s
     :=
     if gtz:dim>0 then
-    ⟨λi, mk_vec K (coords_ ⟨i.1+1,sorry⟩)⟩
+    ⟨λi, mk_vec K (coords_ ⟨i.1+1, begin
+        have h₀ : i.val < dim := i.2,
+        simp only [has_lt.lt, nat.lt] at h₀ ⊢,
+        exact nat.succ_le_succ h₀,
+    end⟩)⟩
     else 
     ⟨λi, mk_vec K 0⟩
 /-
@@ -289,26 +441,26 @@ Convert from a lean vector back into an unframed point in our representation
 -/
 def mk_pt_n_from_coords {K : Type u} [field K] [inhabited K] {dim : ℕ} (coords_:fin (dim) → K) : pt_n K dim
     := 
-    λi, mk_pt K (coords_ ⟨i.1,sorry⟩)
+    λi, mk_pt K (coords_ ⟨i.1, i.2⟩)
 /-
 Convert from a lean vector (with 0 at the top) back into an unframed vector in our representation 
 -/
 def mk_vec_n_from_coords {K : Type u} [field K] [inhabited K] {dim : ℕ} (coords_:fin (dim) → K) : vec_n K dim
     :=
-    λi, mk_vec K (coords_ ⟨i.1,sorry⟩)
+    λi, mk_vec K (coords_ ⟨i.1, i.2⟩)
 
 
 def mk_point_from_coords {K : Type u} [field K] [inhabited K] 
 {dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f} (coords_:fin (dim) → K) : point s
     := 
-    ⟨λi, mk_pt K (coords_ ⟨i.1,sorry⟩)⟩
+    ⟨λi, mk_pt K (coords_ ⟨i.1,i.2⟩)⟩
 /-
 Convert from a lean vector (with 0 at the top) back into an unframed vector in our representation 
 -/
 def mk_vectr_from_coords {K : Type u} [field K] [inhabited K] 
 {dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f} (coords_:fin (dim) → K) : vectr s
     :=
-    ⟨λi, mk_vec K (coords_ ⟨i.1,sorry⟩)⟩
+    ⟨λi, mk_vec K (coords_ ⟨i.1,i.2⟩)⟩
 /-
 Exploit's cramer's rule to form a computable inverse for a given matrix.
 Used in computing transforms
