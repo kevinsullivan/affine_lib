@@ -1,7 +1,34 @@
 import data.real.basic
 import .affnK
+/-
+Amanda:
 
+Go to line 730ish and find the proof I just copied and pasted in. It is an example basis proof. 
+Dig into the details and you'll be able to adapt this, or at least some of it.
+-/
+import linear_algebra.basis
 -- Testing vec_n_basis
+/-
+
+protected noncomputable def span : basis ι R (span R (range v)) :=
+basis.mk (linear_independent_span hli) $
+begin
+  rw eq_top_iff,
+  intros x _,
+  have h₁ : subtype.val '' set.range (λ i, subtype.mk (v i) _) = range v,
+  { rw ← set.range_comp },
+  have h₂ : map (submodule.subtype _) (span R (set.range (λ i, subtype.mk (v i) _)))
+    = span R (range v),
+  { rw [← span_image, submodule.subtype_eq_val, h₁] },
+  have h₃ : (x : M) ∈ map (submodule.subtype _) (span R (set.range (λ i, subtype.mk (v i) _))),
+  { rw h₂, apply subtype.mem x },
+  rcases mem_map.1 h₃ with ⟨y, hy₁, hy₂⟩,
+  have h_x_eq_y : x = y,
+  { rw [subtype.ext_iff, ← hy₂], simp },
+  rwa h_x_eq_y
+end
+
+-/
 
 def vec_1_basis := vec_n_basis.mk (λ a : fin 1, (λ b : fin 1, vec.mk (1 : ℚ))) begin
   ext,
