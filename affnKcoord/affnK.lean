@@ -52,7 +52,7 @@ def add_maps {n1 n2 : ℕ} {T : Type u} (m1 : fin n1 → T) (m2 : fin n2 → T) 
 structure vec_n_basis :=
   (basis_vecs:fin n → vec_n K n)
   (basis_independent : linear_independent K basis_vecs)
-  (basis_spans : submodule.span K (set.range basis_vecs))
+  (basis_spans : submodule.span K (set.range basis_vecs) = ⊤)
 
 instance : has_lift_t (vec_n_basis K n) (fin n → vec_n K n) := ⟨λvb, vb.basis_vecs⟩
 

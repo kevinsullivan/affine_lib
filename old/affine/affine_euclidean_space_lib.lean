@@ -12,7 +12,7 @@ universes u v w
 open aff_fr aff_lib aff_trans
 open_locale big_operators affine
 --set_option class.instance_max_depth 100
-
+--
 namespace eucl_lib
 
 variables 

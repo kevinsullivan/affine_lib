@@ -15,7 +15,7 @@ open_locale nnreal
 open ennreal
 
 variables
-{K : Type u} [field K] [inhabited K] 
+{K : Type u} [inhabited K] 
   [has_lift_t K ℝ]
   [normed_field K]
 {dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} (s : spc K f)
@@ -114,8 +114,6 @@ instance euclidean_normed_group : normed_group (vectr s)
 (norm_smul_le : ∀ (a:α) (b:β), ∥a • b∥ ≤ ∥a∥ * ∥b∥)
 -/
 
-noncomputable instance tttt : normed_field ℚ := by apply_instance
-
 noncomputable 
 instance euclidean_normed_space [module K (vectr s)] : normed_space K (vectr s) 
   :=
@@ -156,6 +154,10 @@ def vectr.compute_angle
 structure orientation extends vectr_basis s := 
     (col_norm_one : ∀ i : fin dim, ∥basis_vectrs i∥ = 1)
     (col_orthogonal : ∀ i j : fin dim, i≠j → ⟪basis_vectrs i,basis_vectrs j⟫ = (0:ℝ))
+
+def mk_orientation (ortho_vectrs : fin dim → vectr s) : orientation s :=
+  ⟨⟨ortho_vectrs, sorry, sorry⟩, sorry, sorry⟩
+
 /--/
 structure rotation :=
   (tr : fm_tr s s ) --not extended because we want to use "transform_vectr" and "transform_point" extension methods
@@ -167,6 +169,15 @@ structure rotation :=
           tr.transform_vectr ((⟨(fm.base dim id_vec).basis.basis_vecs j⟩):vectr s)⟫ 
           = (0:ℝ))
 -/
+structure rotation extends fm_tr s s :=
+  (rotation_no_displacement : ∀ v : vectr s, ∥(to_fm_tr.transform_vectr 0)∥ = 0)
+  (rotation_no_scaling : ∀ v : vectr s, ∥(to_fm_tr.transform_vectr v)∥ = 1) 
+  (rotation_col_orthogonal : ∀ i j : fin dim, 
+        i≠j →
+        ⟪ to_fm_tr.transform_vectr (⟨(fm.base dim id_vec).basis.basis_vecs i⟩:vectr s),
+          to_fm_tr.transform_vectr ((⟨(fm.base dim id_vec).basis.basis_vecs j⟩):vectr s)⟫ 
+          = (0:ℝ))
+/-
 def rotation :=
   {
     tr : fm_tr s s //
@@ -177,12 +188,9 @@ def rotation :=
           ⟪ tr.transform_vectr (⟨(fm.base dim id_vec).basis.basis_vecs i⟩:vectr s),
             tr.transform_vectr ((⟨(fm.base dim id_vec).basis.basis_vecs j⟩):vectr s)⟫ 
             = (0:ℝ))
-  }
+  }-/
 
-variables (bb : vectr_basis s) (pp : point s)
-
-
-def rotation.mk {K : Type u} [field K] [inhabited K] [normed_field K] [has_lift_t K ℝ]
+def mk_rotation' {K : Type u} [inhabited K] [normed_field K] [has_lift_t K ℝ]
 {dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f} (b : vectr_basis s) : rotation s :=
 ⟨ 
   begin
@@ -208,4 +216,8 @@ def rotation.mk {K : Type u} [field K] [inhabited K] [normed_field K] [has_lift_
   end
 ,sorry, sorry, sorry⟩
 
-instance : has_lift_t (orientation s) (rotation s) := ⟨λo, rotation.mk o.1/-subtype notation-/⟩
+def mk_rotation (ortho_vectrs : fin dim → vectr s) : rotation s :=
+  (mk_rotation' ⟨ortho_vectrs, sorry, sorry⟩)
+
+
+instance : has_lift_t (orientation s) (rotation s) := ⟨λo, mk_rotation' o.1/-subtype notation-/⟩

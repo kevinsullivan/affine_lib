@@ -95,6 +95,8 @@ def one11 : ℝ := 1
 
 #check 1
 
+#check real.tendsto_prod_pi_div_two
+--
 --instance module 
 noncomputable
 def l2_metric_tuple
