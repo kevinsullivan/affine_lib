@@ -8,8 +8,8 @@ Dig into the details and you'll be able to adapt this, or at least some of it.
 -/
 import linear_algebra.basis
 -- Testing vec_n_basis
-/-
 
+/-
 protected noncomputable def span : basis ι R (span R (range v)) :=
 basis.mk (linear_independent_span hli) $
 begin
@@ -27,8 +27,8 @@ begin
   { rw [subtype.ext_iff, ← hy₂], simp },
   rwa h_x_eq_y
 end
-
 -/
+
 
 def vec_1_basis := vec_n_basis.mk (λ a : fin 1, (λ b : fin 1, vec.mk (1 : ℚ))) begin
   ext,
@@ -66,6 +66,29 @@ def vec_1_basis := vec_n_basis.mk (λ a : fin 1, (λ b : fin 1, vec.mk (1 : ℚ)
   }
 end begin
   dsimp only [submodule.span, Inf],
+  dsimp only [has_top.top, set.univ],
   dsimp only [coe_sort, has_coe_to_sort.coe, coe, lift_t, has_lift_t.lift, coe_t, has_coe_t.coe, set_like.coe],
-  sorry,
+  dsimp only [set.range, set.Inter],
+  simp only [nonempty_of_inhabited, set.mem_set_of_eq, exists_const],
+  ext,
+  split,
+  {
+    intro,
+    exact true.intro,
+  },
+  {
+    intro,
+    dsimp only [infi, Inf, complete_semilattice_Inf.Inf, complete_lattice.Inf, set.range],
+    simp only [forall_apply_eq_imp_iff', and_imp, set_like.mem_coe, submodule.mem_carrier, set.mem_set_of_eq, exists_imp_distrib, exists_const],
+    suffices h : ∀ (a_1 : submodule ℚ (vec_n ℚ 1)), set_of (eq (λ (b : fin 1), ({coord := 1} : vec ℚ))) ⊆ a_1.carrier → x ∈ a_1,
+    exact h,
+    intros a_1 h,
+    dsimp only [set_of] at h,
+    dsimp only [has_subset.subset, set.subset] at h,
+    sorry
+  },
+  /-rw eq_top_iff,
+  intros x _,
+  have h₁ : subtype.val '' set.range (λ i, subtype.mk (λ (a b : fin 1), {coord := 1} i) _) = {x | ∃y, λ (a b : fin 1), {coord := 1} y = x}
+  { rw ← set.range_comp },-/
 end
