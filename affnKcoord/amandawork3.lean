@@ -1,5 +1,6 @@
 import data.real.basic
 import .affnK
+import tactic.linarith
 /-
 Amanda:
 
@@ -84,13 +85,156 @@ end begin
   {
     intro,
     dsimp only [infi, Inf, complete_semilattice_Inf.Inf, complete_lattice.Inf, set.range],
-    simp only [forall_apply_eq_imp_iff', and_imp, set_like.mem_coe, submodule.mem_carrier, set.mem_set_of_eq, exists_imp_distrib, exists_const],
-    suffices h : ∀ (a_1 : submodule ℚ (vec_n ℚ 1)), set_of (eq (λ (b : fin 1), ({coord := 1} : vec ℚ))) ⊆ a_1.carrier → x ∈ a_1,
-    exact h,
-    intros a_1 h,
-    dsimp only [set_of] at h,
-    dsimp only [has_subset.subset, set.subset] at h,
-    
+    simp *,
+    dsimp [set_of],
+    intros f g,
+    simp [has_subset.subset, set.subset] at g,
+    let h3 := (x ⟨0, by linarith⟩),
+    destruct h3,
+    intros,
+    let one_ : vec_n ℚ 1 := (λ i, {coord := 1}),
+
+    let h4 : one_ ∈ f := by apply @g one_ rfl,
+    let onex := coord•one_,
+    let onexmem : onex ∈ f := 
+      by exact @submodule.smul_mem ℚ (vec_n ℚ 1) _ _ _ f one_ coord h4,
+    haveI := onex,
+    let h6 : coord • (λ (i : fin 1), {coord := 1} : vec_n ℚ 1) = onex := rfl,
+    let onexeq : (∀ (i : fin 1), x i = onex i) := begin
+        intros,
+        cases i,
+        cases i_val,
+        { rw ←h6,
+          let h7 : (coord • (λ (i : fin 1), {coord := 1}) : vec_n ℚ 1) ⟨0, i_property⟩
+            = (coord • {coord := 1}) := begin
+              refl
+            end,
+          simp [h7],
+          dsimp [has_scalar.smul],
+          simp *,
+          let h16 : x 0 = h3 := by refl,
+          rw h16,
+          exact a,
+         },
+        {
+          cases i_val,
+          let h10 : (1 )= (1) := rfl,
+          let h11 := lt_irrefl 1,
+          contradiction,
+
+          let h12 : 1 < i_val.succ.succ := by exact nat.one_lt_succ_succ i_val,
+          let h13 : 1 < 1 := by exact lt_trans h12 i_property,
+          let h14 : ¬1<1 := by exact lt_irrefl _,
+          contradiction,
+        },
+    end,
+    let h20 : x = onex := by exact funext onexeq,
+    rw h20,
+    exact onexmem,
+
   },
 end
+
+variables (sm : submodule ℚ (vec_n ℚ 1)) (v : (vec_n ℚ 1))
+
+let h15 := funext one
+
+#check funext
+#check (1:ℚ) • v
+
+#check nat.add_succ_lt_add
+#check nat.succ_succ_ne_one
+
+#check lt_tra
+
+#check nat.succ_succ
+
+#check lt_add_one
+
+#check nat.succ
+
+#check nat.lt_add_of_zero_lt_left
+
+#check @submodule.smul_mem
+
+#check smul_add
+
+#check finset
+
+#check v ∈ sm
+
+#check (↑sm:set (vec_n ℚ 1)) v
+
+def dajks : fin 2 → ℕ 
+| ⟨0, _⟩ := 1
+| ⟨1, _⟩ := 2
+| ⟨n, _⟩ := 0
+
+#check nat_ceil_lt_add_one
+#check nat_mul_inj
+
+#check lt_irrefl
+
+#check lt_add_one
+#check submodule
+
+#check module
+
+#check {[1]} ⊆  {[1], [2]}
+
+#check ⦃a : vec_n ℚ 1⦄
   
+#check eq_bot_iff
+
+#check eq
+
+#check set.set_of_mem_eq
+
+
+def n := 1
+def K := ℚ
+
+
+def myfinset : finset ℕ := finset.range 4
+@[reducible]
+abbreviation pt_nf := ∀i ∈{i|i∈myfinset}, pt ℚ
+@[reducible]
+abbreviation vec_nf := fin (n) → vec ℚ
+
+#check set.range
+
+
+
+#eval 0 ∈ myfinset
+#eval myfinset
+
+
+
+def mk_pt_nf (vals : vector ℚ n) : pt_nf := 
+  λj : _, λmf:_, begin
+
+  end
+
+def mk_vec_nf (vals : vector ℚ n) : vec_nf ℚ n := 
+  λi, mk_vec ℚ (vals.nth i)
+
+def pt_nf.coords
+ (ptn : pt_nf ) : fin n → ℚ :=
+  λi : fin n, (ptn i).coord
+
+def vec_nf.coords (vecn : vec_nf ) : fin n → K :=
+  λi, (vecn i).coord
+
+
+structure vec_nf_basis :=
+  (basis_vecs:fin n → vec_nf )
+  (basis_independent : linear_independent ℚ basis_vecs)
+  (basis_spans : submodule.span ℚ (set.range basis_vecs) = ⊤)
+
+instance : has_lift_t (vec_nf_basis K n) (fin n → vec_n K n) := ⟨λvb, vb.basis_vecs⟩
+
+open_locale affine
+--done
+instance : add_comm_group (vec_nf) := by apply_instance
+instance : affine_space (vec_nf) (pt_nf) := by apply_instance
+
