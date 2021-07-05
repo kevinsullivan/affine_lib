@@ -46,10 +46,20 @@ begin
   let h1 : 0 < b.succ := by simp *,
   let h2 : a + 0 < a + b.succ := by simp *,
   let h3 : a + 0 < a := by exact lt_trans h2 c,
-  --let h4 : a < a := by exact h3,
   suffices : ¬a < a, from by contradiction, exact irrefl _,
 
 end
+
+@[simp]
+lemma eznat2 :  ∀ (a b : ℕ), b + a < a → false := 
+begin
+  intros a b c,
+  rw ←(nat.add_comm a b) at c,
+  exact eznat _ _ c,
+end
+
+#check nat.add_comm
+
 
 #check nat.succ_ne_zero
 #check nat.add_lt_add_left
@@ -119,10 +129,12 @@ end begin
             → a ∈ c.carrier) → a ∈ c) 
         = t
     -/
-    let h3 := (x ⟨0, by linarith⟩),
+    let h3 := x ⟨0, by linarith⟩,
     destruct h3,
+
     intros,
     let one_ : vec_n ℚ 1 := (λ i, {coord := 1}),
+
 
     let h4 : one_ ∈ f := by apply @g one_ rfl,
     let onex := coord•one_,
@@ -194,12 +206,6 @@ begin
     intros c d,
     dsimp [has_subset.subset, set.subset] at d,--, has_mem.mem, set.mem] at d,
     --rw ←d at t,
-    let x0 := x ⟨0, by linarith⟩, 
-    let x1 := x ⟨1, by linarith⟩,
-    destruct x0,
-    intros,
-    destruct x1,
-    intros,
     --rw d.symm,
     let smdef : set (vec_n ℚ 2) := 
       (λ (a : vec_n ℚ 2), 
@@ -229,27 +235,150 @@ begin
           refl,
           let ht :  i_val + 2 = i_val.succ.succ := by repeat { apply nat.add_one _ },
           rw ←ht at i_property,
-
-        end,        
+          let : false := by exact eznat2 _ _ i_property,
+          contradiction,
+        end,  
+      rw ←h1,    
+      exact (mem_carrier c).mp h0,
     end, 
-    let h11 : c.carrier x := sorry,
-    exact iff.mpr (mem_carrier c) h11,
-   -- dsimp [has_mem.mem, set.mem],
-   -- intros,
+    let v1mem : v1 ∈ c := begin
+      --let h0 : 
+      let c1 : vec_n ℚ 2 := 
+        (λ (j : fin 2), ite (1 = j) ({coord := 1}: vec ℚ) ({coord := 0}: vec ℚ)),
+      let h0 : c.carrier c1 := cmem ⟨1, by linarith⟩,
+      let h1 : c1 = v1 :=
+        begin
+          suffices sh : ∀ i, c1 i = v1 i, from funext sh,
+          intros,
+          cases i,
+          cases i_val,
+          refl,
+          cases i_val,
+          refl,
+          let ht :  i_val + 2 = i_val.succ.succ := by repeat { apply nat.add_one _ },
+          rw ←ht at i_property,
+          let : false := by exact eznat2 _ _ i_property,
+          contradiction,
+        end,  
+      rw ←h1,    
+      exact (mem_carrier c).mp h0,
+    end, 
     
-  --  assume 
-   --   h : x λ (a : vec_n ℚ 2), (∀ (a : fin 2), 
-   --   c.carrier (λ (j : fin 2), ite (a = j) ({coord := 1}: vec ℚ) ({coord := 0}: vec ℚ))),
+    --let x0 := x ⟨0, by linarith⟩, 
+    --let x1 := x ⟨1, by linarith⟩,
+    destruct x ⟨0, by linarith⟩,
+    intros c0 e0,
+    destruct x ⟨1, by linarith⟩,
+    intros c1 e1,
+    let v00 := v0 ⟨0, by linarith⟩,
+    let v10 := v1 ⟨0, by linarith⟩,
+    let c0smulv0 := λ (j : fin 2), ite (0 = j) ({coord := c0}: vec ℚ) ({coord := 0}: vec ℚ),
+    let c0smulv0_eq :
+      (c0 • v0 = c0smulv0)
+        := begin
+         -- simp *,
+          suffices sh : ∀ i, (c0 • v0) i = c0smulv0 i, from funext sh,
+          intros,
+          cases i,
+          cases i_val,
+          simp *,
+          let h0 : ite (0 = 0) ({coord := c0} : vec ℚ) ({coord := 0} : vec ℚ) = ({coord := c0} : vec ℚ) := rfl,
+          simp *, 
+          dsimp [has_scalar.smul],
+          simp *,
+          cases i_val,
+          simp *,
+          let h0 : ite (1 = 0) ({coord := c0} : vec ℚ) ({coord := 0} : vec ℚ) = ({coord := 0} : vec ℚ) := rfl,
+          simp *, 
+          dsimp [has_scalar.smul],
+          simp *,
+          let ht :  i_val + 2 = i_val.succ.succ := by repeat { apply nat.add_one _ },
+          rw ←ht at i_property,
+          let : false := by exact eznat2 _ _ i_property,
+          contradiction,
 
- /-   
-    (λ (a : vec_n ℚ 2), 
-      (∀ ⦃a : vec_n ℚ 2⦄, (a ∈ (↑(λ (x : vec_n ℚ 2), ∃ (y : fin 2), 
-        (λ (j : fin 2), ite (y = j) ({coord := 1}: vec ℚ) 
-          ({coord := 0}: vec ℚ)) = x) : set (vec_n ℚ 2))) → a ∈ c.carrier) → a ∈ c),
--/
-  
+        end,
+    let c0smulv0mem : c0smulv0 ∈ c := 
+      begin 
+        rw ←c0smulv0_eq,
+        exact @submodule.smul_mem ℚ (vec_n ℚ 2) _ _ _ c v0 c0 v0mem
+      end,
+
+    let c1smulv1 := λ (j : fin 2), ite (1 = j) ({coord := c1}: vec ℚ) ({coord := 0}: vec ℚ),
+
+    let c1smulv1_eq :
+      (c1 • v1 = c1smulv1)
+        := begin
+         -- simp *,
+          suffices sh : ∀ i, (c1 • v1) i = c1smulv1 i, from funext sh,
+          intros,
+          cases i,
+          cases i_val,
+          simp *,
+          --let h0 : ite (1 = 0) ({coord := c1} : vec ℚ) ({coord := 0} : vec ℚ) = ({coord := c1} : vec ℚ) := rfl,
+          --simp *, 
+          dsimp [has_scalar.smul],
+          simp *,
+          cases i_val,
+          simp *,
+          --let h0 : ite (0 = 0) ({coord := c1} : vec ℚ) ({coord := 0} : vec ℚ) = ({coord := 0} : vec ℚ) := rfl,
+          --simp *, 
+          dsimp [has_scalar.smul],
+          simp *,
+          let ht :  i_val + 2 = i_val.succ.succ := by repeat { apply nat.add_one _ },
+          rw ←ht at i_property,
+          let : false := by exact eznat2 _ _ i_property,
+          contradiction,
+
+        end,
+    let c1smulv1mem : c1smulv1 ∈ c := 
+      begin 
+        rw ←c1smulv1_eq,
+        exact @submodule.smul_mem ℚ (vec_n ℚ 2) _ _ _ c v1 c1 v1mem
+      end,
+
+    let comb_mem : c0smulv0 + c1smulv1 ∈ c :=
+      by exact @submodule.add_mem ℚ (vec_n ℚ 2) _ _ _ c  _ _ c0smulv0mem c1smulv1mem,
+
+    let x_combeq : x = c0smulv0 + c1smulv1 := begin
+      suffices sh : ∀ i, x i = (c0smulv0 + c1smulv1) i, from funext sh,
+      intros,
+      cases i,
+      cases i_val,
+      /-
+      x ⟨0, i_property⟩ = (c0smulv0 + c1smulv1) ⟨0, i_property⟩
+      -/
+      rw e0,
+      simp *, refl,
+      cases i_val,
+      rw e1,
+      simp *, refl,
+      let ht :  i_val + 2 = i_val.succ.succ := by repeat { apply nat.add_one _ },
+      rw ←ht at i_property,
+      let : false := by exact eznat2 _ _ i_property,
+      contradiction,
+    end,
+     
+    rw x_combeq,
+    exact comb_mem,
   }
 end
+
+
+
+def vec_2_basis_hard := 
+let v := (λ i : fin 2, 
+  if i = 0 then mk_vec_n ℚ 2 ⟨[4, 3],rfl⟩ else mk_vec_n ℚ 2 ⟨[-1, 1],rfl⟩) 
+  in
+  vec_n_basis.mk v
+  begin
+
+  end
+  begin
+
+  end
+
+
 
 variables (sm : submodule ℚ (vec_n ℚ 1)) (v : (vec_n ℚ 1))
 
@@ -262,6 +391,8 @@ let h15 := funext one
 
 #check nat.add_succ_lt_add
 #check nat.succ_succ_ne_one
+
+#check smul_prod
 
 #check lt_tra
 
