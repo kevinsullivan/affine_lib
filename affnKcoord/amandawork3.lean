@@ -31,7 +31,29 @@ end
 -/
 
 open submodule
+/-
 
+protected theorem lt_asymm {n m : ℕ} (h₁ : n < m) : ¬ m < n :=
+le_lt_antisymm (nat.le_of_lt h₁)
+
+-/
+@[simp]
+lemma eznat :  ∀ (a b : ℕ), a + b < a → false := 
+begin
+  intros a b c,
+  cases b,
+  suffices : ¬a < a, from by contradiction, exact irrefl _,
+  let h1 : 0 < b.succ := by simp *,
+  let h2 : a + 0 < a + b.succ := by simp *,
+  let h3 : a + 0 < a := by exact lt_trans h2 c,
+  --let h4 : a < a := by exact h3,
+  suffices : ¬a < a, from by contradiction, exact irrefl _,
+
+end
+
+#check nat.succ_ne_zero
+#check nat.add_lt_add_left
+#check lt_trans
 
 def vec_1_basis := 
 let v := (λ a : fin 1, (λ b : fin 1, vec.mk (1 : ℚ)))  in
@@ -89,6 +111,14 @@ end begin
     dsimp [set_of],
     intros f g,
     simp [has_subset.subset, set.subset] at g,
+    /-
+    (λ (a : vec_n ℚ 2), 
+      (∀ ⦃a : vec_n ℚ 2⦄, 
+        (a ∈ λ (x : vec_n ℚ 2), 
+          ∃ (y : fin 2), (λ (j : fin 2), ite (y = j) {coord := 1} {coord := 0}) = x) 
+            → a ∈ c.carrier) → a ∈ c) 
+        = t
+    -/
     let h3 := (x ⟨0, by linarith⟩),
     destruct h3,
     intros,
@@ -135,9 +165,97 @@ end begin
   },
 end
 
+
+def vec_2_basis := 
+let v := (λ i : fin 2, (λ j : fin 2, 
+  if i = j then mk_vec ℚ 1 else mk_vec ℚ 0
+))  in
+  vec_n_basis.mk v
+begin
+end
+begin
+  dsimp only [submodule.span, Inf],
+  dsimp only [has_top.top, set.univ],
+  dsimp only [coe_sort, has_coe_to_sort.coe, coe, lift_t, has_lift_t.lift, coe_t, has_coe_t.coe, set_like.coe],
+  dsimp only [set.range, set.Inter],
+  simp only [nonempty_of_inhabited, set.mem_set_of_eq, exists_const],
+  ext,
+  split,
+  {
+    intros,
+    exact true.intro,
+  },
+  {
+    intros,
+    intro,
+    dsimp only [infi, Inf, complete_semilattice_Inf.Inf, complete_lattice.Inf, set.range],
+    simp *,
+    dsimp [set_of],
+    intros c d,
+    dsimp [has_subset.subset, set.subset] at d,--, has_mem.mem, set.mem] at d,
+    --rw ←d at t,
+    let x0 := x ⟨0, by linarith⟩, 
+    let x1 := x ⟨1, by linarith⟩,
+    destruct x0,
+    intros,
+    destruct x1,
+    intros,
+    --rw d.symm,
+    let smdef : set (vec_n ℚ 2) := 
+      (λ (a : vec_n ℚ 2), 
+      (∀ ⦃a : vec_n ℚ 2⦄, (∃ (y : fin 2), 
+        (λ (j : fin 2), ite (y = j) ({coord := 1}: vec ℚ) ({coord := 0}: vec ℚ)
+        ) = a) → c.carrier a) 
+          → (↑c : set _) a),
+    let tt : t = smdef := by exact d.symm,
+    simp *,
+    dsimp [has_mem.mem, set.mem],
+    assume cmem : _,
+    let v0 := v ⟨0, by linarith⟩,
+    let v1 := v ⟨1, by linarith⟩,
+    let v0mem : v0 ∈ c := begin
+      --let h0 : 
+      let c0 : vec_n ℚ 2 := 
+        (λ (j : fin 2), ite (0 = j) ({coord := 1}: vec ℚ) ({coord := 0}: vec ℚ)),
+      let h0 : c.carrier c0 := cmem 0,
+      let h1 : c0 = v0 :=
+        begin
+          suffices sh : ∀ i, c0 i = v0 i, from funext sh,
+          intros,
+          cases i,
+          cases i_val,
+          refl,
+          cases i_val,
+          refl,
+          let ht :  i_val + 2 = i_val.succ.succ := by repeat { apply nat.add_one _ },
+          rw ←ht at i_property,
+
+        end,        
+    end, 
+    let h11 : c.carrier x := sorry,
+    exact iff.mpr (mem_carrier c) h11,
+   -- dsimp [has_mem.mem, set.mem],
+   -- intros,
+    
+  --  assume 
+   --   h : x λ (a : vec_n ℚ 2), (∀ (a : fin 2), 
+   --   c.carrier (λ (j : fin 2), ite (a = j) ({coord := 1}: vec ℚ) ({coord := 0}: vec ℚ))),
+
+ /-   
+    (λ (a : vec_n ℚ 2), 
+      (∀ ⦃a : vec_n ℚ 2⦄, (a ∈ (↑(λ (x : vec_n ℚ 2), ∃ (y : fin 2), 
+        (λ (j : fin 2), ite (y = j) ({coord := 1}: vec ℚ) 
+          ({coord := 0}: vec ℚ)) = x) : set (vec_n ℚ 2))) → a ∈ c.carrier) → a ∈ c),
+-/
+  
+  }
+end
+
 variables (sm : submodule ℚ (vec_n ℚ 1)) (v : (vec_n ℚ 1))
 
 let h15 := funext one
+
+#check nat.add_succ_sub_one
 
 #check funext
 #check (1:ℚ) • v
@@ -147,11 +265,42 @@ let h15 := funext one
 
 #check lt_tra
 
+#check lt_one_add
+#check nat.lt_add_left
+
 #check nat.succ_succ
+
+#check iff.mpr
 
 #check lt_add_one
 
 #check nat.succ
+
+
+#check submodule
+/-
+(
+  λ (a : vec_n ℚ 2),
+  (∀ ⦃a : vec_n ℚ 2⦄,
+    set.mem a
+    (
+      λ (x : vec_n ℚ 2), 
+      ∃ (y : fin 2), 
+      (
+        λ (j : fin 2), 
+        ite (y = j) {coord := 1} {coord := 0}
+      ) 
+      = x
+    ) 
+    →
+    set.mem a c.carrier
+  ) 
+  →
+  set.mem a ↑c
+) 
+= t
+
+-/
 
 #check nat.lt_add_of_zero_lt_left
 
@@ -169,6 +318,18 @@ def dajks : fin 2 → ℕ
 | ⟨0, _⟩ := 1
 | ⟨1, _⟩ := 2
 | ⟨n, _⟩ := 0
+
+def dasjsj : ∀i ∈ finset.range 2, ℕ 
+:= λi : _, λ j, begin
+  cases i,
+  exact 0,
+  cases i,
+  exact 0,
+  
+end
+
+#check nat.lt
+
 
 #check nat_ceil_lt_add_one
 #check nat_mul_inj
@@ -238,3 +399,16 @@ open_locale affine
 instance : add_comm_group (vec_nf) := by apply_instance
 instance : affine_space (vec_nf) (pt_nf) := by apply_instance
 
+
+/-
+Frame built from primitive (fin n)-indexed maps pts and vecs.
+Constructors are Base (standard) frame or a derived frame.
+-/
+inductive fm : Π (dim : ℕ) , Type 
+| base : Π (dim : ℕ), fm dim
+
+@[simp]
+def fm.basis 
+{dim : ℕ} :
+fm  dim → (vec_n_basis ℚ dim)
+| (fm.base dim ) := ⟨(λ i j, if j = i then mk_vec K 1 else mk_vec K 0), sorry, sorry⟩
