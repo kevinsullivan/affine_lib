@@ -65,14 +65,157 @@ end
 #check nat.add_lt_add_left
 #check lt_trans
 
+#check finset.sum
+
+#check nat.add_lt_add_left
+
+def fin0notnonempty : ¬nonempty (fin 0) := begin
+  by_contradiction,
+  cases h,
+  cases h,
+    let : ¬h_val < 0 := nat.not_lt_zero _,
+    contradiction
+end
+#check absurd
+
+#check @linear_independent_fin_cons ℚ (vec_n ℚ 2) _ _ _ 
+
+#check @linear_independent_empty_type (fin 0) ℚ (vec_n ℚ 1) sorry _ _ _ fin0notnonempty
+
+#check submodule
+#check module
+
+#check submodule.
+
+#check finset.not_mem_empty
+#check set.not_mem_empty
+
+#check set
+
+#check submodule.span
+
+#check funext
+
+#check ext
+
 def vec_1_basis := 
 let v := (λ a : fin 1, (λ b : fin 1, vec.mk (1 : ℚ)))  in
   vec_n_basis.mk v
 begin
-  ext,
+  /-
+lemma linear_independent_fin_cons {n} {v : fin n → V} :
+  linear_independent K (fin.cons x v : fin (n + 1) → V) ↔
+    linear_independent K v ∧ x ∉ submodule.span K (range v)
+  -/
+  let empty_basis : fin 0 → vec_n ℚ 1 := begin
+    assume f0,
+    cases f0,
+    let : ¬f0_val < 0 := nat.not_lt_zero _,
+    contradiction,
+  end,
+  let empli : linear_independent ℚ empty_basis :=
+    @linear_independent_empty_type (fin 0) ℚ (vec_n ℚ 1) _ _ _ _ fin0notnonempty,
+  let consb : fin 1 → vec_n ℚ 1 := (fin.cons (v ⟨0, by linarith⟩) empty_basis),
+  let consbeqv : consb = v := begin
+    suffices feh : ∀i, consb i = v i, from funext feh,
+    intros,
+    cases i,
+    cases i_val,
+    refl,
+    let ht :  i_val + 1 = i_val.succ := by repeat { apply nat.add_one _ },
+          rw ←ht at i_property,
+          let : false := by exact eznat2 _ _ i_property,
+    contradiction,
+    /-
+    
+          let ht :  i_val + 2 = i_val.succ.succ := by repeat { apply nat.add_one _ },
+          rw ←ht at i_property,
+          let : false := by exact eznat2 _ _ i_property,
+    -/
+  end,
+  let licons : linear_independent ℚ consb := 
+  begin
+    apply (@linear_independent_fin_cons ℚ (vec_n ℚ 1) _ _ _ (v ⟨0, by linarith⟩) _ empty_basis).mpr,
+    split,
+    exact empli,
+    dsimp only [submodule.span, Inf],
+    dsimp only [coe_sort, has_coe_to_sort.coe, coe, lift_t, has_lift_t.lift, coe_t, has_coe_t.coe, set_like.coe],
+    dsimp only [set.range, set.Inter],
+    --simp *,
+    dsimp only [infi, Inf, complete_semilattice_Inf.Inf, complete_lattice.Inf, set.range],
+    simp only [forall_apply_eq_imp_iff', and_imp, fin.mk_zero, exists_prop, nat.not_lt_zero, add_zero, int.coe_nat_zero, id.def,
+    ge_iff_le, int.coe_nat_one, set_like.mem_coe, set.mem_set_of_eq, mem_carrier, exists_imp_distrib,
+    has_subset.subset, set.subset],
+    dsimp [set_of, has_mem.mem, set.mem],
+    assume a,
+    let empvecs : set (vec_n ℚ 1) := ∅,
+    let empsm := @submodule.span ℚ (vec_n ℚ 1) _ _ _ ∅,
+    let empsmemp := @submodule.span_empty ℚ (vec_n ℚ 1) _ _ _,
+    let empsmeqbot : empsm = ⊥ := by simp *,
+    let app_ := a ⊥,
+    let huh : (∀ (a : fin 0), (↑(⊥ : submodule ℚ (vec_n ℚ 1)) : set _) (empty_basis a)) := begin
+      intros f0,
+      cases f0,
+      let : ¬f0_val < 0 := nat.not_lt_zero _,
+      contradiction,
+    end,
+    let hmm := app_ huh,
+    let veq0 : (v 0) = 0 := (@mem_bot ℚ (vec_n ℚ 1) _ _ _ _).mp hmm, 
+    let vneq0_0 : (v 0 0) ≠ 0 := begin
+      simp *,
+      unfold has_zero.zero,
+      dsimp [vec_zero ℚ],
+      assume h,
+      injection h, revert h_1,
+      dec_trivial,
+    end, 
+    let veq0_0 : (v 0 0) = 0 := begin
+      rw veq0,
+      refl,
+    end, 
+    contradiction
+    --intros a,
+    /-let h2 : ((λ (a : vec_n ℚ 1), ∀ (a_1 : submodule ℚ (vec_n ℚ 1)), 
+              (∀ (a : fin 0), empty_basis a ∈ a_1) → a ∈ a_1) : set (vec_n ℚ 1)) (v 0)
+      := 
+        begin 
+          let h3 : _ := (mem_carrier ({carrier := λ (a : vec_n ℚ 1), ∀ (a_1 : submodule ℚ (vec_n ℚ 1)), 
+          (∀ (a : fin 0), empty_basis a ∈ a_1) → a ∈ a_1, zero_mem' := _, add_mem' := _, smul_mem' := _} 
+            : submodule ℚ (vec_n ℚ 1))).mpr h,
+
+        end,
+    let h1 
+      : h0 = ∅ 
+      := by admit,-/
+  end,
+  rw consbeqv at licons,
+  exact licons,
+--#check not
+ -- eapply
+--#check ∉ 
+  /-
+  
+theorem linear_independent_iff' : linear_independent R v ↔
+  ∀ s : finset ι, ∀ g : ι → R, ∑ i in s, g i • v i = 0 → ∀ i ∈ s, g i = 0 :=
+  -/
+  /-
+  eapply (@linear_independent_iff' (fin 1) ℚ (vec_n ℚ 1) v _ _ _).mpr,
+  intros a b c d e,-/
+/-
+
+lemma sum_range_succ {β} [add_comm_monoid β] (f : ℕ → β) (n : ℕ) :
+  ∑ x in range (n + 1), f x = ∑ x in range n, f x + f n :=
+by simp only [add_comm, sum_range_succ_comm]
+-/
+  --unfold finset.sum at *,
+ -- revert c,
+  --unfold_projs,
+  --dsimp [finset.sum] at c,
+  
+  /-ext,
   split,
   {
-    intro h,
+    /-intro h,
     dsimp only [has_bot.bot, has_zero.zero, add_zero_class.zero, add_monoid.zero, add_comm_monoid.zero],
     suffices h' : x = {support := ∅, to_fun := λ (_x : fin 1), semiring.zero, mem_support_to_fun := _},
     exact h',
@@ -84,7 +227,7 @@ begin
     dsimp only [finsupp.total, finsupp.lsum, coe_fn, has_coe_to_fun.coe] at h₁,
     dsimp [finsupp.sum] at h₁,
     simp only [linear_map.id_coe, id.def] at h₁,
-    sorry,
+    sorry,-/
   },
   {
     intro h,
@@ -101,7 +244,7 @@ begin
     rw h₀,
     dsimp [finsupp.sum],
     refl,
-  }
+  }-/
 end begin
   dsimp only [submodule.span, Inf],
   dsimp only [has_top.top, set.univ],
@@ -184,6 +327,7 @@ let v := (λ i : fin 2, (λ j : fin 2,
 ))  in
   vec_n_basis.mk v
 begin
+  sorry
 end
 begin
   dsimp only [submodule.span, Inf],
@@ -270,8 +414,6 @@ begin
     intros c0 e0,
     destruct x ⟨1, by linarith⟩,
     intros c1 e1,
-    let v00 := v0 ⟨0, by linarith⟩,
-    let v10 := v1 ⟨0, by linarith⟩,
     let c0smulv0 := λ (j : fin 2), ite (0 = j) ({coord := c0}: vec ℚ) ({coord := 0}: vec ℚ),
     let c0smulv0_eq :
       (c0 • v0 = c0smulv0)
@@ -379,15 +521,20 @@ let v := (λ i : fin 2,
   end
 
 
+#check @fintype.linear_independent_iff (fin 2) ℚ (vec_n ℚ 2) sorry _ _ _ _
 
 variables (sm : submodule ℚ (vec_n ℚ 1)) (v : (vec_n ℚ 1))
 
 let h15 := funext one
 
+#check @linear_independent_iff' (fin 1) ℚ (vec_n ℚ 1) sorry _ _ _
+
 #check nat.add_succ_sub_one
 
 #check funext
 #check (1:ℚ) • v
+
+#check ↑(finset.range 3)
 
 #check nat.add_succ_lt_add
 #check nat.succ_succ_ne_one
@@ -456,7 +603,8 @@ def dasjsj : ∀i ∈ finset.range 2, ℕ
   exact 0,
   cases i,
   exact 0,
-  
+  cases i,
+
 end
 
 #check nat.lt
