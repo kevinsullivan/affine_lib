@@ -9,7 +9,7 @@ Dig into the details and you'll be able to adapt this, or at least some of it.
 -/
 import linear_algebra.basis
 -- Testing vec_n_basis
-
+⁻¹ 
 /-
 protected noncomputable def span : basis ι R (span R (range v)) :=
 basis.mk (linear_independent_span hli) $
@@ -29,13 +29,14 @@ begin
   rwa h_x_eq_y
 end
 -/
-
+→ 
 open submodule
 /-
 
 protected theorem lt_asymm {n m : ℕ} (h₁ : n < m) : ¬ m < n :=
 le_lt_antisymm (nat.le_of_lt h₁)
 
+∘
 -/
 @[simp]
 lemma eznat :  ∀ (a b : ℕ), a + b < a → false := 
@@ -321,13 +322,110 @@ end begin
 end
 
 
+#check submodule.span
+
+
 def vec_2_basis := 
 let v := (λ i : fin 2, (λ j : fin 2, 
   if i = j then mk_vec ℚ 1 else mk_vec ℚ 0
 ))  in
   vec_n_basis.mk v
 begin
-  sorry
+  /-
+lemma linear_independent_fin_cons {n} {v : fin n → V} :
+  linear_independent K (fin.cons x v : fin (n + 1) → V) ↔
+    linear_independent K v ∧ x ∉ submodule.span K (range v)
+  -/
+  let empty_basis : fin 0 → vec_n ℚ 2 := begin
+    assume f0,
+    cases f0,
+    let : ¬f0_val < 0 := nat.not_lt_zero _,
+    contradiction,
+  end,
+  let empli : linear_independent ℚ empty_basis :=
+    @linear_independent_empty_type (fin 0) ℚ (vec_n ℚ 2) _ _ _ _ fin0notnonempty,
+  let consb : fin 1 → vec_n ℚ 2 := (fin.cons (v ⟨0, by linarith⟩) empty_basis),
+  let consb3 : fin 2 → vec_n ℚ 2 := (fin.snoc consb (v ⟨1, by linarith⟩)),
+  
+  
+  /-let consbeqv : consb = v := begin
+    suffices feh : ∀i, consb i = v i, from funext feh,
+    intros,
+    cases i,
+    cases i_val,
+    refl,
+    let ht :  i_val + 1 = i_val.succ := by repeat { apply nat.add_one _ },
+          rw ←ht at i_property,
+          let : false := by exact eznat2 _ _ i_property,
+    contradiction,
+    /-
+    
+          let ht :  i_val + 2 = i_val.succ.succ := by repeat { apply nat.add_one _ },
+          rw ←ht at i_property,
+          let : false := by exact eznat2 _ _ i_property,
+    -/
+  end,-/
+  let licons : linear_independent ℚ consb := 
+  begin
+    apply (@linear_independent_fin_cons ℚ (vec_n ℚ 2) _ _ _ (v ⟨0, by linarith⟩) _ empty_basis).mpr,
+    split,
+    exact empli,
+    dsimp only [submodule.span, Inf],
+    dsimp only [coe_sort, has_coe_to_sort.coe, coe, lift_t, has_lift_t.lift, coe_t, has_coe_t.coe, set_like.coe],
+    dsimp only [set.range, set.Inter],
+    --simp *,
+    dsimp only [infi, Inf, complete_semilattice_Inf.Inf, complete_lattice.Inf, set.range],
+    simp only [forall_apply_eq_imp_iff', and_imp, fin.mk_zero, exists_prop, nat.not_lt_zero, add_zero, int.coe_nat_zero, id.def,
+    ge_iff_le, int.coe_nat_one, set_like.mem_coe, set.mem_set_of_eq, mem_carrier, exists_imp_distrib,
+    has_subset.subset, set.subset],
+    dsimp [set_of, has_mem.mem, set.mem],
+    assume a,
+    let empvecs : set (vec_n ℚ 2) := ∅,
+    let empsm := @submodule.span ℚ (vec_n ℚ 2) _ _ _ ∅,
+    let empsmemp := @submodule.span_empty ℚ (vec_n ℚ 2) _ _ _,
+    let empsmeqbot : empsm = ⊥ := by simp *,
+    let app_ := a ⊥,
+    let huh : (∀ (a : fin 0), (↑(⊥ : submodule ℚ (vec_n ℚ 2)) : set _) (empty_basis a)) := begin
+      intros f0,
+      cases f0,
+      let : ¬f0_val < 0 := nat.not_lt_zero _,
+      contradiction,
+    end,
+    let hmm := app_ huh,
+    let veq0 : (v 0) = 0 := (@mem_bot ℚ (vec_n ℚ 2) _ _ _ _).mp hmm, 
+    let vneq0_0 : (v 0 0) ≠ 0 := begin
+      simp *,
+      unfold has_zero.zero,
+      dsimp [vec_zero ℚ],
+      assume h,
+      injection h, revert h_1,
+      dec_trivial,
+    end, 
+    let veq0_0 : (v 0 0) = 0 := begin
+      rw veq0,
+      refl,
+    end, 
+    contradiction
+  end,  
+  let consb2 : fin 2 → vec_n ℚ 2 := (fin.snoc consb (v ⟨1, by linarith⟩)),
+  let licons2 : linear_independent ℚ consb2 := 
+  begin
+    apply (@linear_independent_fin_snoc ℚ (vec_n ℚ 2) _ _ _ (v ⟨1, by linarith⟩) _ consb).mpr,
+    split,
+    exact licons,
+    let span_ := span ℚ (set.range consb),
+    dsimp only [submodule.span, Inf],
+    dsimp only [coe_sort, has_coe_to_sort.coe, coe, lift_t, has_lift_t.lift, coe_t, has_coe_t.coe, set_like.coe],
+    dsimp only [set.range, set.Inter],
+    --simp *,
+    dsimp only [infi, Inf, complete_semilattice_Inf.Inf, complete_lattice.Inf, set.range],
+    simp only [forall_apply_eq_imp_iff', and_imp, fin.mk_zero, exists_prop, nat.not_lt_zero, add_zero, int.coe_nat_zero, id.def,
+    ge_iff_le, int.coe_nat_one, set_like.mem_coe, set.mem_set_of_eq, mem_carrier, exists_imp_distrib,
+    has_subset.subset, set.subset],
+    dsimp [set_of, has_mem.mem, set.mem],
+    assume a,
+
+  end
 end
 begin
   dsimp only [submodule.span, Inf],

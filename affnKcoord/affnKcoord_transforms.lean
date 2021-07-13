@@ -18,6 +18,7 @@ Had to move this in here - need to wait until the proof that vectr s is an add_c
 Also Andrew 6/27 - This should get split into two files, a function library and what is most relevant to the transform
 -/
 
+
 structure vectr_basis := 
     (basis_vectrs : fin dim → vectr s)
     (basis_independent : linear_independent K basis_vectrs)
@@ -115,7 +116,11 @@ def fm.to_homogeneous_matrix {K : Type u} [field K] [inhabited K]
         rw h₂ at h₁,
         have h₃ : i'.succ ≤ dim'.succ := nat.le_of_succ_le_succ h₁,
         have h₄ : (i'.succ - 1).succ = i'.succ := by simp only [nat.succ_sub_succ_eq_sub, nat.sub_zero],
-        simp only [has_le.le] at h₃,
+        simp only
+        
+        
+        
+             [has_le.le] at h₃,
         simp only [has_lt.lt, nat.lt],
         rw h₄,
         exact h₃

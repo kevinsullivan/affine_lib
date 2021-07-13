@@ -29,6 +29,8 @@ inductive fm : Π (dim : ℕ) (id_vec : fin dim → ℕ), Type (u)
     (parent : fm dim id_vec)
     : fm dim id_vec
 
+instance fm_i {id_vec : fin dim → ℕ} : inhabited (fm K dim id_vec) := ⟨fm.base _ _⟩
+
 /-
 Helper method to retrieve a "parent frame" from a frame.
 For a base/standard frame, there is no "parent", so it is 
