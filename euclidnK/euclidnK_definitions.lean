@@ -47,7 +47,15 @@ def l2_metric
 noncomputable
 def l2_extended_metric
   : point s → point s → ennreal
-| pt1 pt2 := option.some (⟨∥pt1 -ᵥ pt2∥,sorry⟩:(ℝ≥0))
+| pt1 pt2 := option.some (⟨∥pt1 -ᵥ pt2∥,begin
+  dsimp only [has_norm.norm, norm_coord],
+  have h₀ : ∀ r : ℝ, r ^ (1/2) = real.sqrt r := begin
+    intros,
+    sorry,
+  end,
+  rw h₀,
+  apply real.sqrt_nonneg,
+end⟩:(ℝ≥0))
 
 noncomputable
 instance euclidean_distance_coord : has_dist (point s) := ⟨l2_metric s⟩ 
@@ -80,25 +88,141 @@ class metric_space (α : Type u) extends has_dist α : Type u :=
 
 -/
 
+instance euclidean_pseudo_metric_space_pt : pseudo_metric_space (point s)
+  := ⟨begin
+    intros,
+    dsimp only [dist, l2_metric, norm, norm_coord, 
+      has_vsub.vsub, aff_point_group_sub, sub_point_point, 
+      mk_vectr', aff_pt_group_sub, sub_pt_pt],
+    simp,
+    have h₀ : ∀ r : ℝ, r ^ (1/2) = real.sqrt r := sorry,
+    rw h₀,
+    simp only [real.sqrt_mul, real.sqrt_eq_zero, nat.cast_eq_zero, nat.cast_nonneg, mul_eq_zero],
+    apply or.inr,
+    have h₁ : ↑0 = 0 := by simp only [nat.cast_id],
+    have h₂ : real.sqrt ↑0 = real.sqrt 0 := by simp only [nat.cast_zero],
+    sorry,
+  end, begin
+    intros,
+    dsimp only [dist, l2_metric, norm, norm_coord, 
+      has_vsub.vsub, aff_point_group_sub, sub_point_point, 
+      mk_vectr', aff_pt_group_sub, sub_pt_pt],
+    have h₀ : ∀ i : fin dim, (x.coords i).coord - (y.coords i).coord = -1 * ((y.coords i).coord - (x.coords i).coord) := sorry,
+    suffices h : ∀ i : fin dim, ((x.coords i).coord - (y.coords i).coord) * ((x.coords i).coord - (y.coords i).coord) = ((y.coords i).coord - (x.coords i).coord) * ((y.coords i).coord - (x.coords i).coord),
+    sorry,
+    {
+      intros,
+      rw h₀,
+      have h₁ : (-1) * ((y.coords i).coord - (x.coords i).coord) * ((-1) * ((y.coords i).coord - (x.coords i).coord)) = (-1) * ((y.coords i).coord - (x.coords i).coord) * (-1) * ((y.coords i).coord - (x.coords i).coord) := by simp only [mul_assoc],
+      rw h₁,
+      simp only [mul_comm],
+      have h₂ : ((y.coords i).coord - (x.coords i).coord) * ((-1) * ((-1) * ((y.coords i).coord - (x.coords i).coord))) = ((y.coords i).coord - (x.coords i).coord) * ((-1) * (-1) * ((y.coords i).coord - (x.coords i).coord)) := by simp only [neg_mul_eq_neg_mul_symm, one_mul],
+      rw h₂,
+      simp only [mul_one, one_mul, mul_neg_eq_neg_mul_symm, neg_neg],
+    }
+  end, begin
+    intros,
+    dsimp only [dist, l2_metric, norm, norm_coord, 
+      has_vsub.vsub, aff_point_group_sub, sub_point_point, 
+      mk_vectr', aff_pt_group_sub, sub_pt_pt],
+    sorry,
+  end, sorry, sorry, sorry, sorry⟩
+
+instance euclidean_dist_vec : has_dist (vectr s)
+  := ⟨sorry⟩
+
+instance euclidean_pseudo_metric_space_vec : pseudo_metric_space (vectr s)
+  := ⟨sorry, sorry, sorry, sorry, sorry, sorry, sorry⟩
+
 instance euclidean_metric_space_pt : metric_space (point s)
-  := sorry
+  := ⟨begin
+    intros x y h,
+    dsimp only [dist, l2_metric, norm, norm_coord, 
+      has_vsub.vsub, aff_point_group_sub, sub_point_point, 
+      mk_vectr', aff_pt_group_sub, sub_pt_pt] at h,
+    have h₀ : ∀ r : ℝ, r ^ (1/2) = real.sqrt r := sorry,
+    rw h₀ at h,
+    have h₁ := real.sqrt_eq_zero'.1 h,
+    have h₂ : ∀ r : ℝ, r ≥ 0 → ∑ (i : fin dim), r ≥ 0 := sorry,
+    have h₃ : ∀ r : ℝ, r * r ≥ 0 := sorry,
+    -- have h₄ : ∀ (i : fin dim), ((x.coords i).coord - (y.coords i).coord) * ((x.coords i).coord - (y.coords i).coord) ≥ 0 := sorry,
+    sorry,
+  end⟩
 
 instance euclidean_metric_space_vec : metric_space (vectr s)
-  :=
-  sorry
+  := ⟨begin
+    intros x y h,
+    sorry,
+  end⟩
+
+instance euclidean_pseudo_extended_metric_space_pt : pseudo_emetric_space (point s) 
+  := ⟨begin
+    intros,
+    dsimp only [edist, l2_extended_metric],
+    simp only [some_eq_coe, coe_eq_zero],
+    dsimp only [has_zero.zero],
+    simp only [subtype.mk_eq_mk],
+    dsimp only [has_norm.norm, norm_coord],
+    have h₀ : ∀ r : ℝ, r ^ (1/2) = real.sqrt r := sorry,
+    rw h₀,
+    --simp only [real.sqrt_eq_zero'],
+    dsimp only [has_vsub.vsub, aff_point_group_sub, sub_point_point, aff_pt_group_sub, sub_pt_pt, mk_vectr'],
+    simp,
+    /- have h₁ : ↑dim * ↑0 = 0 := by simp,
+    dsimp only [has_le.le],-/
+    /-have h₁ : real.sqrt ↑dim * real.sqrt ↑0 = 0 := by simp only [real.sqrt_zero, nat.cast_zero, mul_zero],
+    rw h₁,-/
+    sorry,
+  end, begin
+    intros,
+    dsimp only [edist, l2_extended_metric],
+    simp only [coe_eq_coe, subtype.mk_eq_mk, some_eq_coe],
+    dsimp only [norm, norm_coord],
+    have h₀ : ∀ r : ℝ, r ^ (1/2) = real.sqrt r := sorry,
+    repeat {rw h₀},
+    sorry,
+  end, begin
+    intros,
+    dsimp only [edist, l2_extended_metric],
+    simp only [some_eq_coe],
+    sorry,
+  end, sorry, sorry⟩
+
+instance euclidean_pseudo_extended_metric_space_vec : pseudo_emetric_space (vectr s)
+  := ⟨sorry, sorry, sorry, sorry, sorry⟩
 
 noncomputable
 instance euclidean_extended_metric_space_pt : emetric_space (point s) 
-  := sorry
+  := ⟨begin
+    intros x y h,
+    dsimp only [edist, l2_extended_metric] at h,
+    simp only [some_eq_coe, coe_eq_zero] at h,
+    dsimp only [has_zero.zero] at h,
+    simp only [subtype.mk_eq_mk] at h,
+    dsimp only [has_norm.norm, norm_coord] at h,
+    have h₀ : ∀ r : ℝ, r ^ (1/2) = real.sqrt r := sorry,
+    rw h₀ at h,
+    sorry
+  end⟩
 
 noncomputable
 instance euclidean_extended_metric_space_vec : emetric_space (vectr s) 
-  := sorry
+  := ⟨sorry⟩
 
 
 noncomputable
 instance euclidean_extended_metric_space : emetric_space (point s) 
-  := sorry
+  := ⟨begin
+    intros x y h,
+    dsimp only [edist, l2_extended_metric] at h,
+    simp only [some_eq_coe, coe_eq_zero] at h,
+    dsimp only [has_zero.zero] at h,
+    simp only [subtype.mk_eq_mk] at h,
+    dsimp only [has_norm.norm, norm_coord] at h,
+    have h₀ : ∀ r : ℝ, r ^ (1/2) = real.sqrt r := sorry,
+    rw h₀ at h,
+    sorry,
+  end⟩
    
 /-
 (dist_eq : ∀ x y, dist x y = norm (x - y))
@@ -108,7 +232,11 @@ noncomputable
 instance euclidean_normed_group : normed_group (vectr s) 
   :=
   ⟨
-    sorry
+    begin
+      intros,
+      dsimp only [has_norm.norm, norm_coord],
+      sorry
+    end
   ⟩
 /-
 (norm_smul_le : ∀ (a:α) (b:β), ∥a • b∥ ≤ ∥a∥ * ∥b∥)
@@ -117,7 +245,11 @@ instance euclidean_normed_group : normed_group (vectr s)
 noncomputable 
 instance euclidean_normed_space [module K (vectr s)] : normed_space K (vectr s) 
   :=
-  sorry
+  ⟨begin
+    intros,
+    dsimp only [has_norm.norm, norm_coord],
+    sorry,
+  end⟩
 
 /-
 class inner_product_space (𝕜 : Type*) (E : Type*) [is_R_or_C 𝕜]
@@ -130,9 +262,25 @@ class inner_product_space (𝕜 : Type*) (E : Type*) [is_R_or_C 𝕜]
 
 -/
 
+instance euclidean_has_scalar : has_scalar ℝ (vectr s)
+  := ⟨sorry⟩
+
+instance euclidean_mul_action : mul_action ℝ (vectr s)
+  := ⟨sorry, sorry⟩
+
+instance euclidean_distrib_mul_action : distrib_mul_action ℝ (vectr s)
+  := ⟨sorry, sorry⟩
+
+instance euclidean_module : module ℝ (vectr s)
+  := ⟨sorry, sorry⟩
+
+noncomputable
+instance euclidean_normed_space_vec : normed_space ℝ (vectr s)
+  := ⟨sorry⟩
+
 noncomputable
 instance euclidean_inner_product_space : inner_product_space ℝ (vectr s)
-  := sorry
+  := ⟨sorry, sorry, sorry, sorry⟩
 
 
 
@@ -156,7 +304,55 @@ structure orientation extends vectr_basis s :=
     (col_orthogonal : ∀ i j : fin dim, i≠j → ⟪basis_vectrs i,basis_vectrs j⟫ = (0:ℝ))
 
 def mk_orientation (ortho_vectrs : fin dim → vectr s) : orientation s :=
-  ⟨⟨ortho_vectrs, sorry, sorry⟩, sorry, sorry⟩
+  ⟨⟨ortho_vectrs, sorry, sorry⟩, begin
+    intros,
+    simp only,
+    dsimp only [has_norm.norm, norm_coord],
+    have h₀ : ∀ r : ℝ, r ^ (1/2) = real.sqrt r := sorry,
+    rw h₀,
+    have h₁ : ∀ r : ℝ, real.sqrt r = 1 ↔ r = 1 := λ r,
+      if nonneg : 0 ≤ r then begin
+        intros,
+        split,
+        intro h,
+        have h₂ : (0 : ℝ) ≤ (1 : ℝ) := begin
+          have h₃ : (0 : ℝ) < 1 ∨ (0 : ℝ) = 1 := or.inl real.zero_lt_one,
+          have h₄ := le_iff_lt_or_eq.2 h₃,
+          exact h₄,
+        end,
+        have h₃ := (real.sqrt_eq_iff_mul_self_eq nonneg h₂).1 h,
+        simp only [mul_one] at h₃,
+        exact eq.symm h₃,
+        intro h,
+        rw h,
+        exact real.sqrt_one,
+      end
+      else begin
+        simp only [not_le] at nonneg,
+        have h₂ : r ≤ 0 := begin
+          have h₃ : r < 0 ∨ r = 0 := or.inl nonneg,
+          have h₄ := le_iff_lt_or_eq.2 h₃,
+          exact h₄,
+        end,
+        intros,
+        split,
+        intro h,
+        have h₃ := eq.trans (eq.symm (real.sqrt_eq_zero_of_nonpos h₂)) h,
+        have h₄ := zero_ne_one h₃,
+        contradiction,
+        intro h,
+        rw h at nonneg,
+        have h₃ := lt_asymm real.zero_lt_one,
+        contradiction,
+      end,
+    rw h₁,
+    sorry,
+  end, begin
+    intros i j h,
+    simp only,
+    dsimp only [has_inner.inner, dot_product_coord],
+    sorry,
+  end⟩
 
 /--/
 structure rotation :=
@@ -197,24 +393,58 @@ def mk_rotation' {K : Type u} [inhabited K] [normed_field K] [has_lift_t K ℝ]
     
     eapply fm_tr.mk,
     split,
-    sorry,
+    {
+      intros,
+      dsimp only [has_vadd.vadd, add_vectr_point, aff_vec_group_action, add_vec_pt, mk_point'],
+      sorry
+    },
     split,
-    sorry,
-    sorry,
+    {
+      dsimp only [function.left_inverse],
+      intros,
+      sorry
+    },
+    {
+      dsimp only [function.right_inverse, function.left_inverse],
+      intros,
+      sorry
+    },
     exact (λ p, mk_point_from_coords (b.to_matrix.mul_vec p.to_coords)),
     exact (λ p, mk_point_from_coords (b.to_matrix.cramer_inverse.mul_vec p.to_coords)),
 
          --(λ p, mk_point_from_coords (b.to_matrix.mul_vec p.to_coords)),
           --(λ p, mk_point_from_coords ((b.to_matrix.cramer_inverse.mul_vec p.to_coords)),
     split,
-    sorry,
-    sorry,
-    sorry,
-    sorry,
+    {
+      intros,
+      sorry
+    },
+    {
+      intros,
+      sorry,
+    },
+    {
+      dsimp only [function.left_inverse],
+      intros,
+      sorry
+    },
+    {
+      dsimp only [function.right_inverse, function.left_inverse],
+      intros,
+      sorry
+    },
     exact (λ v, mk_vectr_from_coords (b.to_matrix.mul_vec v.to_coords)),
     exact (λ p, mk_vectr_from_coords (b.to_matrix.cramer_inverse.mul_vec p.to_coords)),
   end
-,sorry, sorry, sorry⟩
+,begin
+  intro h,
+  dsimp only [fm_tr.transform_vectr],
+  simp only [mk_vec, mk_pt, equiv.coe_fn_mk, norm_eq_zero],
+  dsimp only [has_zero.zero],
+  dsimp only [vectr_zero, mk_vectr, mk_vec_n, mk_vec],
+  simp only,
+  sorry,
+end, sorry, sorry⟩
 
 def mk_rotation (ortho_vectrs : fin dim → vectr s) : rotation s :=
   (mk_rotation' ⟨ortho_vectrs, sorry, sorry⟩)
