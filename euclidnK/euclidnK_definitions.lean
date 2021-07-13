@@ -7,21 +7,19 @@ import data.complex.is_R_or_C
 import topology.metric_space.pi_Lp
 import data.real.nnreal
 
-universes u
-
 open_locale big_operators
 open_locale nnreal
 
 open ennreal
 
+abbreviation K := ℝ
+
 variables
-{K : Type u} [inhabited K] 
-  [has_lift_t K ℝ]
-  [normed_field K]
 {dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} (s : spc K f)
 {dim2 : nat } {id_vec2 : fin dim → nat} {f2 : fm K dim id_vec} (s2 : spc K f2)
 
-def dot_product_coord
+
+noncomputable def dot_product_coord
   : vectr s → vectr s → ℝ
 | v1 v2 := 
     (∑ (i : fin dim), ↑((v1.coords i).coord * (v1.coords i).coord))
@@ -35,7 +33,7 @@ noncomputable def norm_coord
 
 noncomputable instance vectr_norm : has_norm (vectr s) := ⟨norm_coord s⟩
 
-instance vectr_inner : has_inner ℝ (vectr s) := ⟨dot_product_coord s⟩
+noncomputable instance vectr_inner : has_inner ℝ (vectr s) := ⟨dot_product_coord s⟩
 
 notation `⟪`x`, `y`⟫` := has_inner.inner x y
 
