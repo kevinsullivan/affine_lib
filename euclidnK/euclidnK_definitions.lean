@@ -28,12 +28,12 @@ def dot_product_coord
 
     
 
-def norm_coord
+noncomputable def norm_coord
   : vectr s → ℝ
 | v1 := 
-    (∑ (i : fin dim), ↑((v1.coords i).coord * (v1.coords i).coord)) ^ (1/2)
+    real.sqrt (dot_product_coord _ v1 v1)
 
-instance vectr_norm : has_norm (vectr s) := ⟨norm_coord s⟩
+noncomputable instance vectr_norm : has_norm (vectr s) := ⟨norm_coord s⟩
 
 instance vectr_inner : has_inner ℝ (vectr s) := ⟨dot_product_coord s⟩
 
@@ -49,11 +49,6 @@ def l2_extended_metric
   : point s → point s → ennreal
 | pt1 pt2 := option.some (⟨∥pt1 -ᵥ pt2∥,begin
   dsimp only [has_norm.norm, norm_coord],
-  have h₀ : ∀ r : ℝ, r ^ (1/2) = real.sqrt r := begin
-    intros,
-    sorry,
-  end,
-  rw h₀,
   apply real.sqrt_nonneg,
 end⟩:(ℝ≥0))
 
@@ -87,21 +82,25 @@ class metric_space (α : Type u) extends has_dist α : Type u :=
 
 
 -/
+/-
 
-instance euclidean_pseudo_metric_space_pt : pseudo_metric_space (point s)
+
+-/
+--#eval noncomputable_value -- doesn't work
+
+
+noncomputable instance euclidean_pseudo_metric_space_pt : pseudo_metric_space (point s)
   := ⟨begin
     intros,
     dsimp only [dist, l2_metric, norm, norm_coord, 
       has_vsub.vsub, aff_point_group_sub, sub_point_point, 
       mk_vectr', aff_pt_group_sub, sub_pt_pt],
     simp,
-    have h₀ : ∀ r : ℝ, r ^ (1/2) = real.sqrt r := sorry,
-    rw h₀,
     simp only [real.sqrt_mul, real.sqrt_eq_zero, nat.cast_eq_zero, nat.cast_nonneg, mul_eq_zero],
-    apply or.inr,
-    have h₁ : ↑0 = 0 := by simp only [nat.cast_id],
-    have h₂ : real.sqrt ↑0 = real.sqrt 0 := by simp only [nat.cast_zero],
-    sorry,
+    --apply or.inr,
+   -- have h₁ : ↑0 = 0 := by simp only [nat.cast_id],
+   -- have h₂ : real.sqrt ↑0 = real.sqrt 0 := by simp only [nat.cast_zero],
+    --sorry,
   end, begin
     intros,
     dsimp only [dist, l2_metric, norm, norm_coord, 
@@ -303,6 +302,9 @@ structure orientation extends vectr_basis s :=
     (col_norm_one : ∀ i : fin dim, ∥basis_vectrs i∥ = 1)
     (col_orthogonal : ∀ i j : fin dim, i≠j → ⟪basis_vectrs i,basis_vectrs j⟫ = (0:ℝ))
 
+/-
+don't prove here *yet*
+-/
 def mk_orientation (ortho_vectrs : fin dim → vectr s) : orientation s :=
   ⟨⟨ortho_vectrs, sorry, sorry⟩, begin
     intros,
@@ -354,17 +356,6 @@ def mk_orientation (ortho_vectrs : fin dim → vectr s) : orientation s :=
     sorry,
   end⟩
 
-/--/
-structure rotation :=
-  (tr : fm_tr s s ) --not extended because we want to use "transform_vectr" and "transform_point" extension methods
-  (rotation_no_displacement : ∀ v : vectr s, ∥(tr.transform_vectr 0)∥ = 0)
-  (rotation_no_scaling : ∀ v : vectr s, ∥(tr.transform_vectr v)∥ = 1) 
-  (rotation_col_orthogonal : ∀ i j : fin dim, 
-        i≠j →
-        ⟪ tr.transform_vectr (⟨(fm.base dim id_vec).basis.basis_vecs i⟩:vectr s),
-          tr.transform_vectr ((⟨(fm.base dim id_vec).basis.basis_vecs j⟩):vectr s)⟫ 
-          = (0:ℝ))
--/
 structure rotation extends fm_tr s s :=
   (rotation_no_displacement : ∀ v : vectr s, ∥(to_fm_tr.transform_vectr 0)∥ = 0)
   (rotation_no_scaling : ∀ v : vectr s, ∥(to_fm_tr.transform_vectr v)∥ = 1) 
@@ -373,18 +364,7 @@ structure rotation extends fm_tr s s :=
         ⟪ to_fm_tr.transform_vectr (⟨(fm.base dim id_vec).basis.basis_vecs i⟩:vectr s),
           to_fm_tr.transform_vectr ((⟨(fm.base dim id_vec).basis.basis_vecs j⟩):vectr s)⟫ 
           = (0:ℝ))
-/-
-def rotation :=
-  {
-    tr : fm_tr s s //
-    (∀ v : vectr s, ∥(tr.transform_vectr 0)∥ = 0) ∧
-    (∀ v : vectr s, ∥(tr.transform_vectr v)∥ = 1) ∧
-    (∀ i j : fin dim, 
-          i≠j →
-          ⟪ tr.transform_vectr (⟨(fm.base dim id_vec).basis.basis_vecs i⟩:vectr s),
-            tr.transform_vectr ((⟨(fm.base dim id_vec).basis.basis_vecs j⟩):vectr s)⟫ 
-            = (0:ℝ))
-  }-/
+
 
 def mk_rotation' {K : Type u} [inhabited K] [normed_field K] [has_lift_t K ℝ]
 {dim : nat} {id_vec : fin dim → nat }{f : fm K dim id_vec} {s : spc K f} (b : vectr_basis s) : rotation s :=
