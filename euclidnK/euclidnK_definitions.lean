@@ -259,18 +259,6 @@ class inner_product_space (𝕜 : Type*) (E : Type*) [is_R_or_C 𝕜]
 
 -/
 
-instance euclidean_has_scalar : has_scalar ℝ (vectr s)
-  := ⟨sorry⟩
-
-instance euclidean_mul_action : mul_action ℝ (vectr s)
-  := ⟨sorry, sorry⟩
-
-instance euclidean_distrib_mul_action : distrib_mul_action ℝ (vectr s)
-  := ⟨sorry, sorry⟩
-
-instance euclidean_module : module ℝ (vectr s)
-  := ⟨sorry, sorry⟩
-
 noncomputable
 instance euclidean_normed_space_vec : normed_space ℝ (vectr s)
   := ⟨sorry⟩
