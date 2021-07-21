@@ -90,36 +90,28 @@ class metric_space (α : Type u) extends has_dist α : Type u :=
 noncomputable instance euclidean_pseudo_metric_space_pt : pseudo_metric_space (point s)
   := ⟨begin
     intros,
-    dsimp only [dist, l2_metric, norm, norm_coord, 
+    dsimp only [dist, l2_metric, norm, norm_coord, dot_product_coord,
       has_vsub.vsub, aff_point_group_sub, sub_point_point, 
       mk_vectr', aff_pt_group_sub, sub_pt_pt],
     simp,
-    simp only [real.sqrt_mul, real.sqrt_eq_zero, nat.cast_eq_zero, nat.cast_nonneg, mul_eq_zero],
-    --apply or.inr,
-   -- have h₁ : ↑0 = 0 := by simp only [nat.cast_id],
-   -- have h₂ : real.sqrt ↑0 = real.sqrt 0 := by simp only [nat.cast_zero],
-    --sorry,
   end, begin
     intros,
-    dsimp only [dist, l2_metric, norm, norm_coord, 
+    dsimp only [dist, l2_metric, norm, norm_coord, dot_product_coord, 
       has_vsub.vsub, aff_point_group_sub, sub_point_point, 
       mk_vectr', aff_pt_group_sub, sub_pt_pt],
-    have h₀ : ∀ i : fin dim, (x.coords i).coord - (y.coords i).coord = -1 * ((y.coords i).coord - (x.coords i).coord) := sorry,
-    suffices h : ∀ i : fin dim, ((x.coords i).coord - (y.coords i).coord) * ((x.coords i).coord - (y.coords i).coord) = ((y.coords i).coord - (x.coords i).coord) * ((y.coords i).coord - (x.coords i).coord),
-    sorry,
-    {
+    have h₀ : ∀ x y : ℝ, x - y = -(y - x) := begin
       intros,
-      rw h₀,
-      have h₁ : (-1) * ((y.coords i).coord - (x.coords i).coord) * ((-1) * ((y.coords i).coord - (x.coords i).coord)) = (-1) * ((y.coords i).coord - (x.coords i).coord) * (-1) * ((y.coords i).coord - (x.coords i).coord) := by simp only [mul_assoc],
-      rw h₁,
-      simp only [mul_comm],
-      have h₂ : ((y.coords i).coord - (x.coords i).coord) * ((-1) * ((-1) * ((y.coords i).coord - (x.coords i).coord))) = ((y.coords i).coord - (x.coords i).coord) * ((-1) * (-1) * ((y.coords i).coord - (x.coords i).coord)) := by simp only [neg_mul_eq_neg_mul_symm, one_mul],
-      rw h₂,
-      simp only [mul_one, one_mul, mul_neg_eq_neg_mul_symm, neg_neg],
-    }
+      simp only [neg_sub],
+    end,
+    -- rw h₀,
+    have h₁ : ∀ x : ℝ, (-x) * (-x) = x * x := begin
+      intros,
+      simp only [neg_mul_eq_neg_mul_symm, mul_neg_eq_neg_mul_symm, neg_neg],
+    end,
+    sorry,
   end, begin
     intros,
-    dsimp only [dist, l2_metric, norm, norm_coord, 
+    dsimp only [dist, l2_metric, norm, norm_coord, dot_product_coord, 
       has_vsub.vsub, aff_point_group_sub, sub_point_point, 
       mk_vectr', aff_pt_group_sub, sub_pt_pt],
     sorry,
@@ -131,19 +123,50 @@ instance euclidean_dist_vec : has_dist (vectr s)
 instance euclidean_pseudo_metric_space_vec : pseudo_metric_space (vectr s)
   := ⟨sorry, sorry, sorry, sorry, sorry, sorry, sorry⟩
 
+noncomputable
 instance euclidean_metric_space_pt : metric_space (point s)
   := ⟨begin
     intros x y h,
-    dsimp only [dist, l2_metric, norm, norm_coord, 
+    dsimp only [dist, l2_metric, norm, norm_coord, dot_product_coord, 
       has_vsub.vsub, aff_point_group_sub, sub_point_point, 
       mk_vectr', aff_pt_group_sub, sub_pt_pt] at h,
-    have h₀ : ∀ r : ℝ, r ^ (1/2) = real.sqrt r := sorry,
-    rw h₀ at h,
     have h₁ := real.sqrt_eq_zero'.1 h,
-    have h₂ : ∀ r : ℝ, r ≥ 0 → ∑ (i : fin dim), r ≥ 0 := sorry,
-    have h₃ : ∀ r : ℝ, r * r ≥ 0 := sorry,
-    -- have h₄ : ∀ (i : fin dim), ((x.coords i).coord - (y.coords i).coord) * ((x.coords i).coord - (y.coords i).coord) ≥ 0 := sorry,
-    sorry,
+    have h₂ : ∀ r : ℝ, r ≥ 0 → ∑ (i : fin dim), r ≥ 0 := begin
+      intros r hy,
+      simp only [finset.card_fin, finset.sum_const, ge_iff_le, nsmul_eq_mul],
+      have h₃ : ↑dim ≥ 0 := by simp only [ge_iff_le, zero_le'],
+      have h₄ : r = 0 ∨ r > 0 := sorry, -- should be able to prove with hy
+      cases h₄,
+      {
+        rw h₄,
+        simp only [mul_zero],
+      },
+      {
+        have h₅ : ↑dim = 0 ∨ ↑dim > 0 := sorry, -- should be able to prove with h₃
+        cases h₅,
+        {
+          -- rw h₅,
+          sorry,
+        },
+        {
+          dsimp only [gt] at h₅ h₄,
+          -- have h₈ := real.mul_pos h₇ h₅,
+          sorry
+        }
+      }
+    end,
+    have h₃ : ∀ r : ℝ, r * r ≥ 0 := begin
+      intros,
+      sorry,
+    end,
+    have h₄ : ∑ (i : fin dim), (↑(((x.coords i).coord - (y.coords i).coord) * ((x.coords i).coord - (y.coords i).coord)) : ℝ) ≥ 0 := begin
+      simp only [is_R_or_C.coe_real_eq_id, id.def],
+      have hy : ∀ (i : fin dim), ((x.coords i).coord - (y.coords i).coord) * ((x.coords i).coord - (y.coords i).coord) ≥ 0 := by {intros, apply h₃},
+      -- apply h₂,
+      sorry,
+    end,
+    have h₅ : ∑ (i : fin dim), (↑(((x.coords i).coord - (y.coords i).coord) * ((x.coords i).coord - (y.coords i).coord)) : ℝ) = 0 := le_antisymm h₁ h₄,
+    sorry, -- don't know where to go from here
   end⟩
 
 instance euclidean_metric_space_vec : metric_space (vectr s)
@@ -152,6 +175,7 @@ instance euclidean_metric_space_vec : metric_space (vectr s)
     sorry,
   end⟩
 
+noncomputable
 instance euclidean_pseudo_extended_metric_space_pt : pseudo_emetric_space (point s) 
   := ⟨begin
     intros,
@@ -159,24 +183,17 @@ instance euclidean_pseudo_extended_metric_space_pt : pseudo_emetric_space (point
     simp only [some_eq_coe, coe_eq_zero],
     dsimp only [has_zero.zero],
     simp only [subtype.mk_eq_mk],
-    dsimp only [has_norm.norm, norm_coord],
-    have h₀ : ∀ r : ℝ, r ^ (1/2) = real.sqrt r := sorry,
-    rw h₀,
-    --simp only [real.sqrt_eq_zero'],
+    dsimp only [has_norm.norm, norm_coord, dot_product_coord],
+    simp only [is_R_or_C.coe_real_eq_id, id.def],
     dsimp only [has_vsub.vsub, aff_point_group_sub, sub_point_point, aff_pt_group_sub, sub_pt_pt, mk_vectr'],
     simp,
-    /- have h₁ : ↑dim * ↑0 = 0 := by simp,
-    dsimp only [has_le.le],-/
-    /-have h₁ : real.sqrt ↑dim * real.sqrt ↑0 = 0 := by simp only [real.sqrt_zero, nat.cast_zero, mul_zero],
-    rw h₁,-/
     sorry,
   end, begin
     intros,
     dsimp only [edist, l2_extended_metric],
     simp only [coe_eq_coe, subtype.mk_eq_mk, some_eq_coe],
-    dsimp only [norm, norm_coord],
-    have h₀ : ∀ r : ℝ, r ^ (1/2) = real.sqrt r := sorry,
-    repeat {rw h₀},
+    dsimp only [norm, norm_coord, dot_product_coord],
+    -- Should be similar to the lemmata in euclidean_metric_space_pt
     sorry,
   end, begin
     intros,
@@ -197,8 +214,7 @@ instance euclidean_extended_metric_space_pt : emetric_space (point s)
     dsimp only [has_zero.zero] at h,
     simp only [subtype.mk_eq_mk] at h,
     dsimp only [has_norm.norm, norm_coord] at h,
-    have h₀ : ∀ r : ℝ, r ^ (1/2) = real.sqrt r := sorry,
-    rw h₀ at h,
+    -- once again, must prove 0 = zero
     sorry
   end⟩
 
@@ -215,9 +231,12 @@ instance euclidean_extended_metric_space : emetric_space (point s)
     simp only [some_eq_coe, coe_eq_zero] at h,
     dsimp only [has_zero.zero] at h,
     simp only [subtype.mk_eq_mk] at h,
-    dsimp only [has_norm.norm, norm_coord] at h,
-    have h₀ : ∀ r : ℝ, r ^ (1/2) = real.sqrt r := sorry,
-    rw h₀ at h,
+    simp only [has_norm.norm, norm_coord, dot_product_coord, 
+      is_R_or_C.coe_real_eq_id, id.def, has_vsub.vsub,
+      aff_point_group_sub, sub_point_point, aff_pt_group_sub,
+      sub_pt_pt, mk_vectr'] at h,
+    -- Once again, can't proceed without proving 0 = zero
+    -- Also, wouldn't h be true for x = ⟨3,2,1⟩ and y = ⟨1,2,3⟩, making this proof impossible?
     sorry,
   end⟩
    
@@ -231,7 +250,8 @@ instance euclidean_normed_group : normed_group (vectr s)
   ⟨
     begin
       intros,
-      dsimp only [has_norm.norm, norm_coord],
+      dsimp only [has_norm.norm, norm_coord, dot_product_coord],
+      dsimp only [dist],
       sorry
     end
   ⟩
@@ -244,7 +264,9 @@ instance euclidean_normed_space [module K (vectr s)] : normed_space K (vectr s)
   :=
   ⟨begin
     intros,
-    dsimp only [has_norm.norm, norm_coord],
+    dsimp only [has_norm.norm, norm_coord, dot_product_coord],
+    simp only [is_R_or_C.coe_real_eq_id, id.def],
+    -- dsimp only [has_scalar.smul],
     sorry,
   end⟩
 
@@ -261,7 +283,16 @@ class inner_product_space (𝕜 : Type*) (E : Type*) [is_R_or_C 𝕜]
 
 noncomputable
 instance euclidean_normed_space_vec : normed_space ℝ (vectr s)
-  := ⟨sorry⟩
+  := ⟨begin
+    intros,
+    dsimp only [has_norm.norm, norm_coord, dot_product_coord, 
+      has_scalar.smul, smul_vectr, smul_vec, mk_vectr'],
+    rw eq.symm (real.sqrt_mul_self_eq_abs a),
+    have h₀ : (∑ (i : fin dim), ↑(a * (b.coords i).coord * (a * (b.coords i).coord))) = (∑ (i : fin dim), ↑(a * a * (b.coords i).coord * (b.coords i).coord)) := sorry,
+    have h₁ : (∑ (i : fin dim), ↑(a * a * (b.coords i).coord * (b.coords i).coord)) = a * a * (∑ (i : fin dim), ↑((b.coords i).coord * (b.coords i).coord)) := sorry,
+    have h₂ : ∀ x y : ℝ, real.sqrt x * real.sqrt y = real.sqrt (x * y) := sorry,
+    rw [h₀, h₁, h₂],
+  end⟩
 
 noncomputable
 instance euclidean_inner_product_space : inner_product_space ℝ (vectr s)
@@ -291,13 +322,12 @@ structure orientation extends vectr_basis s :=
 /-
 don't prove here *yet*
 -/
+noncomputable
 def mk_orientation (ortho_vectrs : fin dim → vectr s) : orientation s :=
   ⟨⟨ortho_vectrs, sorry, sorry⟩, begin
     intros,
     simp only,
-    dsimp only [has_norm.norm, norm_coord],
-    have h₀ : ∀ r : ℝ, r ^ (1/2) = real.sqrt r := sorry,
-    rw h₀,
+    dsimp only [has_norm.norm, norm_coord, dot_product_coord],
     have h₁ : ∀ r : ℝ, real.sqrt r = 1 ↔ r = 1 := λ r,
       if nonneg : 0 ≤ r then begin
         intros,
