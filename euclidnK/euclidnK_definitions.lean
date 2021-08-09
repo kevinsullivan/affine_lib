@@ -21,23 +21,158 @@ variables
 {dim2 : nat } {id_vec2 : fin dim → nat} {f2 : fm K dim id_vec} (s2 : spc K f2)
 
 
+
 noncomputable def dot_product_coord
   : vectr s → vectr s → ℝ
 | v1 v2 := 
-    (∑ (i : fin dim), ↑((v1.coords i).coord * (v1.coords i).coord))
+    (∑ (i : fin dim), ↑((v1.coords i).coord * (v2.coords i).coord))
+--amanda fill this in
+noncomputable
+instance : inner_product_space.core K (vectr s) := 
+  ⟨dot_product_coord s,
+  begin
+    intros,
+    simp only [is_R_or_C.conj_to_real, is_R_or_C.coe_real_eq_id, id.def],
+    apply finset.sum_congr,
+    refl,
+    intros,
+    apply mul_comm,
+  end,
+  begin
+    intros,
+    simp only [is_R_or_C.re_to_real, is_R_or_C.coe_real_eq_id, id.def],
+    apply finset.sum_nonneg,
+    intros,
+    have neg_or_nonneg := classical.eq_false_or_eq_true ((x.coords i).coord ≥ 0),
+    cases neg_or_nonneg,
+    {
+      simp only [not_le, eq_iff_iff, iff_false] at neg_or_nonneg,
+      have neg_neg_pos := right.neg_pos_iff.2 neg_or_nonneg,
+      have neg_mul_neg : (x.coords i).coord * (x.coords i).coord = -(x.coords i).coord * -(x.coords i).coord := 
+        by simp only [neg_mul_eq_neg_mul_symm, mul_neg_eq_neg_mul_symm, neg_neg],
+      rw neg_mul_neg,
+      apply le_iff_lt_or_eq.2,
+      apply or.inl,
+      exact mul_pos neg_neg_pos neg_neg_pos,
+    },
+    {
+      simp only [ge_iff_le, iff_true, eq_iff_iff] at neg_or_nonneg,
+      have pos_or_zero := classical.eq_false_or_eq_true ((x.coords i).coord = 0),
+      cases pos_or_zero,
+      {
+        simp only [eq_iff_iff, iff_false] at pos_or_zero,
+        have pos : 0 < (x.coords i).coord := begin
+          apply lt_of_le_of_ne,
+          exact neg_or_nonneg,
+          intro h,
+          exact pos_or_zero (eq.symm h),
+        end,
+        apply le_iff_lt_or_eq.2,
+        apply or.inl,
+        exact mul_pos pos pos,
+      },
+      {
+        simp only [iff_true, eq_iff_iff] at pos_or_zero,
+        rw pos_or_zero,
+        simp only [mul_zero],
+      }
+    }
+  end,
+  begin
+    intros x h,
+    simp only [is_R_or_C.coe_real_eq_id, id.def] at h,
+    have h_nonneg : ∀ i : fin dim, i ∈ (@finset.univ (fin dim) _) → 0 ≤ (x.coords i).coord * (x.coords i).coord := begin
+      intros,
+      have neg_or_nonneg := classical.eq_false_or_eq_true ((x.coords i).coord ≥ 0),
+      cases neg_or_nonneg,
+      {
+        simp only [not_le, eq_iff_iff, iff_false] at neg_or_nonneg,
+        have neg_neg_pos := right.neg_pos_iff.2 neg_or_nonneg,
+        have neg_mul_neg : (x.coords i).coord * (x.coords i).coord = -(x.coords i).coord * -(x.coords i).coord := 
+          by simp only [neg_mul_eq_neg_mul_symm, mul_neg_eq_neg_mul_symm, neg_neg],
+        rw neg_mul_neg,
+        apply le_iff_lt_or_eq.2,
+        apply or.inl,
+        exact mul_pos neg_neg_pos neg_neg_pos,
+      },
+      {
+        simp only [ge_iff_le, iff_true, eq_iff_iff] at neg_or_nonneg,
+        have pos_or_zero := classical.eq_false_or_eq_true ((x.coords i).coord = 0),
+        cases pos_or_zero,
+        {
+          simp only [eq_iff_iff, iff_false] at pos_or_zero,
+          have pos : 0 < (x.coords i).coord := begin
+            apply lt_of_le_of_ne,
+            exact neg_or_nonneg,
+            intro h,
+            exact pos_or_zero (eq.symm h),
+          end,
+          apply le_iff_lt_or_eq.2,
+          apply or.inl,
+          exact mul_pos pos pos,
+        },
+        {
+          simp only [iff_true, eq_iff_iff] at pos_or_zero,
+          rw pos_or_zero,
+          simp only [mul_zero],
+        }
+      }
+    end,
+    have h₀ := (finset.sum_eq_zero_iff_of_nonneg h_nonneg).1 h,
+    ext,
+    dsimp only [has_zero.zero],
+    dsimp only [add_zero_class.zero, add_monoid.zero, sub_neg_monoid.zero, add_group.zero, add_comm_group.zero, vectr_zero, mk_vectr, mk_vec_n, mk_vec, vector.nth],
+    simp only [list.nth_le_repeat],
+    have x_1_in_univ : x_1 ∈ (@finset.univ (fin dim) _) := by simp only [finset.mem_univ],
+    have mul_self_zero := h₀ x_1 x_1_in_univ,
+    have mul_self_nonneg : (x.coords x_1).coord * (x.coords x_1).coord ≤ 0 := le_iff_lt_or_eq.2 (or.inr mul_self_zero),
+    have sqrt_mul_self_nonneg := real.sqrt_eq_zero'.2 mul_self_nonneg,
+    simp only [real.sqrt_mul_self_eq_abs] at sqrt_mul_self_nonneg,
+    exact abs_eq_zero.1 sqrt_mul_self_nonneg,
+  end,
+  begin
+    intros,
+    simp only [is_R_or_C.coe_real_eq_id, id.def],
+    have h := @finset.sum_add_distrib K (fin dim) finset.univ (λ i : fin dim, (x.coords i).coord * (z.coords i).coord) (λ i : fin dim, (y.coords i).coord * (z.coords i).coord) _,
+    simp only at h,
+    rw eq.symm h,
+    apply finset.sum_congr,
+    refl,
+    intros,
+    have add_is : ((x + y).coords x_1).coord = (x.coords x_1).coord + (y.coords x_1).coord := begin
+      dsimp only [has_add.add],
+      refl,
+    end,
+    rw add_is,
+    exact distrib.right_distrib (x.coords x_1).coord (y.coords x_1).coord (z.coords x_1).coord,
+  end,
+  begin
+    intros,
+    simp only [is_R_or_C.conj_to_real, is_R_or_C.coe_real_eq_id, id.def],
+    dsimp only [has_scalar.smul],
+    dsimp only [smul_vectr, has_scalar.smul],
+    dsimp only [smul_vec, mk_vectr'],
+    simp only [mul_assoc],
+    apply eq.symm finset.mul_sum,
+  end⟩
 
-    
+  
+open inner_product_space.of_core
+
+noncomputable instance vectr_inner : has_inner ℝ (vectr s) := ⟨dot_product_coord s⟩
+notation `⟪`x`, `y`⟫` := has_inner.inner x y
+
+noncomputable
+instance : has_norm (vectr s ) := (@inner_product_space.of_core.to_has_norm K (vectr s) _ _ _ _)
 
 noncomputable def norm_coord
   : vectr s → ℝ
 | v1 := 
-    real.sqrt (dot_product_coord _ v1 v1)
+    real.sqrt ((@is_R_or_C.re K _) ⟪v1, v1⟫)
 
-noncomputable instance vectr_norm : has_norm (vectr s) := ⟨norm_coord s⟩
+noncomputable instance vectr_norm : has_norm (vectr s) :=
+{ norm := λ x, real.sqrt ((@is_R_or_C.re K _) ⟪x, x⟫) }
 
-noncomputable instance vectr_inner : has_inner ℝ (vectr s) := ⟨dot_product_coord s⟩
-
-notation `⟪`x`, `y`⟫` := has_inner.inner x y
 
 noncomputable
 def l2_metric
@@ -48,8 +183,9 @@ noncomputable
 def l2_extended_metric
   : point s → point s → ennreal
 | pt1 pt2 := option.some (⟨∥pt1 -ᵥ pt2∥,begin
-  dsimp only [has_norm.norm, norm_coord],
+  dsimp only [has_norm.norm],
   apply real.sqrt_nonneg,
+  admit
 end⟩:(ℝ≥0))
 
 noncomputable
@@ -115,8 +251,13 @@ noncomputable instance euclidean_pseudo_metric_space_pt : pseudo_metric_space (p
     dsimp only [dist, l2_metric],
     have cauchy_schwarz : ∀ p q : vectr s, ∥dot_product_coord s p q∥ ≤ ∥p∥ * ∥q∥ := begin
       intros,
-      have square_norm_nonneg : ∀ c : ℝ, ∥p +ᵥ (-c)•q∥*∥p +ᵥ (-c)•q∥ ≥ 0 := begin
+      have h := real_inner_mul_inner_self_le p q,
+      dsimp only [is_R_or_C.abs, is_R_or_C.norm_sq] at h,
+      simp only [is_R_or_C.re_to_real, add_zero, monoid_with_zero_hom.coe_mk, is_R_or_C.im_to_real, mul_zero] at h,
+      --dsimp only [has_inner.inner] at h,
+      have square_norm_nonneg : ∀ c : ℝ, ∥p +ᵥ (-c)•q∥^2 ≥ 0 := begin
         intros,
+        rw sq,
         dsimp only [has_norm.norm, norm_coord],
         have nonpos_or_pos := classical.eq_false_or_eq_true (dot_product_coord s (p +ᵥ -c • q) (p +ᵥ -c • q) > 0),
         cases nonpos_or_pos,
@@ -135,8 +276,8 @@ noncomputable instance euclidean_pseudo_metric_space_pt : pseudo_metric_space (p
           exact mul_sqrt_pos,
         },
       end,
-      have h₀ : ∀ c : ℝ, ∥p +ᵥ (-c)•q∥*∥p +ᵥ (-c)•q∥ = ∥q∥*∥q∥*c*c - 2*c*(dot_product_coord s p q) + ∥p∥*∥p∥ := sorry,
-      have h₁ : ∀ c : ℝ, ∥q∥*∥q∥*c*c - 2*c*(dot_product_coord s p q) + ∥p∥*∥p∥ ≥ 0 := begin
+      have h₀ : ∀ c : ℝ, ∥p +ᵥ (-c)•q∥^2 = ∥q∥^2*c^2 - 2*c*(dot_product_coord s p q) + ∥p∥^2 := sorry,
+      have h₁ : ∀ c : ℝ, ∥q∥^2*c^2 - 2*c*(dot_product_coord s p q) + ∥p∥^2 ≥ 0 := begin
         intros,
         rw eq.symm (h₀ c),
         exact square_norm_nonneg c,
@@ -168,7 +309,7 @@ noncomputable instance euclidean_pseudo_metric_space_pt : pseudo_metric_space (p
       have h₆ : (4:ℝ) = ((4:ℝ)⁻¹)⁻¹ := by simp only [inv_inv'],
       rw h₆ at h₄,
       have h₇ := (inv_mul_le_iff h₅).1 h₄,-/
-      sorry,
+      repeat {sorry},
     end,
     have abs_add_le_add_abs : ∀ p q : vectr s, ∥p +ᵥ q∥ ≤ ∥p∥ + ∥q∥ := sorry,
     have h₀ : x -ᵥ z = x -ᵥ y +ᵥ (y -ᵥ z) := begin
@@ -474,7 +615,7 @@ instance euclidean_extended_metric_space : emetric_space (point s)
 (dist_eq : ∀ x y, dist x y = norm (x - y))
 -/
 
-/-noncomputable 
+noncomputable 
 instance euclidean_normed_group : normed_group (vectr s) 
   :=
   ⟨
@@ -484,7 +625,7 @@ instance euclidean_normed_group : normed_group (vectr s)
       dsimp only [dist],
       sorry
     end
-  ⟩-/
+  ⟩
 /-
 (norm_smul_le : ∀ (a:α) (b:β), ∥a • b∥ ≤ ∥a∥ * ∥b∥)
 -/
@@ -542,7 +683,7 @@ instance euclidean_normed_space_vec : normedw_space ℝ (vectr s)
     rw [h₀, h₁, h₂],
   end⟩-/
 
-/-noncomputable
+noncomputable
 instance euclidean_inner_product_space : inner_product_space ℝ (vectr s)
   := ⟨begin
     intros,
@@ -629,7 +770,7 @@ instance euclidean_inner_product_space : inner_product_space ℝ (vectr s)
     intros,
     sorry,
     -- can't prove this unless r = 0 or r = 1
-  end⟩-/
+  end⟩
 
 
 
