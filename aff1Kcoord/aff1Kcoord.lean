@@ -27,7 +27,7 @@ inductive fm : nat → Type u
 | deriv : ∀ (n : nat), (prod (pt K) (vec K)) → fm n → fm n
 -/
 
-def mk_fm  {n : nat } (p : pt K) (v : vec K) (f : fm K n): fm K n := fm.deriv n (p, v) f 
+def mk_fm  {n : nat} (p : pt K) (v : vec K) (f : fm K n): fm K n := fm.deriv n (p, v) f 
 
 structure spc {n : nat} (f : fm K n) : Type u       -- interesting specimen, here, btw
 
@@ -66,7 +66,7 @@ def mk_vectr (k : K) : vectr s := vectr.mk (mk_vec K k)
 -- note that we don't extend fm
 def mk_frame {parent : fm K n} {s : spc K parent}  (p : point s) (v : vectr s) :=
 fm.deriv n (p.to_pt, v.to_vec) parent   -- TODO: make sure v ≠ 0 (erasing tyoe info)
-                                      -- TODO: snd arg is really a basis for the vs
+                                        -- TODO: snd arg is really a basis for the vs
 
 
 /-

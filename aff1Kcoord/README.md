@@ -10,7 +10,7 @@ To use this library, import aff1Kcoord_std. This module provides an abstraction 
 
 Within any affine coordinate space, you have points, vectors, vector space operations 
 (vector scaling and addition), and affine space operations (vector-point addition and 
-point-point-subtraction), with nice notations: + and <bu> for vector add and scaling,
+point-point-subtraction), with nice notations: + and <\bu> for vector add and scaling,
 and plus_sub_v and minus_sub_v for vector-point addition and point point substraction.
 
 For clear, concise examples, see the file aff1Kcoord_std_test.lean.
