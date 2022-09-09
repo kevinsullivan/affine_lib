@@ -1,4 +1,5 @@
 import .aff1K
+import category_theory.groupoid
 import linear_algebra.affine_space.affine_equiv
 import linear_algebra.matrix
 
@@ -120,14 +121,11 @@ begin
     let h0 : (0 + a).to_vec = (0 : vectr s).to_vec + a.to_vec := rfl,
     simp [h0],
     exact zero_add _,
-    exact zero_add _,
-
 end
 
 lemma add_zero_vectr : ∀ a : vectr s, a + 0 = a := 
 begin
     intros,ext,
-    exact add_zero _,
     exact add_zero _,
 end
 
@@ -154,7 +152,7 @@ instance has_sub_vectr : has_sub (vectr s) := ⟨ sub_vectr_vectr s ⟩
 lemma sub_eq_add_neg_vectr : ∀ a b : vectr s, a - b = a + -b := 
 begin
     intros,ext,
-    refl,refl
+    refl,
 
 end 
 
@@ -176,13 +174,21 @@ lemma add_left_neg_vectr : ∀ a : vectr s, -a + a = 0 :=
 begin
     intros,
     ext,
-    repeat {
-    have h0 : (-a + a).to_vec = -a.to_vec + a.to_vec := rfl,
+    have h0 : (-a + a).to_vec = -a.to_vec + a.to_vec := begin
+        have h₁ : -a + a = add_vectr_vectr _ (-a) a := rfl,
+        rw h₁,
+        dsimp only [add_vectr_vectr],
+        dsimp only [mk_vectr'],
+        have h₂ : -a = neg_vectr _ a := rfl,
+        rw h₂,
+        dsimp only [neg_vectr, mk_vectr'],
+        suffices h : (-(1 : K)) • a.to_vec = -a.to_vec,
+        rw h,
+        simp only [one_smul, neg_smul],
+    end,
     simp [h0],
     have : (0:vec K) = (0:vectr s).to_vec := rfl,
     simp *,
-    }
-    
 end
 
 
@@ -253,7 +259,6 @@ begin
     cases b,
     ext,
     exact mul_assoc x y _,
-    exact mul_assoc x y _
 end
 
 instance mul_action_vectr : mul_action K (vectr s) := ⟨
@@ -273,7 +278,7 @@ lemma smul_add_vectr : ∀(r : K) (x y : vectr s), r • (x + y) = r • x + r �
 end
 
 lemma smul_zero_vectr : ∀(r : K), r • (0 : vectr s) = 0 := begin
-    intros, ext, exact mul_zero _, exact mul_zero _
+    intros, ext, exact mul_zero _
 end
 instance distrib_mul_action_K_vectrK : distrib_mul_action K (vectr s) := ⟨
 smul_add_vectr s,
@@ -285,14 +290,13 @@ lemma add_smul_vectr : ∀ (a b : K) (x : vectr s), (a + b) • x = a • x + b 
 begin
   intros,
   ext,
-  exact right_distrib _ _ _,
   exact right_distrib _ _ _
 end
 
 lemma zero_smul_vectr : ∀ (x : vectr s), (0 : K) • x = 0 := begin
     intros,
     ext,
-    exact zero_mul _, exact zero_mul _
+    exact zero_mul _,
 end
 instance module_K_vectrK : module K (vectr s) := ⟨ 
     add_smul_vectr s, 
@@ -361,7 +365,6 @@ instance : has_vadd (vectr s) (point s) := ⟨aff_vectr_group_action s⟩
 lemma zero_vectr_vadd'_a1 : ∀ p : point s, (0 : vectr s) +ᵥ p = p := begin
     intros,
     ext,--exact zero_add _,
-    exact add_zero _,
     exact add_zero _
 end
 
@@ -464,8 +467,15 @@ And now for transforms
 abbreviation raw_tr := (pt K) ≃ᵃ[K] (pt K)
 --abbreviation fm_tr := (point s1) ≃ᵃ[K] (point s2)
 
+@[ext]
 structure fm_tr {f1 : fm K n} {f2 : fm K n} (s1 : spc K f1) (s2 : spc K f2)  extends (point s1) ≃ᵃ[K] (point s2)
 
+def fm_tr.refl {f1 : fm K n} (s1 : spc K f1) : fm_tr s1 s1 :=
+    ⟨⟨
+        equiv.refl (point s1),
+        linear_equiv.refl K (vectr s1),
+        λ _ _, rfl
+    ⟩⟩
 
 def fm_tr.symm  {f1 : fm K n} {f2 : fm K n} {s1 : spc K f1} {s2 : spc K f2} (ftr : fm_tr s1 s2) : fm_tr s2 s1 :=
     ⟨ftr.1.symm⟩
@@ -630,6 +640,90 @@ def s1_to_s2 : _ := s1.fm_tr s2     -- Yay!
 variables (my_vec : vectr s1)
 
 #check ((s1_to_s2 s1 s2).transform_vectr) (((s1_to_s2 s1 s2).transform_vectr) my_vec)
+
+instance : quiver (spc K f) := ⟨λ (s1 s2 : spc K f), fm_tr s1 s2⟩
+
+instance : category_theory.category_struct (spc K f) := ⟨
+    λ (s : spc K f), fm_tr.refl s, -- identity transformation
+    λ {s1 s2 s3 : spc K f} (f : fm_tr s1 s2) (g : fm_tr s2 s3), fm_tr.trans f g -- f ∘ g
+⟩
+
+instance : category_theory.category (spc K f) := ⟨
+    begin
+        simp only [auto_param_eq],
+        intros,
+        have h_orig := (fm_tr.ext_iff (𝟙 X ≫ f_1) f_1).2,
+        apply h_orig,
+        cases f_1 with f_aff,
+        cases f_aff with f_equiv f_linear f_map_vadd',
+        dsimp only [category_theory.category_struct.id, fm_tr.refl],
+        dsimp only [category_theory.category_struct.comp, fm_tr.trans, affine_equiv.trans],
+        ext,
+        dsimp only [coe_fn, has_coe_to_fun.coe],
+        simp only [equiv.refl_trans],
+    end,
+    begin
+        simp only [auto_param_eq],
+        intros,
+        have h₀ := (fm_tr.ext_iff (𝟙 X ≫ f_1) f_1).2,
+        apply h₀,
+        cases f_1 with f_aff,
+        cases f_aff with f_equiv f_linear f_map_vadd',
+        dsimp only [category_theory.category_struct.id, fm_tr.refl],
+        dsimp only [category_theory.category_struct.comp, fm_tr.trans, affine_equiv.trans],
+        ext,
+        dsimp only [coe_fn, has_coe_to_fun.coe],
+        simp only [equiv.refl_trans],
+    end,
+    begin
+        simp only [auto_param_eq],
+        intros,
+        have h₀ := (fm_tr.ext_iff ((f_1 ≫ g) ≫ h) (f_1 ≫ g ≫ h)).2,
+        apply h₀,
+        cases f_1 with f_aff,
+        cases g with g_aff,
+        cases h with h_aff,
+        cases f_aff with f_equiv f_linear f_map_vadd',
+        cases g_aff with g_equiv g_linear g_map_vadd',
+        cases h_aff with h_equiv h_linear h_map_vadd',
+        dsimp only [category_theory.category_struct.comp, fm_tr.trans, affine_equiv.trans],
+        ext,
+        dsimp only [coe_fn, has_coe_to_fun.coe],
+        simp only [equiv.trans_assoc],
+    end
+⟩ 
+
+instance : category_theory.groupoid (spc K f) := ⟨
+    λ {s1 s2 : spc K f} (f_1 : fm_tr s1 s2), fm_tr.symm f_1,
+    begin
+        simp only [auto_param_eq],
+        intros,
+        dsimp only [category_theory.category_struct.comp],
+        have h₀ := (fm_tr.ext_iff ((fm_tr.symm f_1).trans f_1) (𝟙 Y)).2,
+        apply h₀,
+        dsimp only [category_theory.category_struct.id, fm_tr.refl],
+        dsimp only [fm_tr.trans, affine_equiv.trans],
+        dsimp only [fm_tr.symm, affine_equiv.symm],
+        ext,
+        dsimp only [coe_fn, has_coe_to_fun.coe],
+        simp only [affine_equiv.coe_to_equiv, equiv.to_fun_as_coe, id.def, function.comp_app, affine_equiv.apply_symm_apply,
+            equiv.coe_trans, affine_equiv.symm_to_equiv, equiv.coe_refl],
+    end,
+    begin
+        simp only [auto_param_eq],
+        intros,
+        dsimp only [category_theory.category_struct.comp],
+        have h₀ := (fm_tr.ext_iff (fm_tr.trans f_1 (fm_tr.symm f_1)) (𝟙 X)).2,
+        apply h₀,
+        dsimp only [category_theory.category_struct.id, fm_tr.refl],
+        dsimp only [fm_tr.trans, affine_equiv.trans],
+        dsimp only [fm_tr.symm, affine_equiv.symm],
+        ext,
+        dsimp only [coe_fn, has_coe_to_fun.coe],
+        simp only [affine_equiv.coe_to_equiv, equiv.to_fun_as_coe, id.def, function.comp_app, affine_equiv.symm_apply_apply,
+            equiv.coe_trans, affine_equiv.symm_to_equiv, equiv.coe_refl],
+    end
+⟩ 
 
 end implicitK
 
