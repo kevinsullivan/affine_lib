@@ -1,6 +1,6 @@
 import data.real.basic
 import .aff1K
-
+ 
 universes u 
 variables 
 (K : Type u) 
@@ -28,6 +28,7 @@ noncomputable def p1 : pt ℝ := mk_pt ℝ 0
 noncomputable def p2 : pt ℝ := mk_pt ℝ 3
 noncomputable def p3 := p1 -ᵥ p2
 noncomputable def p4 := v4 +ᵥ p2
+noncomputable def p5 := p1 + p2     -- type error!
 
 -- get coordinate of pt
 noncomputable def p4c : ℝ := pt.coord p4

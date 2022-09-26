@@ -1,9 +1,9 @@
 import ..lin2Kcoord.lin2kcoord
-import linear_algebra.direct_sum_module
+import algebra.direct_sum.module
 
 universes u 
 variables 
-(K : Type u) 
+(K : Type u)
 [field K]
 [inhabited K]
 
@@ -12,7 +12,7 @@ We represent primitive points and vectors constituting a 1-D affine
 space with a field K by as elements of a 2-D linear space over K. We
 represent the 1-D affine point, p, with coordinate x : K, as a pair, 
 (1 : K, x), and a 1-D (affine space) vector, v, with coordinate, x : K,
-as a pair (0 : K, x). 
+as a pair (0 : K, x).  
 
 We prove the following properties
 
