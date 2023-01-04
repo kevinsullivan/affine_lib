@@ -1,1 +1,4 @@
 *.lock
+*.olean
+/_target
+/leanpkg.path
