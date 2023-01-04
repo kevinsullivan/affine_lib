@@ -1,7 +1,7 @@
 import algebra.module.basic
 import linear_algebra.affine_space.affine_equiv
-import algebra.direct_sum
-import linear_algebra.direct_sum_module
+import algebra.direct_sum.basic
+import algebra.direct_sum.module
 import tactic.linarith
 import .lin2kcoord
 
