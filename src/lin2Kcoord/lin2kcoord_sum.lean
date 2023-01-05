@@ -7,7 +7,9 @@ import .lin2kcoord
 
 open_locale direct_sum
 /-
-⨁ i, β i is now available as the n-ary direct sum.
+⨁ i, β i is now available as the n-ary direct sum
+of objects of type β i, indexed by the values of i,
+an index set.
  -/
 
 universes u 
@@ -66,19 +68,31 @@ universal finset α containing every term of α,
 called univ. See data.fintype.basic
 -/
 
-def finsetn : finset (fin n) := finset.univ 
-
-#check @finset.univ
-#check finsetn
-#check finsetn 5
-
 /-
-Given a mapping from i = [0,..,n-1] to 2D K-vectors, 
-construct their direct sum, ⨁(i : fin n), (λi, K × K) i,
-abbreviated here as lin2k_sum K n.
+We need a complete subset of the finite set of 
+values, m : ℕ such that m is less than n. The
+function, finset_fin_N, gives us what we need.
+Given n as an argument, it returns the subset 
+containing the full range of values, 0..n-1, of
+fin n. The value needed is finset.univ (mathlib). 
 -/
 
-def x := (↑(finsetn n) : set (fin n))
+def finset_fin_N : finset (fin n) := finset.univ 
+
+/-
+Given 2D modules over K indexed by i = [0,..,n-1], 
+return the direct sum, ⨁(i : fin n), (λi, K × K) i.
+We abbreviate this function as lin2k_sum K n.
+-/
+
+/-
+We need a function set_fin_N that takes a natural
+number and returns a complete set of the finite
+natural numbers in the range [0,n-1]. 
+-/
+def set_fin_N := ( ((finset_fin_N n)) : set (fin n) )
+#check set_fin_N
+#reduce set_fin_N 2
 
 def mk_linnk : (fin n → K × K) → lin2k_sum K n :=
 /-
@@ -86,31 +100,47 @@ Given an n-tuple of 2D K-vectors
 -/
 λv, 
   /-
-  What is val? Given i as a subset of indices 0..n,
-  -/
-  let val : Π (i : (↑(finsetn n) : set (fin n))), (λi, K × K) i.val := 
+  What is val? Given i of type subset of finite
+  indices, 0..n, of type ℕ.
+  
+      return type is a function that takes i
+      and returns v i, where i is a complete
+      finite set 0..n-1 of ℕ,
+      a function  
+      -/
+  let val : 
+      Π (i :  -- function that takes i of type complete set 0..n-1
+          (↑(finset_fin_N n) : set (fin n))
+        ),    
+        (   -- returns the result of applying 
+          λ j, K × K  
+        )   
+         i.val 
+         -- subtype.val : Π {α : Type} {p : α → Prop}, subtype p → α
+                := 
+      λ i, v i 
   /-
   val is the function that takes 
   -/
-    λi, v i in 
+    in 
       -- Create direct sum of a family M of R modules indexed over ι.
-      direct_sum.lmk K _ _ _ val
+    direct_sum.lmk K _ _ _ val
+
+#check @subtype.val
 
 
-/-
--/
-def mk_linnk : (fin n → K × K) → lin2k_sum K n :=
-λv, 
-  /-
-  What is val? Given i as a subset of indices 0..n,
-  -/
-  let val : Π (i : (↑(finsetn n) : set (fin n))), (λi, K × K) i.val := 
-  /-
-  val is the function that takes 
-  -/
-    λi, v i in 
-      -- Create direct sum of a family M of R modules indexed over ι.
-      direct_sum.lmk K _ _ _ val
+-- def mk_linnk : (fin n → K × K) → lin2k_sum K n :=
+-- λv, 
+--   /-
+--   What is val? Given i as a subset of indices 0..n,
+--   -/
+--   let val : Π (i : (↑(finset_fin_N n) : set (fin n))), (λi, K × K) i.val := 
+--   /-
+--   val is the function that takes 
+--   -/
+--     λi, v i in 
+--       -- Create direct sum of a family M of R modules indexed over ι.
+--       direct_sum.lmk K _ _ _ val
 
 /-
 def direct_sum.lmk 
@@ -126,6 +156,6 @@ def direct_sum.lmk
 def mk_linnk' : (fin n → K × K) → lin2k_sum K n :=
 λv, 
   let val : 
-    Π (i : (↑(finsetn n) : set (fin n))), (λi, K × K) i.val := 
+    Π (i : (↑(finset_fin_N n) : set (fin n))), (λi, K × K) i.val := 
       λi, v i in
         direct_sum.lmk K _ _ _ val
