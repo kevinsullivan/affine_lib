@@ -1,5 +1,5 @@
 {
-    "name": "kevinjsullivan",
+    "name": "affine_algebra",
     "image": "ghcr.io/kevinsullivan/moralpain_container:latest",
     "containerEnv": {
         "WORKSPACE_FOLDER": "${containerWorkspaceFolder}"
